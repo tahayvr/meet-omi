@@ -224,3 +224,58 @@ const FRAMES = {
     ...tint(OUTER_RECTS, "pop"),
   ],
 };
+
+/* mouths: the inner frame's bottom becomes the mouth. Same geometry: the
+   inner frame is split into segments and everything but the head and the
+   mouth dims. The head (top bar, and both walls down through the left dip,
+   to y 160) always stays lit. Mouths reach no higher than y 180, leaving one
+   dim cell between head and mouth.
+   left / right: lit [y0, y1, class?] spans of the side walls (180–240)
+   bottom: lit [x0, x1, class?] spans of the bottom bar (40–260) */
+const DIM = 0.2;
+function mouth({ left = [], right = [], bottom = [], dimDip = false } = {}) {
+  // dimDip dims the bottom dip too (the stub under the inner frame at y 260)
+  const misc = dimDip
+    ? MISC.map((r) => (r.y === 260 ? { ...r, o: DIM } : r))
+    : MISC;
+  const out = [...OUTER_RECTS, ...misc, R(40, 40, 120, 20), R(220, 40, 40, 20)];
+  // walk a span, emitting lit pieces where listed and dim pieces between
+  const run = (from, to, lit, mk) => {
+    let at = from;
+    [...lit]
+      .sort((p, q) => p[0] - q[0])
+      .forEach(([a, b, c]) => {
+        if (a > at) out.push({ ...mk(at, a), o: DIM });
+        out.push({ ...mk(a, b), ...(c ? { c } : {}) });
+        at = b;
+      });
+    if (at < to) out.push({ ...mk(at, to), o: DIM });
+  };
+  const HEAD = [60, 160];
+  run(60, 240, [HEAD, ...left], (a, b) => R(40, a, 20, b - a));
+  run(60, 240, [HEAD, ...right], (a, b) => R(240, a, 20, b - a));
+  run(40, 260, bottom, (a, b) => R(a, 240, b - a, 20));
+  return out;
+}
+const both = (segs) => ({ left: segs, right: segs });
+Object.assign(FRAMES, {
+  happy: mouth({
+    ...both([[180, 240]]),
+    bottom: [[40, 260]],
+  }),
+  laughing: mouth({
+    ...both([
+      [180, 200, "ha"],
+      [200, 240],
+    ]),
+    bottom: [[40, 260]],
+  }),
+  shy: mouth({ dimDip: true }),
+  skeptical: mouth({
+    right: [[200, 240, "skm"]],
+    bottom: [[140, 260, "skm"]],
+  }),
+  bored: mouth({ bottom: [[100, 180]] }),
+  scared: mouth({ bottom: [[110, 190, "flash"]] }),
+  angry: mouth({ bottom: [[40, 260]] }),
+});

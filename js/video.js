@@ -104,6 +104,19 @@ function partAnim(c, t, r) {
   const o = { tx: 0, ty: 0, sx: 1, sy: 1, op: 1 };
   if (!c) return o;
   const has = (k) => c.split(" ").includes(k);
+  for (const k of c.split(" ")) {
+    const a = EMO_ANIM[k];
+    if (!a) continue;
+    const v = kf(
+      a.keys.map(([p, raw]) => [p, emoVal(raw)]),
+      ph(t, a.dur),
+    );
+    o.tx += v.tx;
+    o.ty += v.ty;
+    o.sx *= v.sx;
+    o.sy *= v.sy;
+    o.op *= v.op;
+  }
   if (has("eye"))
     o.sy = kf(
       [

@@ -238,3 +238,68 @@ const SNAKE = SNAKE_PATH.map(([x, y], i) => ({
   i,
   s: `animation-delay:${((i / SNAKE_N) * SNAKE_DUR - SNAKE_DUR).toFixed(3)}s`,
 }));
+
+/* emotions: eyes only (plus brows and tears). The mouth, when there is one,
+   is the inner frame's bottom; see mouth() in frames.js. Animated faces rest
+   on the full expression, so stills and PNG exports read correctly. */
+Object.assign(F, {
+  happy: F.idle,
+  laughing: [
+    ...blk(90, 100, [
+      [0, 0],
+      [1, 1],
+      [0, 2],
+    ]),
+    ...blk(170, 100, [
+      [1, 0],
+      [0, 1],
+      [1, 2],
+    ]),
+  ],
+  excited: [
+    R(100, 110, 20, 40, "twinkle"),
+    R(90, 120, 40, 20, "twinkle"),
+    R(180, 110, 20, 40, "twinkle"),
+    R(170, 120, 40, 20, "twinkle"),
+  ],
+  shy: [R(100, 110, 20, 40, "shy"), R(180, 110, 20, 40, "shy")],
+  skeptical: [
+    R(90, 125, 40, 10, "skq"),
+    R(170, 90, 40, 10, "skb"),
+    R(180, 110, 20, 40, "eye"),
+  ],
+  bored: [
+    R(90, 130, 40, 10),
+    R(100, 140, 20, 10, "doze"),
+    R(170, 130, 40, 10),
+    R(180, 140, 20, 10, "doze"),
+  ],
+  // worried brows, inner ends raised
+  sad: [
+    R(90, 110, 20, 10),
+    R(110, 100, 20, 10),
+    R(170, 100, 20, 10),
+    R(190, 110, 20, 10),
+    R(100, 130, 20, 30, "eye"),
+    R(180, 130, 20, 30, "eye"),
+    R(100, 170, 10, 10, "drop"),
+  ],
+  // closed eyes tilted inward: outer ends low, inner ends high
+  crying: [
+    R(90, 140, 20, 10),
+    R(110, 130, 20, 10),
+    R(170, 130, 20, 10),
+    R(190, 140, 20, 10),
+    R(95, 160, 10, 10, "drop"),
+    R(195, 160, 10, 10, "drop"),
+  ],
+  scared: [R(100, 110, 20, 20, "tremble"), R(180, 110, 20, 20, "tremble")],
+  angry: [
+    R(80, 100, 20, 10, "furrow"),
+    R(100, 110, 20, 10, "furrow"),
+    R(200, 100, 20, 10, "furrow"),
+    R(180, 110, 20, 10, "furrow"),
+    R(100, 130, 20, 30),
+    R(180, 130, 20, 30),
+  ],
+});

@@ -36,6 +36,77 @@ function shapes(d, body) {
 const rectTag = (r) =>
   `<rect${r.c ? ` class="${r.c}"` : ""}${r.s ? ` style="${r.s}"` : ""}${r.o != null ? ` fill-opacity="${r.o}"` : ""} x="${r.x}" y="${r.y}" width="${r.w}" height="${r.h}"/>`;
 
+/* Emotion animations, defined once: the CSS below and the video engine
+   (partAnim) are both generated from these keyframes. Each key is
+   [progress 0..1, { tx, ty (units), sx, sy (scale), op (opacity) }]. */
+const EMO_ANIM = {
+  // laughing: the mouth opens and closes, ha-ha
+  ha: { dur: 0.7, keys: [[0, { op: 1 }], [0.5, { op: 0.2 }], [1, { op: 1 }]] },
+  // excited: star eyes twinkle
+  twinkle: { dur: 0.9, keys: [[0, {}], [0.5, { sx: 1.3, sy: 1.3 }], [1, {}]] },
+  // shy: holds your gaze, glances down (lids drop), drifts away, sneaks a
+  // quick peek back up, darts off again, then slowly comes back
+  shy: {
+    dur: 6,
+    keys: [
+      [0, {}],
+      [0.08, {}],
+      [0.16, { ty: 40, sy: 0.75 }],
+      [0.26, { ty: 40, sy: 0.75 }],
+      [0.34, { tx: 20, ty: 50, sy: 0.7 }],
+      [0.46, { tx: 20, ty: 50, sy: 0.7 }],
+      [0.51, { tx: 10, ty: 20, sy: 0.9 }],
+      [0.56, { tx: 10, ty: 20, sy: 0.9 }],
+      [0.6, { tx: 20, ty: 50, sy: 0.7 }],
+      [0.78, { tx: 20, ty: 50, sy: 0.7 }],
+      [0.94, {}],
+      [1, {}],
+    ],
+  },
+  // skeptical: starts neutral, then one eye squints, a brow lifts, a smirk
+  skq: { dur: 5, keys: [[0, { sx: 0.5, sy: 4 }], [0.2, { sx: 0.5, sy: 4 }], [0.35, {}], [0.85, {}], [1, { sx: 0.5, sy: 4 }]] },
+  skb: { dur: 5, keys: [[0, { op: 0, ty: 10 }], [0.2, { op: 0, ty: 10 }], [0.35, {}], [0.85, {}], [1, { op: 0, ty: 10 }]] },
+  skm: { dur: 5, keys: [[0, { op: 0.2 }], [0.25, { op: 0.2 }], [0.4, {}], [0.85, {}], [1, { op: 0.2 }]] },
+  // bored: eyes wander slowly under heavy lids, then a long slow blink
+  doze: {
+    dur: 10,
+    keys: [
+      [0, {}],
+      [0.12, { tx: -10 }],
+      [0.3, { tx: -10 }],
+      [0.45, { tx: 10 }],
+      [0.6, { tx: 10 }],
+      [0.7, { tx: 0 }],
+      [0.78, {}],
+      [0.85, { sy: 0.01 }],
+      [0.92, { sy: 0.01 }],
+      [1, {}],
+    ],
+  },
+  // scared: eyes tremble
+  tremble: { dur: 0.25, keys: [[0, { tx: -2 }], [0.5, { tx: 2 }], [1, { tx: -2 }]] },
+  // angry: brows press down
+  furrow: { dur: 2, keys: [[0, {}], [0.4, { ty: 6 }], [0.6, { ty: 6 }], [1, {}]] },
+};
+const emoVal = (v) => ({
+  tx: v.tx || 0,
+  ty: v.ty || 0,
+  sx: v.sx ?? 1,
+  sy: v.sy ?? 1,
+  op: v.op ?? 1,
+});
+const EMO_CSS = Object.entries(EMO_ANIM)
+  .map(([k, a]) => {
+    const frames = a.keys
+      .map(([p, raw]) => {
+        const v = emoVal(raw);
+        return `${+(p * 100).toFixed(2)}%{transform:translate(${v.tx}px,${v.ty}px) scale(${v.sx},${v.sy});opacity:${v.op}}`;
+      })
+      .join("");
+    return `@keyframes omi-${k}{${frames}}\n.omi-a .${k}{animation:omi-${k} ${a.dur}s ease-in-out infinite}`;
+  })
+  .join("\n");
+
 const MOTION_CSS = `@keyframes omi-bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-4%)}}
 @keyframes omi-hop{0%,60%,100%{transform:translateY(0)}20%{transform:translateY(-10%)}40%{transform:translateY(0)}50%{transform:translateY(-4%)}}
 @keyframes omi-shake{0%,70%,100%{transform:translateX(0)}74%{transform:translateX(-3%)}80%{transform:translateX(3%)}86%{transform:translateX(-2%)}92%{transform:translateX(2%)}}
@@ -118,6 +189,7 @@ const MOTION_CSS = `@keyframes omi-bob{0%,100%{transform:translateY(0)}50%{trans
 .omi-a .arrow{animation:omi-arrow 1.2s ease-in-out infinite}
 .omi-a .pulse{animation:omi-pulse .8s ease-in-out infinite}
 .omi-a .pulseop{animation:omi-pulseop 1.2s ease-in-out infinite}
+${EMO_CSS}
 @media (prefers-reduced-motion:reduce){.omi-a:not(.force) *{animation:none!important}}`;
 {
   const st = document.createElement("style");
