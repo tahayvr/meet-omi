@@ -1,0 +1,97 @@
+/* Mode grid tiles */
+.main > .side {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  bottom: 16px;
+  max-width: calc(100% - 32px);
+  border: 1px solid var(--line);
+  border-radius: 0;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.35);
+  z-index: 4;
+}
+.group h2 {
+  margin: 40px 0 20px;
+  font-size: 17px;
+  font-weight: 700;
+  color: var(--label);
+  opacity: 0.9;
+}
+.group > .tiles:first-child {
+  margin-top: 32px;
+}
+.tiles {
+  display: grid;
+  grid-template-columns: repeat(
+    auto-fill,
+    minmax(var(--tile, 220px), 1fr)
+  );
+  gap: 40px 24px;
+}
+.tile {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+.tile .art {
+  width: 100%;
+}
+.tile .art > svg {
+  width: 100%;
+  height: auto;
+  display: block;
+  overflow: visible;
+}
+.tile .meta {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--label);
+}
+.tile .name {
+  font-weight: 600;
+  font-size: 13px;
+}
+.tile .save,
+.tile .reset {
+  min-height: 44px;
+  min-width: 44px;
+  border: 0;
+  background: transparent;
+  color: var(--label);
+  border-radius: 0;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0.75;
+}
+.tile .save:hover,
+.tile .reset:hover {
+  opacity: 1;
+  background: var(--label-hover);
+}
+.tile .save svg,
+.tile .reset svg {
+  width: 18px;
+  height: 18px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.75;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.tile .save[disabled] {
+  display: none;
+}
+/* reset + download sit together as one icon pair */
+.tile .reset,
+.tile .reset + .save {
+  min-width: 32px;
+}
+.tile .reset + .save {
+  margin-left: -6px;
+}

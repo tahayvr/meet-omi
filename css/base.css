@@ -1,0 +1,131 @@
+/* Tokens, reset, app shell, buttons */
+:root {
+  --chrome: #eef0f6;
+  --panel: #ffffff;
+  --line: #d5d9e6;
+  --text: #1f2335;
+  --dim: #4c5372;
+  --hover: #e3e6f0;
+  --focus: #3d59a1;
+  --btn: #1f2335;
+  --btn-text: #ffffff;
+  box-sizing: border-box;
+  padding-top: env(safe-area-inset-top, 0px);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --chrome: #13141c;
+    --panel: #1a1b26;
+    --line: #2a2e42;
+    --text: #c0caf5;
+    --dim: #9aa3c7;
+    --hover: #24283b;
+    --focus: #7aa2f7;
+    --btn: #c0caf5;
+    --btn-text: #1a1b26;
+  }
+}
+:root[data-theme="dark"] {
+  --chrome: #13141c;
+  --panel: #1a1b26;
+  --line: #2a2e42;
+  --text: #c0caf5;
+  --dim: #9aa3c7;
+  --hover: #24283b;
+  --focus: #7aa2f7;
+  --btn: #c0caf5;
+  --btn-text: #1a1b26;
+}
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+html {
+  height: 100%;
+  scroll-padding-top: env(safe-area-inset-top, 0px);
+}
+body {
+  height: 100%;
+  margin: 0;
+  background: var(--chrome);
+  color: var(--text);
+  font-family:
+    "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Consolas,
+    monospace;
+  font-size: 14px;
+}
+button,
+input,
+select {
+  font: inherit;
+  color: inherit;
+}
+:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+}
+
+.app {
+  height: 100%;
+  display: grid;
+  grid-template-rows: auto 1fr;
+}
+.bar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 16px;
+  border-bottom: 1px solid var(--line);
+  background: var(--panel);
+}
+.bar h1 {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 700;
+}
+.bar .count {
+  color: var(--dim);
+  font-size: 13px;
+}
+.bar .spacer {
+  flex: 1;
+}
+.btn {
+  min-height: 44px;
+  padding: 0 14px;
+  border-radius: 0;
+  border: 1px solid var(--line);
+  background: transparent;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  white-space: nowrap;
+}
+.btn:hover {
+  background: var(--hover);
+}
+.btn.primary {
+  background: var(--btn);
+  color: var(--btn-text);
+  border-color: var(--btn);
+  font-weight: 600;
+}
+.btn.primary:hover {
+  opacity: 0.9;
+}
+.btn[disabled] {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+.btn svg {
+  width: 18px;
+  height: 18px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.75;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}

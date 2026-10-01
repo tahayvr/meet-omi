@@ -1,0 +1,257 @@
+/* Page layout: header nav, hero, sections, ASCII gallery, footer */
+.main {
+  display: flex;
+  min-height: 0;
+  position: relative;
+}
+.stage {
+  flex: 1;
+  overflow: auto;
+  min-width: 0;
+  transition: background 0.2s;
+}
+.stage.checker {
+  background-color: #fff;
+  background-image:
+    linear-gradient(45deg, #d9dce6 25%, transparent 25%),
+    linear-gradient(-45deg, #d9dce6 25%, transparent 25%),
+    linear-gradient(45deg, transparent 75%, #d9dce6 75%),
+    linear-gradient(-45deg, transparent 75%, #d9dce6 75%);
+  background-size: 20px 20px;
+  background-position:
+    0 0,
+    0 10px,
+    10px -10px,
+    -10px 0;
+}
+.grid {
+  padding: 0;
+}
+.bar {
+  position: relative;
+  z-index: 3;
+}
+.brand {
+  font-weight: 700;
+  font-size: 15px;
+  color: var(--text);
+  text-decoration: none;
+  white-space: nowrap;
+}
+.brand {
+  display: block;
+}
+.brand svg {
+  display: block;
+  height: 24px;
+  width: auto;
+}
+.nav {
+  display: flex;
+  gap: 4px;
+  margin-left: 16px;
+}
+.nav a {
+  color: var(--dim);
+  text-decoration: none;
+  font-size: 13px;
+  padding: 0 10px;
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  border-radius: 0;
+}
+.nav a:hover {
+  color: var(--text);
+  background: var(--hover);
+}
+.pill {
+  font-size: 12px;
+  color: var(--dim);
+  border: 1px solid var(--line);
+  border-radius: 0;
+  padding: 6px 12px;
+  white-space: nowrap;
+}
+.stage {
+  color: var(--label);
+  scroll-behavior: smooth;
+}
+@media (prefers-reduced-motion: reduce) {
+  .stage {
+    scroll-behavior: auto;
+  }
+}
+.wrap {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 24px 24px;
+}
+.eyebrow {
+  margin: 0;
+  font-size: 13px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--accent);
+  font-weight: 700;
+}
+.hero {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 48px;
+  align-items: center;
+  padding: 64px 0 72px;
+  min-height: min(78vh, 760px);
+}
+.hcopy {
+  flex: 1 1 360px;
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+  min-width: 0;
+}
+.display {
+  margin: 0;
+  font-size: clamp(3rem, 8vw, 5.5rem);
+  line-height: 1;
+  letter-spacing: -0.02em;
+}
+.lede {
+  margin: 0;
+  font-size: 1.1rem;
+  line-height: 1.65;
+  max-width: 520px;
+  opacity: 0.85;
+}
+.small {
+  margin: 0;
+  font-size: 13px;
+  opacity: 0.8;
+  line-height: 1.6;
+}
+.small a {
+  color: var(--accent);
+}
+.hart {
+  flex: 1 1 360px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+.hname {
+  margin: 0;
+  font-size: 14px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  opacity: 0.8;
+  text-align: center;
+}
+.hero-art {
+  width: 100%;
+  max-width: 480px;
+  padding: 24px;
+}
+.hero-art svg {
+  width: 100%;
+  height: auto;
+  display: block;
+  overflow: visible;
+}
+.s {
+  padding: 72px 0;
+  border-top: 1px solid var(--rule);
+  display: flex;
+  flex-direction: column;
+  gap: 36px;
+}
+.shead {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  max-width: 660px;
+}
+.shead h2 {
+  margin: 0;
+  font-size: clamp(1.75rem, 4vw, 2.5rem);
+  line-height: 1.15;
+}
+.shead p:not(.eyebrow) {
+  margin: 0;
+  line-height: 1.65;
+  opacity: 0.85;
+}
+.row3,
+.asciis {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 32px;
+}
+.fig {
+  margin: 0;
+  flex: 1 1 220px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  min-width: 0;
+}
+.fig svg {
+  width: 100%;
+  max-width: 240px;
+  height: auto;
+  display: block;
+  overflow: visible;
+}
+.fig figcaption {
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.fig figcaption b {
+  font-size: 15px;
+}
+.fig figcaption span {
+  font-size: 13px;
+  opacity: 0.75;
+}
+.asciis figure {
+  margin: 0;
+  flex: 1 1 260px;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.asciis .scroll {
+  overflow-x: auto;
+  max-width: 100%;
+}
+.asciis pre {
+  margin: 0;
+  font-family: inherit;
+  font-size: 10px;
+  line-height: 1;
+  /* cells are sampled 1:2, so each glyph must be half as wide as tall */
+  letter-spacing: calc(0.5em - 1ch);
+  color: var(--accent);
+}
+.asciis figcaption {
+  font-size: 13px;
+  opacity: 0.75;
+}
+.foot {
+  padding: 40px 0 24px;
+  border-top: 1px solid var(--rule);
+  font-size: 13px;
+  opacity: 0.7;
+}
+.foot a {
+  color: inherit;
+  text-underline-offset: 3px;
+}
+.foot a:hover {
+  color: var(--accent);
+}

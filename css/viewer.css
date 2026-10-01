@@ -1,0 +1,321 @@
+/* Single view dialog, review UI, toast */
+.tile .open {
+  width: 100%;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  cursor: zoom-in;
+  border-radius: 0;
+  display: block;
+}
+.tile .open:hover {
+  background: var(--label-hover);
+}
+dialog.view {
+  border: 0;
+  padding: 0;
+  margin: 0;
+  width: 100%;
+  height: 100%;
+  max-width: none;
+  max-height: none;
+  background: var(--vbg, #1a1b26);
+  color: var(--label, #e6e9f5);
+}
+dialog.view.checker {
+  background-color: #fff;
+  background-image:
+    linear-gradient(45deg, #d9dce6 25%, transparent 25%),
+    linear-gradient(-45deg, #d9dce6 25%, transparent 25%),
+    linear-gradient(45deg, transparent 75%, #d9dce6 75%),
+    linear-gradient(-45deg, transparent 75%, #d9dce6 75%);
+  background-size: 20px 20px;
+  background-position:
+    0 0,
+    0 10px,
+    10px -10px,
+    -10px 0;
+}
+dialog.view::backdrop {
+  background: rgba(0, 0, 0, 0.5);
+}
+.vwrap {
+  height: 100%;
+  display: grid;
+  grid-template-rows: auto 1fr;
+  padding: calc(12px + env(safe-area-inset-top, 0px)) 16px
+    calc(16px + env(safe-area-inset-bottom, 0px));
+}
+.vtop,
+.vbottom {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.vtop h2 {
+  margin: 0 auto 0 8px;
+  font-size: 18px;
+  font-weight: 700;
+}
+.vtop .pos {
+  font-size: 13px;
+  opacity: 0.75;
+  margin-right: 8px;
+}
+.vbtn {
+  min-height: 44px;
+  min-width: 44px;
+  padding: 0 14px;
+  border-radius: 0;
+  border: 1px solid currentColor;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  opacity: 0.85;
+}
+.vbtn:hover {
+  opacity: 1;
+  background: var(--label-hover);
+}
+.vbtn svg {
+  width: 18px;
+  height: 18px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.75;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.vbtn.icon {
+  padding: 0;
+  border-color: transparent;
+}
+.vbtn.tip {
+  padding: 0;
+}
+.btn.icon {
+  width: 44px;
+  padding: 0;
+  justify-content: center;
+}
+.bar .btn.icon {
+  background: var(--btn);
+  color: var(--btn-text);
+  border-color: var(--btn);
+}
+.bar .btn.icon:hover {
+  opacity: 0.85;
+}
+.tip {
+  position: relative;
+}
+.tip::after {
+  content: attr(data-tip);
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 0;
+  z-index: 30;
+  background: var(--btn);
+  color: var(--btn-text);
+  padding: 6px 10px;
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 1.2;
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.15s;
+}
+.tip:hover::after,
+.tip:focus-visible::after {
+  opacity: 1;
+}
+.vart {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 0;
+  padding: 16px;
+}
+.vart > svg {
+  width: auto;
+  height: 100%;
+  max-width: 100%;
+  max-height: min(70vh, 720px);
+  aspect-ratio: 1;
+  overflow: visible;
+}
+.vbottom {
+  justify-content: center;
+}
+.vbottom .lbl {
+  font-size: 13px;
+  opacity: 0.75;
+  margin-right: 4px;
+}
+.votes {
+  display: flex;
+  gap: 2px;
+}
+.vote {
+  min-height: 44px;
+  min-width: 40px;
+  border: 0;
+  background: transparent;
+  color: var(--label);
+  border-radius: 0;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0.55;
+}
+.vote:hover {
+  opacity: 1;
+  background: var(--label-hover);
+}
+.vote svg {
+  width: 18px;
+  height: 18px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.vote[aria-pressed="true"] {
+  opacity: 1;
+}
+.vote[data-v="accept"][aria-pressed="true"] {
+  background: #9ece6a;
+  color: #14210a;
+}
+.vote[data-v="deny"][aria-pressed="true"] {
+  background: #f7768e;
+  color: #2b0910;
+}
+.vote[data-v="edit"][aria-pressed="true"] {
+  background: #e0af68;
+  color: #2b1d05;
+}
+.votes[hidden] {
+  display: none;
+}
+.chip {
+  font-size: 11px;
+  font-weight: 700;
+  padding: 3px 8px;
+  border-radius: 0;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+.chip.accept {
+  background: #9ece6a;
+  color: #14210a;
+}
+.chip.deny {
+  background: #f7768e;
+  color: #2b0910;
+}
+.chip.edit {
+  background: #e0af68;
+  color: #2b1d05;
+}
+.tile .note {
+  font-size: 12px;
+  color: var(--label);
+  opacity: 0.8;
+  max-width: 100%;
+  text-align: center;
+  line-height: 1.4;
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+.tile .meta {
+  flex-wrap: wrap;
+  justify-content: center;
+}
+.vreview {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  align-items: center;
+  padding: 8px 0 12px;
+}
+.vreview .votes .vote {
+  min-width: auto;
+  padding: 0 14px;
+  gap: 8px;
+  border: 1px solid currentColor;
+  opacity: 0.75;
+  font-size: 14px;
+}
+.vreview .votes {
+  gap: 8px;
+}
+.vreview .noterow {
+  display: flex;
+  gap: 8px;
+  width: min(100%, 640px);
+}
+.vreview textarea {
+  flex: 1;
+  min-height: 44px;
+  height: 64px;
+  resize: vertical;
+  padding: 10px 12px;
+  border-radius: 0;
+  border: 1px solid currentColor;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  font-size: 14px;
+}
+.vreview textarea::placeholder {
+  color: inherit;
+  opacity: 0.6;
+}
+.summary {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 6px;
+  margin-bottom: 12px;
+}
+.summary div {
+  border: 1px solid var(--line);
+  border-radius: 0;
+  padding: 8px 10px;
+  font-size: 12px;
+  color: var(--dim);
+}
+.summary b {
+  display: block;
+  font-size: 18px;
+  color: var(--text);
+}
+.toast {
+  z-index: 20;
+  position: fixed;
+  left: 50%;
+  bottom: calc(24px + env(safe-area-inset-bottom, 0px));
+  transform: translateX(-50%);
+  background: var(--btn);
+  color: var(--btn-text);
+  padding: 12px 16px;
+  border-radius: 0;
+  font-size: 13px;
+  max-width: calc(100% - 32px);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s;
+}
+.toast.on {
+  opacity: 1;
+}

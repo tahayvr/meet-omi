@@ -1,0 +1,365 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, viewport-fit=cover"
+    />
+    <title>Meet Omi — The Omarchy logo, brought to life.</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="css/base.css" />
+    <link rel="stylesheet" href="css/site.css" />
+    <link rel="stylesheet" href="css/tiles.css" />
+    <link rel="stylesheet" href="css/controls.css" />
+    <link rel="stylesheet" href="css/viewer.css" />
+    <link rel="stylesheet" href="css/export-dialog.css" />
+    <link rel="stylesheet" href="css/responsive.css" />
+  </head>
+  <body>
+    <div class="app">
+      <header class="bar">
+        <a class="brand" href="#meet" aria-label="Omi"
+          ><svg
+            viewBox="0 0 30 16"
+            aria-hidden="true"
+            shape-rendering="crispEdges"
+          >
+            <path
+              fill="currentColor"
+              d="M2 0h6v1h-6zM1 1h8v1h-8zM0 2h3v1h-3zM7 2h3v1h-3zM27 2h2v1h-2zM0 3h3v1h-3zM7 3h3v1h-3zM27 3h2v1h-2zM0 4h3v1h-3zM7 4h3v1h-3zM17 4h3v1h-3zM0 5h3v1h-3zM7 5h3v1h-3zM13 5h11v1h-11zM27 5h3v1h-3zM0 6h3v1h-3zM7 6h3v1h-3zM12 6h13v1h-13zM27 6h3v1h-3zM0 7h3v1h-3zM7 7h3v1h-3zM11 7h3v1h-3zM17 7h3v1h-3zM23 7h3v1h-3zM27 7h3v1h-3zM0 8h3v1h-3zM7 8h3v1h-3zM11 8h3v1h-3zM17 8h3v1h-3zM23 8h3v1h-3zM27 8h3v1h-3zM0 9h3v1h-3zM7 9h3v1h-3zM11 9h3v1h-3zM17 9h3v1h-3zM23 9h3v1h-3zM27 9h3v1h-3zM0 10h3v1h-3zM7 10h3v1h-3zM11 10h3v1h-3zM17 10h3v1h-3zM23 10h3v1h-3zM27 10h3v1h-3zM0 11h3v1h-3zM7 11h3v1h-3zM11 11h3v1h-3zM17 11h3v1h-3zM23 11h3v1h-3zM27 11h3v1h-3zM0 12h3v1h-3zM7 12h3v1h-3zM11 12h3v1h-3zM17 12h3v1h-3zM23 12h3v1h-3zM27 12h3v1h-3zM0 13h3v1h-3zM7 13h3v1h-3zM11 13h3v1h-3zM17 13h3v1h-3zM23 13h3v1h-3zM27 13h3v1h-3zM1 14h8v1h-8zM12 14h2v1h-2zM17 14h3v1h-3zM23 14h2v1h-2zM27 14h2v1h-2zM2 15h6v1h-6zM13 15h1v1h-1zM17 15h3v1h-3zM23 15h1v1h-1zM27 15h1v1h-1z"
+            /></svg
+        ></a>
+        <nav class="nav" aria-label="Sections">
+          <a href="#anatomy">Anatomy</a><a href="#modes">Modes</a
+          ><a href="#terminal">Terminal</a>
+        </nav>
+        <span class="spacer"></span>
+        <span class="pill">concept · not final</span>
+        <button
+          class="btn icon tip"
+          id="toggleSide"
+          aria-expanded="false"
+          aria-controls="side"
+          aria-label="Controls"
+          data-tip="Controls"
+        >
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path
+              d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"
+            ></path>
+            <circle cx="12" cy="12" r="3"></circle>
+          </svg>
+        </button>
+      </header>
+      <div class="main">
+        <main class="stage" id="stage">
+          <div class="wrap">
+            <section class="hero" id="meet">
+              <div class="hcopy">
+                <p class="eyebrow">The Omarchy mascot</p>
+                <h1 class="display">Meet Omi.</h1>
+                <p class="lede">
+                  The Omarchy logo, brought to life. <br />The inner square
+                  holds a face. The frames move to show what Omi is up to.
+                </p>
+                <p class="small">
+                  <a href="#modes"
+                    >See all <span id="modeCount"></span> modes</a
+                  >
+                  · open <b>Controls</b> to restyle the whole page with any
+                  theme.
+                </p>
+              </div>
+              <div class="hart">
+                <div class="hero-art" id="heroArt"></div>
+                <p class="hname" id="heroName" aria-hidden="true"></p>
+              </div>
+            </section>
+
+            <section class="s" id="anatomy">
+              <div class="shead">
+                <p class="eyebrow">Anatomy</p>
+                <h2>Built from the logo</h2>
+              </div>
+              <div class="row3" id="anat"></div>
+            </section>
+
+            <section class="s" id="modes">
+              <div class="shead">
+                <p class="eyebrow">Modes</p>
+                <h2>One body, every mood</h2>
+                <p>
+                  System states, thinking, reactions and a few easter eggs.
+                  <br />Click any mode for a closer look, or use the download
+                  button to export it as SVG, PNG, video and more.
+                </p>
+              </div>
+              <div class="grid" id="grid"></div>
+            </section>
+
+            <section class="s" id="terminal">
+              <div class="shead">
+                <p class="eyebrow">Terminal</p>
+                <h2>Survives ASCII</h2>
+                <p>
+                  Omi's grid geometry keeps most modes readable at that
+                  resolution.
+                </p>
+              </div>
+              <div class="asciis" id="asciis"></div>
+            </section>
+
+            <footer class="foot">
+              Omi · concept exploration for
+              <a href="https://omarchy.org" target="_blank" rel="noopener"
+                >Omarchy</a
+              >
+              · by
+              <a href="https://taha.gg" target="_blank" rel="noopener">Taha</a>
+            </footer>
+          </div>
+        </main>
+        <aside class="side" id="side" aria-label="Controls">
+          <div class="v-only editing">
+            <h2>Editing <span id="editName"></span></h2>
+            <p class="hint" style="margin-top: 0">
+              Changes here apply only to this design. Everything else keeps the
+              global settings.
+            </p>
+            <button class="btn" id="resetOver" style="margin-top: 10px">
+              Reset to global settings
+            </button>
+          </div>
+
+          <h2>Theme</h2>
+          <select id="themeSel" aria-label="Theme"></select>
+
+          <h2>Background</h2>
+          <div class="colorrow">
+            <input type="color" id="bgPick" aria-label="Background color" />
+            <input
+              type="text"
+              id="bgHex"
+              aria-label="Background hex"
+              spellcheck="false"
+              maxlength="7"
+            />
+          </div>
+          <div class="swatches" id="bgSw"></div>
+
+          <h2>Omi color</h2>
+          <div class="colorrow">
+            <input type="color" id="fgPick" aria-label="Omi color" />
+            <input
+              type="text"
+              id="fgHex"
+              aria-label="Omi hex"
+              spellcheck="false"
+              maxlength="7"
+            />
+          </div>
+          <div class="swatches" id="fgSw"></div>
+
+          <h2>Display</h2>
+          <label class="switch"
+            ><span>Animate</span><input type="checkbox" id="anim"
+          /></label>
+          <p class="hint" id="rmHint" hidden>
+            Reduce motion is on in your system settings, so animations are
+            paused.
+            <button
+              class="btn"
+              id="rmPlay"
+              style="width: 100%; margin-top: 8px"
+            >
+              Play animations anyway
+            </button>
+          </p>
+          <label class="switch g-only"
+            ><span>Names</span><input type="checkbox" id="names"
+          /></label>
+          <label class="field"
+            ><span>Animation speed <output id="speedOut">1×</output></span
+            ><input type="range" id="speed" min="0.25" max="3" step="0.25"
+          /></label>
+          <label class="field g-only"
+            ><span>Tile size</span
+            ><input type="range" id="tile" min="140" max="420" step="20"
+          /></label>
+
+          <h2>Export</h2>
+          <label class="field"
+            ><span>Format</span>
+            <select id="fmt">
+              <option value="svg">SVG</option>
+              <option value="svga">SVG, animated</option>
+              <option value="png">PNG</option>
+              <option value="jpg">JPG</option>
+              <option value="webp">WebP</option>
+              <option value="txt">ASCII (.txt)</option>
+              <option value="json">JSON (geometry)</option>
+              <option value="webm">Video, WebM</option>
+              <option value="mp4">Video, MP4</option>
+            </select>
+          </label>
+          <div class="two">
+            <label class="field" style="grid-column: 1 / -1"
+              ><span>Aspect ratio</span>
+              <select id="ratio">
+                <option value="1:1">1:1 square</option>
+                <option value="16:9">16:9 landscape</option>
+                <option value="9:16">9:16 story</option>
+                <option value="4:3">4:3</option>
+                <option value="3:4">3:4</option>
+                <option value="4:5">4:5 portrait post</option>
+                <option value="21:9">21:9 wide</option>
+              </select>
+            </label>
+            <label class="field"
+              ><span>Size, long edge (px)</span>
+              <select id="size">
+                <option>256</option>
+                <option>512</option>
+                <option>1024</option>
+                <option value="1280">1280 (720p)</option>
+                <option value="1920">1920 (1080p)</option>
+                <option>2048</option>
+                <option value="3840">3840 (4K)</option>
+              </select>
+            </label>
+            <label class="field"
+              ><span>Padding</span>
+              <select id="pad">
+                <option value="0">None</option>
+                <option value="0.08">Small</option>
+                <option value="0.16">Medium</option>
+                <option value="0.28">Large</option>
+              </select>
+            </label>
+          </div>
+          <label class="field" id="lenField"
+            ><span>Video length</span>
+            <select id="vlen">
+              <option value="4">4 seconds</option>
+              <option value="8">8 seconds</option>
+              <option value="12">12 seconds</option>
+            </select>
+          </label>
+          <label class="switch"
+            ><span>Transparent background</span
+            ><input type="checkbox" id="clear"
+          /></label>
+          <div class="stack v-only" style="margin-top: 8px">
+            <button class="btn primary" id="saveOne">Export this design</button>
+          </div>
+          <div class="stack g-only" style="margin-top: 8px">
+            <button class="btn primary" id="saveAll">Export all as ZIP</button>
+            <button class="btn" id="copyAll">Copy SVG sprite</button>
+          </div>
+          <p class="hint g-only" id="saveHint">
+            Use the download button under any design to export just that one.
+          </p>
+        </aside>
+      </div>
+    </div>
+    <dialog class="view" id="view" aria-labelledby="vname">
+      <div class="vwrap">
+        <div class="vtop">
+          <button class="vbtn icon" id="vprev" aria-label="Previous design">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M15 5l-7 7 7 7"></path>
+            </svg>
+          </button>
+          <button class="vbtn icon" id="vnext" aria-label="Next design">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M9 5l7 7-7 7"></path>
+            </svg>
+          </button>
+          <h2 id="vname"></h2>
+          <span class="pos" id="vpos"></span>
+          <button
+            class="vbtn tip"
+            id="vside"
+            aria-expanded="true"
+            aria-controls="side"
+            aria-label="Controls"
+            data-tip="Controls"
+          >
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path
+                d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"
+              ></path>
+              <circle cx="12" cy="12" r="3"></circle>
+            </svg>
+          </button>
+          <button class="vbtn icon" id="vclose" aria-label="Close">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M6 6l12 12M18 6L6 18"></path>
+            </svg>
+          </button>
+        </div>
+        <div class="vart" id="vart" data-sid=""></div>
+      </div>
+    </dialog>
+    <dialog class="xdlg" id="xdlg" aria-labelledby="xname">
+      <form method="dialog" id="xform">
+        <div class="xhead">
+          <div class="xart" id="xart"></div>
+          <div>
+            <p class="xeyebrow">Export</p>
+            <h2 id="xname"></h2>
+          </div>
+        </div>
+        <label class="field"
+          ><span>Format</span
+          ><select id="xfmt"></select
+        ></label>
+        <div class="two">
+          <label class="field" style="grid-column: 1 / -1"
+            ><span>Aspect ratio</span
+            ><select id="xratio"></select
+          ></label>
+          <label class="field"
+            ><span>Size, long edge (px)</span
+            ><select id="xsize"></select
+          ></label>
+          <label class="field"
+            ><span>Padding</span
+            ><select id="xpad"></select
+          ></label>
+        </div>
+        <label class="field" id="xlenField"
+          ><span>Video length</span
+          ><select id="xvlen"></select
+        ></label>
+        <label class="switch"
+          ><span>Transparent background</span
+          ><input type="checkbox" id="xclear"
+        /></label>
+        <div class="xactions">
+          <button class="btn" value="cancel" formnovalidate>Cancel</button>
+          <button class="btn primary" value="export" id="xgo">Export</button>
+        </div>
+      </form>
+    </dialog>
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+    <script src="js/geometry.js"></script>
+    <script src="js/frames.js"></script>
+    <script src="js/designs.js"></script>
+    <script src="js/render.js"></script>
+    <script src="js/state.js"></script>
+    <script src="js/export.js"></script>
+    <script src="js/video.js"></script>
+    <script src="js/download.js"></script>
+    <script src="js/viewer.js"></script>
+    <script src="js/site.js"></script>
+    <script src="js/export-dialog.js"></script>
+    <script src="js/main.js"></script>
+  </body>
+</html>
