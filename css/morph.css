@@ -27,14 +27,6 @@
   height: auto;
   overflow: visible;
 }
-/* the live animation takes over from the morph at its rest pose, so start
-   the loops whose first frame isn't the rest pose there */
-.mart .omi-a .peek {
-  animation-delay: -1.125s;
-}
-.mart .omi-a :is(.skq, .skb, .skm) {
-  animation-delay: -1.75s;
-}
 .mpick {
   display: flex;
   flex-direction: column;

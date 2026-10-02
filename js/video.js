@@ -1,4 +1,4 @@
-/* ---------- motion engine (mirrors the CSS keyframes, for video) ---------- */
+/* ---------- video: draws each frame from the motion table (motion.js) ---------- */
 const HAS_ENCODER = typeof VideoEncoder !== "undefined";
 const MP4 =
   HAS_ENCODER ||
@@ -16,393 +16,9 @@ const WEBM =
       MediaRecorder.isTypeSupported(t),
     )
   );
-const ease = (p) =>
-  p < 0.5 ? 4 * p * p * p : 1 - Math.pow(-2 * p + 2, 3) / 2;
-const easeOut = (p) => 1 - Math.pow(1 - p, 3);
-function kf(frames, p, fn = ease) {
-  for (let i = 1; i < frames.length; i++) {
-    const [p1, v1] = frames[i];
-    if (p <= p1) {
-      const [p0, v0] = frames[i - 1],
-        k = p1 === p0 ? 1 : fn((p - p0) / (p1 - p0)),
-        out = {};
-      for (const key in v1)
-        out[key] = v0[key] + (v1[key] - v0[key]) * k;
-      return out;
-    }
-  }
-  return frames[frames.length - 1][1];
-}
-const ph = (t, dur, delay = 0) => ((((t - delay) / dur) % 1) + 1) % 1;
-const MOODS = {
-  "m-bob": (t, W, H) => ({
-    ty:
-      kf(
-        [
-          [0, { v: 0 }],
-          [0.5, { v: -0.04 }],
-          [1, { v: 0 }],
-        ],
-        ph(t, 2.8),
-      ).v * H,
-  }),
-  "m-happy": (t, W, H) => ({
-    ty:
-      kf(
-        [
-          [0, { v: 0 }],
-          [0.2, { v: -0.1 }],
-          [0.4, { v: 0 }],
-          [0.5, { v: -0.04 }],
-          [0.6, { v: 0 }],
-          [1, { v: 0 }],
-        ],
-        ph(t, 1.6),
-      ).v * H,
-  }),
-  "m-slow": (t, W, H) => ({
-    ty:
-      kf(
-        [
-          [0, { v: 0 }],
-          [0.5, { v: -0.04 }],
-          [1, { v: 0 }],
-        ],
-        ph(t, 5),
-      ).v * H,
-  }),
-  "m-beat": (t, W, H) => ({
-    s: kf(
-      [
-        [0, { v: 1 }],
-        [0.1, { v: 1.06 }],
-        [0.2, { v: 1 }],
-        [0.3, { v: 1.04 }],
-        [0.4, { v: 1 }],
-        [1, { v: 1 }],
-      ],
-      ph(t, 1.2),
-    ).v,
-  }),
-  "m-error": (t, W, H) => ({
-    tx:
-      kf(
-        [
-          [0, { v: 0 }],
-          [0.7, { v: 0 }],
-          [0.74, { v: -0.03 }],
-          [0.8, { v: 0.03 }],
-          [0.86, { v: -0.02 }],
-          [0.92, { v: 0.02 }],
-          [1, { v: 0 }],
-        ],
-        ph(t, 2.2),
-      ).v * W,
-  }),
-};
-function partAnim(c, t, r) {
-  const o = { tx: 0, ty: 0, sx: 1, sy: 1, op: 1 };
-  if (!c) return o;
-  const has = (k) => c.split(" ").includes(k);
-  for (const k of c.split(" ")) {
-    const a = EMO_ANIM[k];
-    if (!a) continue;
-    const v = kf(
-      a.keys.map(([p, raw]) => [p, emoVal(raw)]),
-      ph(t, a.dur),
-    );
-    o.tx += v.tx;
-    o.ty += v.ty;
-    o.sx *= v.sx;
-    o.sy *= v.sy;
-    o.op *= v.op;
-  }
-  if (has("eye"))
-    o.sy = kf(
-      [
-        [0, { v: 1 }],
-        [0.9, { v: 1 }],
-        [0.94, { v: 0.1 }],
-        [1, { v: 1 }],
-      ],
-      ph(t, 4),
-    ).v;
-  if (has("cur")) o.op = ph(t, 1.05) < 0.5 ? 1 : 0;
-  if (has("dot"))
-    o.op = kf(
-      [
-        [0, { v: 0.25 }],
-        [0.3, { v: 1 }],
-        [1, { v: 0.25 }],
-      ],
-      ph(t, 1.2, has("dot2") ? 0.2 : has("dot3") ? 0.4 : 0),
-    ).v;
-  if (has("z")) {
-    const p = ph(t, 2.6, has("z2") ? 0.87 : has("z3") ? 1.73 : 0),
-      e = easeOut(p);
-    o.tx = 10 * e;
-    o.ty = -24 * e;
-    o.op = p < 0.3 ? easeOut(p / 0.3) : 1 - (p - 0.3) / 0.7;
-  }
-  if (r && r.chase) {
-    const p = ph(t, r.dur, r.dl),
-      f = r.floor != null ? r.floor : 0.2;
-    o.op = p < r.tail ? 1 - (p / r.tail) * (1 - f) : f;
-  }
-  if (has("ripple"))
-    o.op = kf(
-      [
-        [0, { v: 0.3 }],
-        [0.2, { v: 1 }],
-        [0.6, { v: 0.3 }],
-        [1, { v: 0.3 }],
-      ],
-      ph(t, 0.8, (r && r.dl) || 0),
-    ).v;
-  if (has("breathe"))
-    o.op = kf(
-      [
-        [0, { v: 0.35 }],
-        [0.5, { v: 1 }],
-        [1, { v: 0.35 }],
-      ],
-      ph(t, 4),
-    ).v;
-  if (has("pop"))
-    o.op = kf(
-      [
-        [0, { v: 0.35 }],
-        [0.2, { v: 1 }],
-        [0.6, { v: 0.35 }],
-        [1, { v: 0.35 }],
-      ],
-      ph(t, 1.6),
-    ).v;
-  if (has("flash"))
-    o.op = kf(
-      [
-        [0, { v: 1 }],
-        [0.7, { v: 1 }],
-        [0.74, { v: 0.2 }],
-        [0.8, { v: 1 }],
-        [0.86, { v: 0.2 }],
-        [0.92, { v: 1 }],
-        [1, { v: 1 }],
-      ],
-      ph(t, 2.2),
-    ).v;
-  if (has("sn")) {
-    const p = ph(t, SNAKE_DUR, (r.i / SNAKE_N) * SNAKE_DUR);
-    o.op = p < 0.216 ? 1 - (p / 0.216) * 0.85 : 0.15;
-  }
-  if (has("drop")) {
-    const v = kf(
-      [
-        [0, { y: -10, o: 0 }],
-        [0.3, { y: 0, o: 1 }],
-        [0.75, { y: 10, o: 1 }],
-        [1, { y: 20, o: 0 }],
-      ],
-      ph(t, 1.2),
-    );
-    o.ty = v.y;
-    o.op = v.o;
-  }
-  if (has("unplug"))
-    o.ty = kf(
-      [
-        [0, { v: 0 }],
-        [0.62, { v: 0 }],
-        [0.68, { v: -10 }],
-        [0.72, { v: -10 }],
-        [0.78, { v: 0 }],
-        [1, { v: 0 }],
-      ],
-      ph(t, 3.2),
-    ).v;
-  if (has("led"))
-    o.op = kf(
-      [
-        [0, { v: 0.15 }],
-        [0.5, { v: 1 }],
-        [1, { v: 0.15 }],
-      ],
-      ph(t, 3),
-    ).v;
-  if (r && r.hole) {
-    const p = ph(t, r.dur, r.dl);
-    o.op = p < 0.05 ? p / 0.05 : 1;
-  }
-  if (has("rise")) {
-    const v = kf(
-      [
-        [0, { y: 10, o: 0 }],
-        [0.3, { y: 0, o: 1 }],
-        [0.75, { y: -10, o: 1 }],
-        [1, { y: -20, o: 0 }],
-      ],
-      ph(t, 1.2),
-    );
-    o.ty = v.y;
-    o.op = v.o;
-  }
-  if (has("conf")) {
-    const p = ph(t, 1.6, r.dl),
-      e = easeOut(p);
-    o.tx = r.mx * e;
-    o.ty = r.my * e;
-    o.op = 1 - p;
-  }
-  if (has("gl"))
-    o.tx = kf(
-      [
-        [0, { v: 0 }],
-        [0.86, { v: 0 }],
-        [0.88, { v: -8 }],
-        [0.9, { v: 6 }],
-        [0.92, { v: -3 }],
-        [0.94, { v: 0 }],
-        [1, { v: 0 }],
-      ],
-      ph(t, 2.4, r.dl),
-      (p) => p,
-    ).v;
-  if (has("rain")) {
-    const p = ph(t, 1.4, r.dl);
-    o.ty = 160 * p;
-    o.op = p < 0.1 ? p / 0.1 : 1 - p;
-  }
-  if (has("tile"))
-    o.op = kf(
-      [
-        [0, { v: 0 }],
-        [0.05, { v: 0 }],
-        [0.12, { v: 1 }],
-        [0.85, { v: 1 }],
-        [0.95, { v: 0 }],
-        [1, { v: 0 }],
-      ],
-      ph(t, 3, r.dl),
-    ).v;
-  if (has("lid"))
-    o.ty = kf(
-      [
-        [0, { v: 0 }],
-        [0.2, { v: 0 }],
-        [0.35, { v: -60 }],
-        [0.7, { v: -60 }],
-        [0.85, { v: 0 }],
-        [1, { v: 0 }],
-      ],
-      ph(t, 2.4),
-    ).v;
-  if (has("trav"))
-    o.tx = kf(
-      [
-        [0, { v: 0 }],
-        [0.5, { v: 40 }],
-        [1, { v: 0 }],
-      ],
-      ph(t, 1.6),
-    ).v;
-  if (has("look"))
-    o.tx = kf(
-      [
-        [0, { v: -10 }],
-        [0.5, { v: 10 }],
-        [1, { v: -10 }],
-      ],
-      ph(t, 3),
-    ).v;
-  if (has("scan"))
-    o.tx = kf(
-      [
-        [0, { v: -30 }],
-        [0.5, { v: 30 }],
-        [1, { v: -30 }],
-      ],
-      ph(t, 1.6),
-    ).v;
-  if (has("arrow")) {
-    const v = kf(
-      [
-        [0, { y: -4, o: 0.4 }],
-        [0.5, { y: 4, o: 1 }],
-        [1, { y: -4, o: 0.4 }],
-      ],
-      ph(t, 1.2),
-    );
-    o.ty = v.y;
-    o.op = v.o;
-  }
-  if (has("pulse")) {
-    o.sx = kf(
-      [
-        [0, { v: 1 }],
-        [0.5, { v: 1.5 }],
-        [1, { v: 1 }],
-      ],
-      ph(t, 0.8),
-    ).v;
-  }
-  if (has("hb")) {
-    // scale about the heart's center, not each rect's own center
-    const s = kf(
-      [
-        [0, { v: 1 }],
-        [0.1, { v: 1.35 }],
-        [0.2, { v: 1 }],
-        [0.3, { v: 1.2 }],
-        [0.4, { v: 1 }],
-        [1, { v: 1 }],
-      ],
-      ph(t, 1.2),
-    ).v;
-    o.sx = o.sy = s;
-    o.tx = (r.x + r.w / 2 - r.hx) * (s - 1);
-    o.ty = (r.y + r.h / 2 - r.hy) * (s - 1);
-  }
-  if (has("pulseop"))
-    o.op = kf(
-      [
-        [0, { v: 1 }],
-        [0.5, { v: 0.35 }],
-        [1, { v: 1 }],
-      ],
-      ph(t, 1.2),
-    ).v;
-  if (has("arm"))
-    o.ty = kf(
-      [
-        [0, { v: 0 }],
-        [0.5, { v: -12 }],
-        [1, { v: 0 }],
-      ],
-      ph(t, 1.4),
-    ).v;
-  if (has("shades")) {
-    const v = kf(
-      [
-        [0, { y: -140, o: 0 }],
-        [0.18, { y: 0, o: 1 }],
-        [0.88, { y: 0, o: 1 }],
-        [1, { y: 0, o: 0 }],
-      ],
-      ph(t, 3.6),
-    );
-    o.ty = v.y;
-    o.op = v.o;
-  }
-  if (has("ch")) {
-    const n = +(c.match(/ch(\d)/) || [0, 1])[1],
-      p = ph(t, 3.2, (n - 1) * 0.25);
-    o.op = p < 0.1 ? 0 : p < 0.86 ? 1 : 0;
-  }
-  return o;
-}
 function drawRects(ctx, rects, t) {
   for (const r of rects) {
-    const a = partAnim(r.c, t, r);
+    const a = motionAt(r.c, t, r);
     if (a.op <= 0.001) continue;
     ctx.globalAlpha = Math.min(1, a.op) * (r.o != null ? r.o : 1);
     const cx = r.x + r.w / 2,
@@ -421,41 +37,31 @@ function drawFrame(ctx, d, t, vb, size, color, bg, hgt) {
   ctx.setTransform(s, 0, 0, s, -vb.x * s, -vb.y * s);
   ctx.fillStyle = color;
   const sh = shapes(d, X.body);
-  if (sh.inner) {
-    const p = ph(t, 4.5),
-      ty = kf(
-        [
-          [0, { v: 180 }],
-          [0.25, { v: 0 }],
-          [0.75, { v: 0 }],
-          [1, { v: 180 }],
-        ],
-        p,
-      ).v;
+  ctx.save();
+  if (d.mood && ANIM[d.mood]) {
+    // body moods move and scale the whole of Omi about its center
+    const m = motionAt(d.mood, t),
+      cx = (sh.box.x + sh.box.x2) / 2,
+      cy = (sh.box.y + sh.box.y2) / 2;
+    ctx.translate(cx + m.tx, cy + m.ty);
+    ctx.scale(m.sx, m.sy);
+    ctx.translate(-cx, -cy);
+  }
+  if (d.clip) {
+    // pieces seen through a window, on a layer of their own that can move
+    const c = d.clip;
     ctx.save();
     ctx.beginPath();
-    ctx.rect(-60, -130, 440, 450);
+    ctx.rect(c.x, c.y, c.w, c.h);
     ctx.clip();
-    ctx.translate(0, ty);
-    drawRects(ctx, sh.inner, t);
-    ctx.restore();
-    drawRects(ctx, sh.outer, t);
-    return;
-  }
-  const m = d.mood && X.anim !== null ? MOODS[d.mood] : null;
-  ctx.save();
-  if (m) {
-    const g = m(t, sh.box.x2 - sh.box.x, sh.box.y2 - sh.box.y);
-    ctx.translate(g.tx || 0, g.ty || 0);
-    if (g.s) {
-      const cx = (sh.box.x + sh.box.x2) / 2,
-        cy = (sh.box.y + sh.box.y2) / 2;
-      ctx.translate(cx, cy);
-      ctx.scale(g.s, g.s);
-      ctx.translate(-cx, -cy);
+    if (c.mood) {
+      const m = motionAt(c.mood, t);
+      ctx.translate(m.tx, m.ty);
     }
+    drawRects(ctx, sh.rects.filter((r) => r.clip), t);
+    ctx.restore();
   }
-  drawRects(ctx, sh.rects, t);
+  drawRects(ctx, sh.rects.filter((r) => !r.clip), t);
   ctx.restore();
 }
 /* ---------- video encoding ---------- */

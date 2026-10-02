@@ -19,29 +19,24 @@ const blk = (cx, cy, pts, c) =>
   pts.map(([dx, dy]) => R(cx + dx * 20, cy + dy * 20, 20, 20, c));
 const cellsOf = (path, extra = () => ({})) =>
   path.map(([x, y], i) => ({ ...R(x, y, 20, 20), ...extra(i, x, y) }));
+// a light running along a path: each cell lags the one before it
 function chase(path, dur, tail, offset = 0) {
   const N = path.length,
-    cls = "t" + Math.round(tail * 100);
-  return cellsOf(path, (i) => {
-    const dl = ((i / N) * dur + offset) % dur;
-    return {
-      c: cls,
-      chase: true,
-      dur,
-      dl,
-      tail,
-      s: `--dur:${dur}s;--d:${(dl - dur).toFixed(3)}s`,
-    };
-  });
+    c = "t" + Math.round(tail * 100);
+  return cellsOf(path, (i) => ({
+    c,
+    dur,
+    dl: ((i / N) * dur + offset) % dur,
+  }));
 }
-const Z = (x, y, s, c) => {
+const Z = (x, y, s, dl = 0) => {
   const t = s / 4;
   return [
-    R(x, y, s, t, c),
-    R(x + s - 2 * t, y + t, t, t, c),
-    R(x + t, y + s - 2 * t, t, t, c),
-    R(x, y + s - t, s, t, c),
-  ];
+    R(x, y, s, t, "z"),
+    R(x + s - 2 * t, y + t, t, t, "z"),
+    R(x + t, y + s - 2 * t, t, t, "z"),
+    R(x, y + s - t, s, t, "z"),
+  ].map((r) => (dl ? { ...r, dl } : r));
 };
 const F = {
   idle: [R(100, 110, 20, 40, "eye"), R(180, 110, 20, 40, "eye")],
@@ -55,9 +50,9 @@ const F = {
   thinking: [
     R(120, 90, 20, 40, "eye"),
     R(200, 90, 20, 40, "eye"),
-    R(160, 40, 20, 20, "dot dot1"),
-    R(180, 40, 20, 20, "dot dot2"),
-    R(200, 40, 20, 20, "dot dot3"),
+    R(160, 40, 20, 20, "dot"),
+    { ...R(180, 40, 20, 20, "dot"), dl: 0.2 },
+    { ...R(200, 40, 20, 20, "dot"), dl: 0.4 },
   ],
   success: [
     ...blk(80, 130, [
@@ -90,9 +85,9 @@ const F = {
   sleeping: [
     R(80, 144, 40, 12, "breathe"),
     R(160, 144, 40, 12, "breathe"),
-    ...Z(318, -20, 16, "z z1"),
-    ...Z(340, -62, 24, "z z2"),
-    ...Z(370, -114, 32, "z z3"),
+    ...Z(318, -20, 16),
+    ...Z(340, -62, 24, 0.87),
+    ...Z(370, -114, 32, 1.73),
   ],
   wink: [
     ...blk(90, 100, [
@@ -235,8 +230,7 @@ const SNAKE_N = SNAKE_PATH.length,
   SNAKE_DUR = 2.4;
 const SNAKE = SNAKE_PATH.map(([x, y], i) => ({
   ...R(x, y, 20, 20, "sn"),
-  i,
-  s: `animation-delay:${((i / SNAKE_N) * SNAKE_DUR - SNAKE_DUR).toFixed(3)}s`,
+  dl: (i / SNAKE_N) * SNAKE_DUR,
 }));
 
 /* emotions: eyes only (plus brows and tears). The mouth, when there is one,

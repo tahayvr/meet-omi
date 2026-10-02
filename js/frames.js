@@ -18,21 +18,12 @@ const OUT_PATH = [
   ...range(140, 20, -20).map((x) => [x, 280]),
   ...range(280, 20, -20).map((y) => [0, y]),
 ];
-const tint = (rects, c, s) =>
-  rects.map((r) => ({ ...r, c, ...(s ? { s } : {}) }));
+const tint = (rects, c) => rects.map((r) => ({ ...r, c }));
 /* growth: frame streams flow into a growing arrow, one continuous motion */
-function grow(paths, arrow, dt = 0.06, D = 2.8, tail = 0.4) {
+function grow(paths, arrow, dt = 0.06, D = 2.8) {
   const mk = (x, y, w, hh, k, floor) => {
     const dl = k * dt;
-    return {
-      ...R(x, y, w, hh, floor ? "t40" : "a40"),
-      chase: true,
-      dur: D,
-      dl,
-      tail,
-      floor,
-      s: `--dur:${D}s;--d:${(dl - D).toFixed(3)}s`,
-    };
+    return { ...R(x, y, w, hh, floor ? "t40" : "a40"), dur: D, dl };
   };
   const out = [];
   paths.forEach((p) =>
@@ -102,11 +93,8 @@ const FRAMES = {
     ...MISC,
     ...INNER_RECTS,
     ...cellsOf(OUT_PATH, (i) => ({
-      hole: true,
-      dur: 4,
-      dl: (i / OUT_PATH.length) * 4,
       c: "hole",
-      s: `--d:${((i / OUT_PATH.length) * 4 - 4).toFixed(3)}s`,
+      dl: (i / OUT_PATH.length) * 4,
     })),
   ],
   "thinking-stack": [
@@ -187,21 +175,16 @@ const FRAMES = {
   listening: [
     MISC[0],
     MISC[2],
-    ...tint([MISC[1]], "ripple", "--d:.1s").map((r) => ({
-      ...r,
-      dl: 0.1,
-    })),
+    ...tint([MISC[1]], "ripple").map((r) => ({ ...r, dl: 0.1 })),
     ...INNER_RECTS.filter((r) => r.w !== 20),
     ...tint(
       INNER_RECTS.filter((r) => r.w === 20),
       "ripple",
-      "--d:0s",
     ),
     ...OUTER_RECTS.filter((r) => r.w !== 20),
     ...tint(
       OUTER_RECTS.filter((r) => r.w === 20),
       "ripple",
-      "--d:.2s",
     ).map((r) => ({ ...r, dl: 0.2 })),
   ],
   typing: [

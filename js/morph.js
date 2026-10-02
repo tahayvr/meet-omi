@@ -42,24 +42,13 @@ function cells(r) {
       out.push({ x: xs[i], y: ys[j], w: xs[i + 1] - xs[i], h: ys[j + 1] - ys[j] });
   return out;
 }
-const clip = (r, b) => {
-  const x = Math.max(r.x, b.x),
-    y = Math.max(r.y, b.y),
-    x2 = Math.min(r.x + r.w, b.x + b.w),
-    y2 = Math.min(r.y + r.h, b.y + b.h);
-  return x2 - x > 0.01 && y2 - y > 0.01 ? { ...r, x, y, w: x2 - x, h: y2 - y } : null;
-};
-// A mode at rest, as atoms {x, y, w, h, o}.
+// A mode at rest (frame 0 of its loops), as atoms {x, y, w, h, o}.
 function atomsOf(d) {
-  const sh = shapes(d, false);
-  const rects = sh.inner
-    ? [
-        // peek: the logo rises over a ledge, clipped by its window
-        ...sh.inner.map((r) => clip(r, { x: -60, y: -130, w: 440, h: 450 })),
-        ...sh.outer,
-      ].filter(Boolean)
-    : sh.rects;
-  return rects.flatMap((r) => cells(r).map((c) => ({ ...c, o: r.o ?? 1 })));
+  return shapes(d, false)
+    .rects.map(restOf)
+    .map((r) => (r.clip ? clipTo(r, d.clip) : r))
+    .filter(Boolean)
+    .flatMap((r) => cells(r).map((c) => ({ ...c, o: r.o ?? 1 })));
 }
 // What an animated SVG shows right now, as atoms in its user space.
 function snapLayer(svg) {
@@ -98,7 +87,7 @@ function snapLayer(svg) {
         h: c.h * sy,
         o,
       };
-      if (box) r = clip(r, box);
+      if (box) r = clipTo(r, box);
       if (r) out.push(r);
     });
   });

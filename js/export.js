@@ -153,10 +153,11 @@ function geometry(d) {
     role: role(r),
     ...(r.o != null ? { opacity: r.o } : {}),
   });
-  if (sh.inner) {
-    out.clip = { x: -60, y: -130, width: 440, height: 450 };
-    out.clipped = sh.inner.map(map);
-    out.rects = sh.outer.map(map);
+  if (d.clip) {
+    const c = d.clip;
+    out.clip = { x: c.x, y: c.y, width: c.w, height: c.h };
+    out.clipped = sh.rects.filter((r) => r.clip).map(map);
+    out.rects = sh.rects.filter((r) => !r.clip).map(map);
   } else out.rects = sh.rects.map(map);
   return JSON.stringify(out, null, 2) + "\n";
 }

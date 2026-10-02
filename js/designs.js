@@ -1,13 +1,9 @@
 /* ---------- easter eggs ---------- */
-const withD = (r, dur, dl, extra = {}) => ({
-  ...r,
-  dl,
-  dur,
-  ...extra,
-  s: `--d:${(dl - dur).toFixed(3)}s${extra.mx != null ? `;--mx:${extra.mx}px;--my:${extra.my}px` : ""}`,
-});
-// A 50x40 pixel heart. Each rect carries the heart's center (hx, hy) so the
-// beat scales the whole heart around it, in CSS and in the video engine.
+// a piece with its own place in its loop (dl) and anything else it needs
+const withD = (r, dur, dl, extra = {}) => ({ ...r, dl, dur, ...extra });
+// A 50x40 pixel heart. Each rect carries its offset from the heart's center
+// (dx, dy), so the beat spreads the pixels and the whole heart scales about
+// its middle.
 const heart = (x, y) => {
   const hx = x + 25,
     hy = y + 20;
@@ -20,10 +16,8 @@ const heart = (x, y) => {
   ].map((r) => ({
     ...r,
     c: "hb",
-    hx,
-    hy,
-    // offset from the heart's center, so each pixel can spread outward
-    s: `--dx:${r.x + r.w / 2 - hx};--dy:${r.y + r.h / 2 - hy}`,
+    dx: r.x + r.w / 2 - hx,
+    dy: r.y + r.h / 2 - hy,
   }));
 };
 const outline = (x, y, w, h, t, c) => [
@@ -137,7 +131,25 @@ const DESIGNS_OLD = [
   { id: "wink", name: "Wink", face: F.wink, mood: "m-bob" },
   { id: "sudo", name: "Sudo", face: F.sudo, mood: "m-bob" },
   { id: "typing", name: "Typing", face: F.typing, mood: "m-bob" },
-  { id: "peek", name: "Peek", peek: true, mood: "" },
+  {
+    // the logo peers over a ledge: the logo and eyes sit 160 lower, seen
+    // through a window that ends at the ledge, and rise into it (clip.mood)
+    id: "peek",
+    name: "Peek",
+    clip: { x: -60, y: -130, w: 440, h: 450, mood: "peek" },
+    logo: [
+      ...LOGO.map((r) => ({ ...r, y: r.y + 160, clip: true })),
+      { ...R(-20, 320, 340, 20), o: 1 },
+      { ...R(-20, 340, 340, 20), o: 0.55 },
+      { ...R(-20, 360, 340, 20), o: 0.2 },
+    ],
+    face: [
+      { ...R(110, 250, 20, 40, "eye"), clip: true },
+      { ...R(190, 250, 20, 40, "eye"), clip: true },
+    ],
+    body: [R(20, 310, 40, 20), R(240, 310, 40, 20)],
+    mood: "",
+  },
 ];
 const G_ = (g, list) => list.map((d) => ({ ...d, group: g }));
 const byId = (id) => DESIGNS_OLD.find((d) => d.id === id);
