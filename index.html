@@ -18,6 +18,7 @@
     <link rel="stylesheet" href="css/controls.css" />
     <link rel="stylesheet" href="css/viewer.css" />
     <link rel="stylesheet" href="css/export-dialog.css" />
+    <link rel="stylesheet" href="css/morph.css" />
     <link rel="stylesheet" href="css/responsive.css" />
   </head>
   <body>
@@ -36,6 +37,7 @@
         ></a>
         <nav class="nav" aria-label="Sections">
           <a href="#anatomy">Anatomy</a><a href="#modes">Modes</a
+          ><a href="#morph">Morph</a
           ><a href="#terminal">Terminal</a>
         </nav>
         <span class="spacer"></span>
@@ -100,6 +102,26 @@
                 </p>
               </div>
               <div class="grid" id="grid"></div>
+            </section>
+
+            <section class="s" id="morph">
+              <div class="shead">
+                <p class="eyebrow">Morph</p>
+                <h2>Any mode, into any other</h2>
+                <p>
+                  Every mode is built from the same pixels, so Omi never cuts
+                  between states. The frame stays put and only changes
+                  brightness, while the face's pieces travel, split and merge
+                  into the next mode. Pick one, or click again mid-morph.
+                </p>
+              </div>
+              <div class="morph">
+                <div class="mstage">
+                  <div class="mart" id="mart" data-sid="morph"></div>
+                  <p class="hname" id="mname" aria-live="polite"></p>
+                </div>
+                <div class="mpick" id="mpick"></div>
+              </div>
             </section>
 
             <section class="s" id="terminal">
@@ -359,6 +381,7 @@
     <script src="js/download.js"></script>
     <script src="js/viewer.js"></script>
     <script src="js/site.js"></script>
+    <script src="js/morph.js"></script>
     <script src="js/export-dialog.js"></script>
     <script src="js/main.js"></script>
   </body>

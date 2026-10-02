@@ -56,6 +56,7 @@ function renderSite() {
     $("anat").innerHTML = anat;
     $("anat")._html = anat;
   }
+  if (typeof renderMorph === "function") renderMorph();
   // ascii (async, only when the inputs change)
   const key = S.fg + "|" + S.pad;
   if (key !== asciiKey) {

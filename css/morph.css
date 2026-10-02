@@ -1,0 +1,93 @@
+/* Morph section: one big Omi, a button per mode */
+.morph {
+  display: grid;
+  grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr);
+  gap: 48px;
+  align-items: start;
+}
+.mstage {
+  position: sticky;
+  top: 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+.mart {
+  display: grid;
+  width: 100%;
+  max-width: 560px;
+  color: var(--accent);
+}
+.mart > svg {
+  grid-area: 1 / 1;
+  display: block;
+  width: 100%;
+  height: auto;
+  overflow: visible;
+}
+/* the live animation takes over from the morph at its rest pose, so start
+   the loops whose first frame isn't the rest pose there */
+.mart .omi-a .peek {
+  animation-delay: -1.125s;
+}
+.mart .omi-a :is(.skq, .skb, .skm) {
+  animation-delay: -1.75s;
+}
+.mpick {
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+  min-width: 0;
+}
+.mgroup h3 {
+  margin: 0 0 10px;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  opacity: 0.7;
+}
+.mbtns {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.mbtn {
+  min-height: 40px;
+  padding: 0 12px;
+  border: 1px solid var(--rule);
+  border-radius: 0;
+  background: transparent;
+  color: var(--label);
+  font-size: 13px;
+  cursor: pointer;
+  transition:
+    background 0.15s,
+    color 0.15s,
+    border-color 0.15s;
+}
+.mbtn:hover {
+  background: var(--label-hover);
+}
+.mbtn[aria-pressed="true"] {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--accent-ink);
+}
+.mbtn.tour {
+  border-style: dashed;
+}
+@media (max-width: 900px) {
+  .morph {
+    grid-template-columns: 1fr;
+    gap: 32px;
+  }
+  .mstage {
+    position: static;
+  }
+  .mart {
+    max-width: 380px;
+  }
+}
