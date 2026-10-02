@@ -1,10 +1,12 @@
 /* Omi player: draws Omi from an Omi pack (omi.json), plays every mode's
-   animations and morphs from any mode into any other. No dependencies.
+   animations and morphs from any mode into any other. No dependencies, and
+   no browser needed: it runs in web pages, Node, and other JavaScript
+   engines such as QML's and GJS's.
 
      const omi = new Omi(canvas, pack);   // pack = the parsed omi.json
      omi.set("thinking");                 // morph there from wherever Omi is
      omi.set("idle", { instant: true });  // or jump
-     omi.addEventListener("settled", () => …);   // a morph landed
+     omi.on("settled", () => …);          // a morph landed
 
    Options (also settable later as properties):
      color        fill color; null follows the canvas's CSS `color`
@@ -15,9 +17,14 @@
      view         [x, y, w, h] to show, instead of the pack's view
 
    Everything Omi shows is a list of axis-aligned rects with an opacity, so
-   each frame is: work out the rects, fill them. README.md in the pack
-   describes the format and the morph step by step; this file follows it. */
-(function (root) {
+   each frame is: work out the rects, fill them. In a browser, draw() fills
+   them on the canvas. Anywhere else, call frame(ms) on every display frame
+   and fill omi.rects() yourself; pass a color, and null for the canvas if
+   there is none.
+
+   README.md in the pack describes the format and the morph step by step;
+   this file follows it. */
+var Omi = (function () {
   "use strict";
 
   /* ---------- animations ---------- */
@@ -334,13 +341,13 @@
   const lerp = (a, b, t) => a + (b - a) * t,
     easeBack = (p) => 1 + 2.70158 * (p - 1) ** 3 + 1.70158 * (p - 1) ** 2;
 
-  class Omi extends EventTarget {
+  class Omi {
     constructor(canvas, pack, opts = {}) {
-      super();
+      this._listeners = {};
       if (!pack || pack.format !== "omi-pack" || pack.version !== 1)
         throw new Error("Omi: expected an Omi pack, format version 1");
       this.canvas = canvas;
-      this.ctx = canvas.getContext("2d");
+      this.ctx = canvas && canvas.getContext ? canvas.getContext("2d") : null;
       this.pack = pack;
       this.anims = {};
       for (const [k, a] of Object.entries(pack.animations))
@@ -363,6 +370,7 @@
       if (
         typeof ResizeObserver !== "undefined" &&
         typeof Element !== "undefined" &&
+        canvas &&
         canvas instanceof Element
       ) {
         this._ro = new ResizeObserver(() => this.draw());
@@ -387,6 +395,26 @@
       this.wake();
     }
 
+    // Events: "settled" (a morph landed). The DOM-style names work too.
+    on(type, fn) {
+      (this._listeners[type] = this._listeners[type] || []).push(fn);
+      return this;
+    }
+    off(type, fn) {
+      const l = this._listeners[type];
+      if (l) this._listeners[type] = l.filter((f) => f !== fn);
+      return this;
+    }
+    addEventListener(type, fn) {
+      return this.on(type, fn);
+    }
+    removeEventListener(type, fn) {
+      return this.off(type, fn);
+    }
+    emit(type) {
+      for (const fn of this._listeners[type] || []) fn({ type, target: this });
+    }
+
     /* Change mode. Morphs from exactly what is on screen now, mid-loop or
        mid-morph; { instant: true } jumps. */
     set(id, { instant = false } = {}) {
@@ -400,7 +428,7 @@
       if (instant || !from.length) {
         this.morph = null;
         this.wake();
-        this.dispatchEvent(new Event("settled"));
+        this.emit("settled");
         return;
       }
       const P = this.planner,
@@ -523,11 +551,12 @@
         // landed on the rest pose: the mode's loops start at t = 0
         this.morph = null;
         this.t = 0;
-        this.dispatchEvent(new Event("settled"));
+        this.emit("settled");
       }
     }
 
     draw() {
+      if (!this.ctx) return; // no canvas: the host fills rects() itself
       const cv = this.canvas,
         dpr = (typeof devicePixelRatio !== "undefined" && devicePixelRatio) || 1,
         W = Math.round((cv.clientWidth || cv.width) * dpr),
@@ -541,7 +570,9 @@
         oy = (H - vh * s) / 2 - vy * s;
       ctx.setTransform(1, 0, 0, 1, 0, 0);
       ctx.clearRect(0, 0, W, H);
-      ctx.fillStyle = this.color || getComputedStyle(cv).color;
+      ctx.fillStyle =
+        this.color ||
+        (typeof getComputedStyle !== "undefined" ? getComputedStyle(cv).color : "#000");
       for (const r of this.rects()) {
         if (r.o <= 0.001 || r.w <= 0 || r.h <= 0) continue;
         // snap edges to device pixels: crisp, and neighbours meet exactly
@@ -565,6 +596,7 @@
 
   Omi.look = look;
   Omi.prepare = prepare;
-  if (typeof module !== "undefined" && module.exports) module.exports = Omi;
-  else root.Omi = Omi;
-})(typeof window !== "undefined" ? window : globalThis);
+  return Omi;
+})();
+// a global `Omi` in browsers, a module in Node, `<import>.Omi` in QML
+if (typeof module !== "undefined" && module.exports) module.exports = Omi;

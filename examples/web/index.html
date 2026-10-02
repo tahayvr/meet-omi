@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Omi on a web page</title>
+    <style>
+      :root {
+        color-scheme: dark;
+      }
+      body {
+        margin: 0;
+        padding: 24px 16px;
+        background: #1a1b26;
+        color: #c0caf5;
+        font: 14px/1.5 ui-monospace, monospace;
+      }
+      main {
+        max-width: 720px;
+        margin: 0 auto;
+        display: grid;
+        gap: 20px;
+      }
+      /* the player draws in the canvas's CSS color */
+      #omi {
+        width: min(320px, 100%);
+        aspect-ratio: 1;
+        justify-self: center;
+        color: #9ece6a;
+      }
+      nav {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+      }
+      button {
+        font: inherit;
+        color: inherit;
+        background: none;
+        border: 1px solid #3b4261;
+        padding: 6px 10px;
+        min-height: 36px;
+        cursor: pointer;
+      }
+      button[aria-pressed="true"] {
+        background: #9ece6a;
+        color: #1a1b26;
+        border-color: #9ece6a;
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <canvas id="omi" role="img" aria-label="Omi"></canvas>
+      <nav id="modes" aria-label="Modes"></nav>
+    </main>
+
+    <!-- the player and the pack, straight from the published pack folder -->
+    <script src="../../pack/omi.js"></script>
+    <script type="module">
+      const pack = await (await fetch("../../pack/omi.json")).json();
+      // with reduced motion on: no loops, and jump between modes
+      const still = matchMedia("(prefers-reduced-motion: reduce)").matches;
+      const omi = new Omi(document.getElementById("omi"), pack, { animate: !still });
+
+      // one button per mode; clicking morphs Omi there
+      const nav = document.getElementById("modes");
+      nav.innerHTML = pack.modes
+        .map((m) => `<button data-mode="${m.id}">${m.name}</button>`)
+        .join("");
+      const show = () =>
+        nav.querySelectorAll("button").forEach((b) =>
+          b.setAttribute("aria-pressed", String(b.dataset.mode === omi.mode)),
+        );
+      nav.addEventListener("click", (e) => {
+        const b = e.target.closest("button");
+        if (!b) return;
+        omi.set(b.dataset.mode, { instant: still });
+        show();
+      });
+      show();
+    </script>
+  </body>
+</html>

@@ -96,11 +96,12 @@ checks the reference player against it.
 [[step]]
 id = 6
 title = "Integration examples"
-status = "todo"
+status = "done"
 detail = """
-Small, copyable starting points that show the pack used in different
-environments: a plain web page, a QML item running omi.js in QML's
-JavaScript engine, a terminal renderer (rects to block characters).
+examples/: a plain web page, a QML item running omi.js in QML's JavaScript
+engine, and a terminal renderer (rects to half-block characters). The player
+needs no browser: it runs in any JavaScript engine and hands hosts its rects.
+The QML example has not been run in Qt yet.
 """
 
 [[step]]

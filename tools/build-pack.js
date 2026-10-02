@@ -25,8 +25,6 @@ const SOURCES = [
 // just enough of a browser for those scripts to load
 const ctx = vm.createContext({
   console,
-  EventTarget,
-  Event,
   document: {
     createElement: () => ({}),
     head: { appendChild() {} },

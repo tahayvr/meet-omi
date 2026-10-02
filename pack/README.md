@@ -31,9 +31,10 @@ for players in other languages:
 
 Options: color (null follows the canvas's CSS color), speed, animate,
 bodyMotion (false leaves out whole-body bobs), mode (where to start), view
-(an [x, y, w, h] to show instead of the pack's view). It fires "settled" when
-a morph lands. Outside a browser (tests, other hosts), drive it yourself by
-calling omi.frame(milliseconds), and read what to draw from omi.rects().
+(an [x, y, w, h] to show instead of the pack's view). omi.on("settled", fn)
+runs fn when a morph lands. Outside a browser (QML, GJS, Node, tests), pass
+null for the canvas and a color, call omi.frame(milliseconds) on every
+display frame, and fill the rects in omi.rects() yourself.
 
 ## Units
 
