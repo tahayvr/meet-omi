@@ -4,6 +4,16 @@
    the format to whoever writes a player for it. Bump PACK_VERSION whenever
    the format changes in a way an existing player would misread. */
 const PACK_VERSION = 1;
+// "mark": the plain logo, with nothing in the middle
+const MORPH_MARK = { id: "mark", name: "The mark", face: [], mood: "" };
+// a square around the logo with room for the props
+const MORPH_VB = { x: -70, y: -70, w: 440, h: 440 };
+// morph timing, in seconds at 1x; each pair starts up to `stagger` late, the
+// further from the face (MORPH_C) the later
+const MORPH_TIME = { duration: 0.62, stagger: 0.22 },
+  MORPH_EASE = [0.65, 0, 0.35, 1],
+  MORPH_C = { x: 150, y: 140 },
+  SPLIT_REACH = 140; // a new piece splits off a piece at most this far away
 
 function packAnim(a) {
   return {
@@ -28,7 +38,7 @@ function packPiece(r) {
   if (a) {
     p.anim = r.c;
     if (r.dur && r.dur !== a.dur) p.duration = r.dur;
-    if (r.dl) p.delay = +r.dl.toFixed(4);
+    if (r.dl) p.delay = r.dl;
     (a.vars || []).forEach((v) => (p[v] = r[v]));
   }
   return p;
@@ -70,7 +80,7 @@ function buildPack() {
       ...MORPH_TIME,
       ease: MORPH_EASE,
       center: [MORPH_C.x, MORPH_C.y],
-      splitReach: Math.sqrt(SPLIT_REACH),
+      splitReach: SPLIT_REACH,
       rolePenalty: 100,
     },
     animations: Object.fromEntries(
@@ -87,6 +97,25 @@ const PACK_README = `# Omi pack
 Everything an app needs to draw Omi, animate every mode, and morph between
 modes. Made by the Meet Omi design jig. This file describes format version
 ${PACK_VERSION}.
+
+## Using the player
+
+omi.js (in this folder) is a small player for web pages and Electron apps,
+and the reference for players on other platforms:
+
+    <canvas id="omi" style="width: 240px; height: 240px; color: #9ece6a"></canvas>
+    <script src="omi.js"></script>
+    <script>
+      const pack = await (await fetch("omi.json")).json();
+      const omi = new Omi(document.getElementById("omi"), pack);
+      omi.set("thinking"); // morphs from wherever Omi is
+    </script>
+
+Options: color (null follows the canvas's CSS color), speed, animate,
+bodyMotion (false leaves out whole-body bobs), mode (where to start), view
+(an [x, y, w, h] to show instead of the pack's view). It fires "settled" when
+a morph lands. Outside a browser (tests, other hosts), drive it yourself by
+calling omi.frame(milliseconds), and read what to draw from omi.rects().
 
 ## Units
 
@@ -182,12 +211,15 @@ always match.
 
 $("savePack").addEventListener("click", async () => {
   const enc = new TextEncoder(),
-    file = (name, text) => ({ name: "omi-pack/" + name, data: enc.encode(text) });
-  await save(
-    "omi-pack.zip",
-    zip([
+    file = (name, text) => ({ name: "omi-pack/" + name, data: enc.encode(text) }),
+    files = [
       file("omi.json", JSON.stringify(buildPack(), null, 2) + "\n"),
       file("README.md", PACK_README),
-    ]),
-  );
+    ];
+  try {
+    const res = await fetch("player/omi.js");
+    if (res.ok) files.push(file("omi.js", await res.text()));
+  } catch (e) {}
+  if (files.length < 3) toast("Couldn\u2019t include the player (omi.js).");
+  await save("omi-pack.zip", zip(files));
 });

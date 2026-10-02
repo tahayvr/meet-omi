@@ -1,4 +1,8 @@
 /* Morph section: one big Omi, a button per mode */
+#morph {
+  /* the canvas bleeds past the art; never past the page edge */
+  overflow-x: clip;
+}
 .morph {
   display: grid;
   grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr);
@@ -15,17 +19,21 @@
   min-width: 0;
 }
 .mart {
-  display: grid;
+  position: relative;
   width: 100%;
   max-width: 560px;
+  aspect-ratio: 1;
   color: var(--accent);
 }
-.mart > svg {
-  grid-area: 1 / 1;
-  display: block;
-  width: 100%;
-  height: auto;
-  overflow: visible;
+/* the canvas bleeds past the art (--bleed, set by morph.js) so props like
+   the z's can drift outside the logo's square */
+.mart canvas {
+  position: absolute;
+  left: calc(-1 * var(--bleed, 0%));
+  top: calc(-1 * var(--bleed, 0%));
+  width: calc(100% + 2 * var(--bleed, 0%));
+  aspect-ratio: 1;
+  pointer-events: none;
 }
 .mpick {
   display: flex;
