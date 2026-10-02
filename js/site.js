@@ -13,7 +13,8 @@ const FEATURED = [
 ];
 let heroId = "idle",
   heroAuto = true,
-  heroTimer = null;
+  heroTimer = null,
+  heroOmi = null; // the hero's player: it morphs between featured modes
 const byIdD = (id) => DESIGNS.find((d) => d.id === id);
 const fig = (svg, title, sub) =>
   `<figure class="fig">${svg}<figcaption><b>${title}</b>${sub ? `<span>${sub}</span>` : ""}</figcaption></figure>`;
@@ -28,15 +29,17 @@ function renderSite() {
       vb: box(d),
       label,
     });
-  // hero
+  // hero: starts as the plain logo and morphs into each featured mode
   const hd = byIdD(heroId) || DESIGNS[0];
-  const heroHTML = `<div data-sid="${hd.id}">${svgFor(hd, { color: eff(hd.id).fg, animated: eff(hd.id).anim, force: S.force, vb: box(hd), label: "Omi, " + hd.name })}</div>`;
-  const ha = $("heroArt");
-  if (ha._html !== heroHTML) {
-    ha.innerHTML = heroHTML;
-    ha._html = heroHTML;
-  }
+  if (!heroOmi)
+    heroOmi = mountOmi($("heroCanvas"), { margin: 36, bleed: 124, mode: "mark" });
+  else syncOmi(heroOmi);
+  const fg = eff(hd.id).fg;
+  heroOmi.color = fg === S.fg ? null : fg; // null: the page's accent color
+  if (heroOmi.mode !== hd.id)
+    heroOmi.set(hd.id, { instant: pagePlayerOpts().instant });
   $("heroName").textContent = hd.name;
+  $("heroCanvas").setAttribute("aria-label", "Omi, " + hd.name);
   // anatomy
   const logo = { id: "logo", name: "Logo", face: [], mood: "" };
   const anat =

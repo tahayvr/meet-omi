@@ -19,21 +19,7 @@
   min-width: 0;
 }
 .mart {
-  position: relative;
-  width: 100%;
   max-width: 560px;
-  aspect-ratio: 1;
-  color: var(--accent);
-}
-/* the canvas bleeds past the art (--bleed, set by morph.js) so props like
-   the z's can drift outside the logo's square */
-.mart canvas {
-  position: absolute;
-  left: calc(-1 * var(--bleed, 0%));
-  top: calc(-1 * var(--bleed, 0%));
-  width: calc(100% + 2 * var(--bleed, 0%));
-  aspect-ratio: 1;
-  pointer-events: none;
 }
 .mpick {
   display: flex;

@@ -1,22 +1,48 @@
-/* ---------- morph section: the reference player, fed the Omi pack ----------
-   This section uses exactly what an app gets: the pack built by pack.js, as
-   JSON, played by player/omi.js. If it looks right here, it looks right in
-   any app that uses the pack. */
-// a margin around the pack's view, so z's and arrows can spill past the art
-const MORPH_BLEED = 90;
+/* ---------- Omi on the page: the reference player, fed the Omi pack ----------
+   The hero and the Morph section use exactly what an app gets: the pack
+   built by pack.js, as JSON, played by player/omi.js. If it looks right
+   here, it looks right in any app that uses the pack. */
+let pagePackCache = null;
+// round-trip through JSON: the players get exactly what omi.json holds
+const pagePack = () =>
+  pagePackCache || (pagePackCache = JSON.parse(JSON.stringify(buildPack())));
+// what the players should do under the current settings
+function pagePlayerOpts() {
+  const still = RM.matches && !S.force;
+  return { speed: S.speed || 1, animate: S.anim && !still, instant: still };
+}
+/* A player on a canvas inside an .omi-stage. `margin` is the room around the
+   logo inside the stage, in pack units; the canvas bleeds `bleed` units
+   further on every side, so props like the z's can drift outside the stage.
+   The body stays put (no bob, hop or shake), so every morph starts and ends
+   at the same spot. */
+function mountOmi(canvas, { margin = 70, bleed = 90, mode } = {}) {
+  const side = 300 + 2 * margin;
+  canvas.style.setProperty("--bleed", `${(bleed / side) * 100}%`);
+  return new Omi(canvas, pagePack(), {
+    view: [-margin - bleed, -margin - bleed, side + 2 * bleed, side + 2 * bleed],
+    bodyMotion: false,
+    mode,
+    ...pagePlayerOpts(),
+  });
+}
+// settings changed (speed, animate, reduce motion, theme)
+function syncOmi(player) {
+  const o = pagePlayerOpts();
+  player.speed = o.speed;
+  if (player.animate !== o.animate) player.animate = o.animate;
+  player.draw(); // picks up a new theme color
+}
+
+/* ---------- the Morph section ---------- */
 const morphDesign = (id) =>
   id === MORPH_MARK.id ? MORPH_MARK : DESIGNS.find((d) => d.id === id);
 const morphOrder = () => [MORPH_MARK.id, ...DESIGNS.map((d) => d.id)];
 let omi = null,
   morphTour = 0;
 
-// what the player should do under the current settings
-function morphPlayerOpts() {
-  const still = RM.matches && !S.force;
-  return { speed: S.speed || 1, animate: S.anim && !still, instant: still };
-}
 function morphTo(id) {
-  omi.set(id, { instant: morphPlayerOpts().instant });
+  omi.set(id, { instant: pagePlayerOpts().instant });
   syncMorphUI();
 }
 
@@ -70,25 +96,9 @@ function renderMorph() {
       if (morphTour) stopTour();
       morphTo(b.dataset.id);
     });
-    // round-trip through JSON: the player gets exactly what omi.json holds
-    const pack = JSON.parse(JSON.stringify(buildPack())),
-      [x, y, w, h] = pack.view,
-      B = MORPH_BLEED,
-      canvas = $("mcanvas");
-    canvas.style.setProperty("--bleed", `${(B / w) * 100}%`);
-    omi = new Omi(canvas, pack, {
-      view: [x - B, y - B, w + 2 * B, h + 2 * B],
-      // the body stays put here, so every morph starts and ends at the same
-      // spot
-      bodyMotion: false,
-      ...morphPlayerOpts(),
-    });
+    omi = mountOmi($("mcanvas"));
     syncMorphUI();
     return;
   }
-  // settings changed (speed, animate, reduce motion)
-  const o = morphPlayerOpts();
-  omi.speed = o.speed;
-  if (omi.animate !== o.animate) omi.animate = o.animate;
-  omi.draw(); // picks up a new theme color
+  syncOmi(omi);
 }

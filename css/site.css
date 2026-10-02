@@ -102,6 +102,8 @@
   align-items: center;
   padding: 64px 0 72px;
   min-height: min(78vh, 760px);
+  /* the hero's canvas bleeds past its art; never past the page edge */
+  overflow-x: clip;
 }
 .hcopy {
   flex: 1 1 360px;
@@ -153,11 +155,22 @@
   max-width: 480px;
   padding: 24px;
 }
-.hero-art svg {
+/* a player's canvas (see mountOmi in morph.js): a square stage, drawn in
+   the page's accent color. The canvas bleeds past it (--bleed) so props
+   like the z's can drift outside the logo's square. */
+.omi-stage {
+  position: relative;
   width: 100%;
-  height: auto;
-  display: block;
-  overflow: visible;
+  aspect-ratio: 1;
+  color: var(--accent);
+}
+.omi-stage canvas {
+  position: absolute;
+  left: calc(-1 * var(--bleed, 0%));
+  top: calc(-1 * var(--bleed, 0%));
+  width: calc(100% + 2 * var(--bleed, 0%));
+  aspect-ratio: 1;
+  pointer-events: none;
 }
 .s {
   padding: 72px 0;
