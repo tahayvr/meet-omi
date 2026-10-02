@@ -26,6 +26,11 @@ language:
 
 `omi.on("settled", fn)` tells you when a morph has landed.
 
+To show the same Omi as every other app on the machine, follow the shared
+state instead of calling `set` yourself: see the
+[Omi state protocol](../protocol/README.md). The terminal example does it with
+`--follow`.
+
 ## Running them
 
 - **Web:** serve the repo (for example `python3 -m http.server`) and open
@@ -35,7 +40,9 @@ language:
   pack in your resources instead.
 - **Terminal:** `node examples/terminal/omi-tty.js` tours every mode;
   `node examples/terminal/omi-tty.js idle thinking` cycles the modes you name;
-  `--once error` prints one still.
+  `--once error` prints one still; `--follow` shows the shared Omi (start
+  `node service/omi-service.js` first, and change it with
+  `node service/omictl.js set thinking`).
 
 ## Another language
 

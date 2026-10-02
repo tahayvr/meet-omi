@@ -44,6 +44,14 @@ tools/check-player.js's procedure passes for it against conformance.json.
 """
 
 [[layer]]
+name = "Shared state (optional)"
+path = "protocol/, service/"
+role = """
+One Omi for the whole machine: a service holds what Omi is doing, any app or
+script changes it, every app showing Omi follows in sync with its own player.
+"""
+
+[[layer]]
 name = "Apps and environments"
 role = """
 Embed a player and call set(mode). Optionally share one Omi across apps
@@ -107,12 +115,14 @@ The QML example has not been run in Qt yet.
 [[step]]
 id = 7
 title = "Shared state across apps (optional)"
-status = "todo"
+status = "done"
 detail = """
-A written protocol so several apps on one machine can show the same Omi in
-sync: a service holds the current mode and when it started, apps subscribe
-and play it locally with their own player. Spec first; any language can
-implement either side.
+protocol/README.md: one state (mode, from, since, instant) held by a
+service, changed by any app over a Unix socket (JSON lines), followed by
+every app with its own player. Changes carry `since`, and players run shared
+changes on the wall clock, so every app shows the same frame. service/ has a
+reference service, omictl and a Node client; tools/check-service.js checks
+them end to end.
 """
 
 [[step]]

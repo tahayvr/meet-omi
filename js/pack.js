@@ -201,7 +201,9 @@ for players in other languages:
 Options: color (null follows the canvas's CSS color), speed, animate,
 bodyMotion (false leaves out whole-body bobs), mode (where to start), view
 (an [x, y, w, h] to show instead of the pack's view). omi.on("settled", fn)
-runs fn when a morph lands. Outside a browser (QML, GJS, Node, tests), pass
+runs fn when a morph lands. omi.set(mode, { since }) plays a change that
+happened at \`since\` (Unix ms), for apps sharing one Omi through the Omi
+state protocol: every app then shows the same frame at the same moment. Outside a browser (QML, GJS, Node, tests), pass
 null for the canvas and a color, call omi.frame(milliseconds) on every
 display frame, and fill the rects in omi.rects() yourself.
 

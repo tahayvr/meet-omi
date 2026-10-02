@@ -6,6 +6,8 @@
      const omi = new Omi(canvas, pack);   // pack = the parsed omi.json
      omi.set("thinking");                 // morph there from wherever Omi is
      omi.set("idle", { instant: true });  // or jump
+     omi.set("idle", { since: 1767225600000 });  // a change made at that
+                                          // Unix time (ms): shared state
      omi.on("settled", () => …);          // a morph landed
 
    Options (also settable later as properties):
@@ -363,6 +365,7 @@ var Omi = (function () {
       this.mode = this.modes[opts.mode] ? opts.mode : "mark";
       this.t = 0; // seconds into the current mode's loops
       this.morph = null;
+      this._sync = null; // set by a shared change: { since, after }
       this._raf = 0;
       this._last = 0;
       this._tick = (ts) => this.frame(ts);
@@ -416,17 +419,35 @@ var Omi = (function () {
     }
 
     /* Change mode. Morphs from exactly what is on screen now, mid-loop or
-       mid-morph; { instant: true } jumps. */
-    set(id, { instant = false } = {}) {
+       mid-morph; { instant: true } jumps. { since } is when the change
+       happened (Unix ms), for changes shared between apps (see the Omi
+       state protocol): the morph is that far along already, or has landed
+       and its loops are that far in, so every app shows the same frame. */
+    set(id, { instant = false, since = null } = {}) {
       const mode = this.modes[id];
       if (!mode) throw new Error(`Omi: no mode "${id}"`);
-      if (id === this.mode && !this.morph) return;
+      const late =
+          since == null
+            ? 0
+            : (Math.max(0, Date.now() - since) / 1000) * Math.max(0.05, this.speed),
+        total = this.pack.morph.duration + this.pack.morph.stagger;
+      // a shared change runs on the wall clock, so every app shows the same
+      // frame at the same moment however its own frames are timed; a local
+      // change runs on this player's frames
+      this._sync = since == null ? null : { since, after: instant ? 0 : total };
+      if (id === this.mode && !this.morph) {
+        // already there: with `since`, line the loops up with it
+        if (since != null && this._animate)
+          this.t = instant ? late : Math.max(0, late - total);
+        return;
+      }
       const from = this.rects(),
         to = this.restRects(mode);
       this.mode = id;
       this.t = 0;
       if (instant || !from.length) {
         this.morph = null;
+        if (this._animate) this.t = late;
         this.wake();
         this.emit("settled");
         return;
@@ -443,6 +464,11 @@ var Omi = (function () {
         s.now = { ...s.a };
       }
       this.morph = { steps, t: 0 };
+      if (late) {
+        // catch up; if it has landed, run its loops on by what's left over
+        this.stepMorph(late);
+        if (!this.morph && this._animate) this.t = late - total;
+      }
       this.wake();
     }
 
@@ -513,7 +539,11 @@ var Omi = (function () {
       const dt = this._last ? Math.min(0.1, Math.max(0, (ts - this._last) / 1000)) : 0;
       this._last = ts;
       const sp = Math.max(0.05, this.speed);
-      if (this.morph) this.stepMorph(dt * sp);
+      if (this._sync) {
+        const el = ((Date.now() - this._sync.since) / 1000) * sp;
+        if (this.morph) this.stepMorph(Math.max(0, el - this.morph.t));
+        if (!this.morph && this._animate) this.t = Math.max(0, el - this._sync.after);
+      } else if (this.morph) this.stepMorph(dt * sp);
       else if (this._animate) this.t += dt * sp;
       this.draw();
       this._raf = raf && (this.morph || this._animate) ? raf(this._tick) : 0;

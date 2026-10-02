@@ -5,6 +5,9 @@
      node examples/terminal/omi-tty.js                 tour every mode
      node examples/terminal/omi-tty.js idle thinking   cycle these modes
      node examples/terminal/omi-tty.js --once error    print one still and exit
+     node examples/terminal/omi-tty.js --follow        follow the shared Omi
+                         (start service/omi-service.js, change it with
+                         service/omictl.js; every follower moves together)
 
    Options: --size 40 (pixels across), --fg #9ece6a, --bg #1a1b26,
             --every 2.5 (seconds per mode) */
@@ -25,7 +28,9 @@ const args = process.argv.slice(2),
     args.splice(i, 2);
     return v;
   };
-const once = args.includes("--once") && args.splice(args.indexOf("--once"), 1),
+const flag = (name) => args.includes(name) && args.splice(args.indexOf(name), 1),
+  once = flag("--once"),
+  following = flag("--follow"),
   size = +opt("size", Math.min(48, (process.stdout.columns || 80) - 2)),
   every = +opt("every", 2.5),
   rgb = (hex) => [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16)),
@@ -88,11 +93,22 @@ process.stdout.write("\x1b[?1049h\x1b[?25l");
 process.on("exit", restore);
 process.on("SIGINT", () => process.exit(0));
 
+if (following)
+  require("../../service/client.js").follow(omi, {
+    name: "omi-tty",
+    onError: (e) => {
+      restore();
+      console.error(`Can't reach the Omi service (${e.code || e.message}).`);
+      process.exit(1);
+    },
+    onClose: () => process.exit(0),
+  });
+
 let next = 0,
   changed = 0;
 const tick = () => {
   const now = Date.now();
-  if (now - changed >= every * 1000) {
+  if (!following && now - changed >= every * 1000) {
     omi.set(modes[next++ % modes.length]);
     changed = now;
   }
