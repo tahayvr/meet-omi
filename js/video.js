@@ -36,7 +36,7 @@ function drawFrame(ctx, d, t, vb, size, color, bg, hgt) {
   const s = size / vb.w;
   ctx.setTransform(s, 0, 0, s, -vb.x * s, -vb.y * s);
   ctx.fillStyle = color;
-  const sh = shapes(d, X.body);
+  const sh = shapes(d);
   ctx.save();
   if (d.mood && ANIM[d.mood]) {
     // body moods move and scale the whole of Omi about its center
@@ -153,7 +153,7 @@ async function encodeVideo(d, kind) {
   c.height = height;
   const ctx = c.getContext("2d", { alpha: false });
   const vb = frameBox(
-    shapes(d, X.body).box,
+    shapes(d).box,
     Math.max(+X.pad, 0.1),
     width / height,
   );
@@ -217,7 +217,7 @@ async function recordRealtime(d, kind) {
   c.height = hgt;
   const ctx = c.getContext("2d", { alpha: false });
   const vb = frameBox(
-    shapes(d, X.body).box,
+    shapes(d).box,
     Math.max(+X.pad, 0.1),
     size / hgt,
   );

@@ -49,7 +49,6 @@ const DEF = {
   bg: "#1a1b26",
   fg: "#9ece6a",
   anim: true,
-  body: false,
   names: true,
   tile: 220,
   fmt: "svg",
@@ -70,7 +69,6 @@ try {
   if (saved) S = { ...DEF, ...saved };
 } catch (e) {}
 if (window.matchMedia("(max-width:720px)").matches) S.side = false;
-S.body = false;
 S.side = false;
 const persist = () => {
   try {
@@ -95,7 +93,7 @@ function lum(hex) {
 function uniformBox() {
   const b = { x: Infinity, y: Infinity, x2: -Infinity, y2: -Infinity };
   DESIGNS.forEach((d) => {
-    const s = shapes(d, S.body).box;
+    const s = shapes(d).box;
     b.x = Math.min(b.x, s.x);
     b.y = Math.min(b.y, s.y);
     b.x2 = Math.max(b.x2, s.x2);
@@ -103,7 +101,7 @@ function uniformBox() {
   });
   // Center on the logo so extras that stick out on one side (z's, confetti)
   // grow the frame evenly instead of pushing every Omi off-center.
-  const ref = shapes(DESIGNS.find((d) => d.id === "idle") || DESIGNS[0], S.body).box,
+  const ref = shapes(DESIGNS.find((d) => d.id === "idle") || DESIGNS[0]).box,
     cx = (ref.x + ref.x2) / 2,
     cy = (ref.y + ref.y2) / 2,
     p = 30,
@@ -163,7 +161,7 @@ function render() {
   const E = (d) => eff(d.id);
   const tile = (d) => `
     <figure class="tile" role="listitem">
-      <button class="open" data-id="${d.id}" aria-label="Open ${d.name}"><div class="art${E(d).bg !== S.bg ? " own" : ""}" data-sid="${d.id}"${E(d).bg !== S.bg ? ` style="background:${E(d).bg || "transparent"}"` : ""}>${svgFor(d, { color: E(d).fg, body: S.body, animated: E(d).anim, force: S.force, vb, label: "Omi, " + d.name })}</div></button>
+      <button class="open" data-id="${d.id}" aria-label="Open ${d.name}"><div class="art${E(d).bg !== S.bg ? " own" : ""}" data-sid="${d.id}"${E(d).bg !== S.bg ? ` style="background:${E(d).bg || "transparent"}"` : ""}>${svgFor(d, { color: E(d).fg, animated: E(d).anim, force: S.force, vb, label: "Omi, " + d.name })}</div></button>
       <figcaption class="meta">
 ${S.names ? `<span class="name">${d.name}</span>` : ""}${hasOver(d.id) ? `<button class="reset" data-id="${d.id}" aria-label="Reset ${d.name} to global settings" title="Has its own settings. Reset to global">${RESET_ICON}</button>` : ""}
 <button class="save" data-id="${d.id}" aria-label="Export ${d.name}" title="Export ${d.name}">${DL_ICON}</button>

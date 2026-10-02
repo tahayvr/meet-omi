@@ -14,8 +14,7 @@
     "brow",
     "mouth",
     "tear",
-    "extra",
-    "body"
+    "extra"
   ],
   "morph": {
     "duration": 0.62,

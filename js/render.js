@@ -1,10 +1,5 @@
-function shapes(d, body) {
-  const face = body && d.bodyFace ? d.bodyFace : d.face;
-  const rects = [
-    ...(d.logo || LOGO),
-    ...face,
-    ...(body && !d.noBody ? d.body || BODY : []),
-  ];
+function shapes(d) {
+  const rects = [...(d.logo || LOGO), ...d.face];
   const box = {
     x: Infinity,
     y: Infinity,
@@ -95,9 +90,9 @@ function squareBox(box, pad) {
   };
 }
 
-/* opts: {color,bg|null,body,animated,style,vb,size,label,roles} */
+/* opts: {color,bg|null,animated,style,vb,size,label,roles} */
 function svgFor(d, o) {
-  const sh = shapes(d, o.body);
+  const sh = shapes(d);
   const vb = o.vb;
   // a still is frame 0 of the loops, so it matches where the animation starts
   const rects = o.animated ? sh.rects : sh.rects.map(restOf),

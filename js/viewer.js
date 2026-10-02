@@ -3,7 +3,7 @@ const view = $("view");
 let vi = 0;
 function showView() {
   const d = DESIGNS[vi],
-    vb = squareBox(shapes(d, S.body).box, 0.14),
+    vb = squareBox(shapes(d).box, 0.14),
     C = eff(d.id);
   const dark = C.bg ? lum(C.bg) < 0.35 : false;
   view.classList.toggle("checker", !C.bg);
@@ -20,7 +20,6 @@ function showView() {
   $("vpos").textContent = `${vi + 1} / ${DESIGNS.length}`;
   const vHTML = svgFor(d, {
     color: C.fg,
-    body: S.body,
     animated: C.anim,
     force: S.force,
     vb,

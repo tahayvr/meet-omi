@@ -19,11 +19,10 @@ const fig = (svg, title, sub) =>
   `<figure class="fig">${svg}<figcaption><b>${title}</b>${sub ? `<span>${sub}</span>` : ""}</figcaption></figure>`;
 let asciiKey = "";
 function renderSite() {
-  const box = (d) => squareBox(shapes(d, false).box, 0.12);
+  const box = (d) => squareBox(shapes(d).box, 0.12);
   const art = (d, label, anim = S.anim) =>
     svgFor(d, {
       color: S.fg,
-      body: false,
       animated: anim,
       force: S.force,
       vb: box(d),
@@ -31,7 +30,7 @@ function renderSite() {
     });
   // hero
   const hd = byIdD(heroId) || DESIGNS[0];
-  const heroHTML = `<div data-sid="${hd.id}">${svgFor(hd, { color: eff(hd.id).fg, body: false, animated: eff(hd.id).anim, force: S.force, vb: box(hd), label: "Omi, " + hd.name })}</div>`;
+  const heroHTML = `<div data-sid="${hd.id}">${svgFor(hd, { color: eff(hd.id).fg, animated: eff(hd.id).anim, force: S.force, vb: box(hd), label: "Omi, " + hd.name })}</div>`;
   const ha = $("heroArt");
   if (ha._html !== heroHTML) {
     ha.innerHTML = heroHTML;
@@ -137,7 +136,7 @@ $("saveAll").addEventListener("click", async () => {
       });
     }
     await save(
-      `omi-${S.fmt === "svga" ? "svg-animated" : S.fmt}${S.body ? "-body" : ""}.zip`,
+      `omi-${S.fmt === "svga" ? "svg-animated" : S.fmt}.zip`,
       zip(files),
     );
   } catch (err) {
@@ -151,12 +150,11 @@ $("copyAll").addEventListener("click", async () => {
   const sprite =
     '<svg xmlns="http://www.w3.org/2000/svg" style="display:none">\n' +
     DESIGNS.map((d) => {
-      const sh = shapes(d, S.body),
+      const sh = shapes(d),
         vb = squareBox(sh.box, +S.pad);
       const inner = svgFor(d, {
         color: S.fg,
         bg: null,
-        body: S.body,
         vb,
       })
         .replace(/^<svg[^>]*>/, "")

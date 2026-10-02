@@ -31,7 +31,7 @@ function exportBg() {
   return X.clear ? null : X.bg;
 }
 function fileName(d) {
-  return `omi-${d.id}${X.body && !d.noBody ? "-body" : ""}.${EXT[X.fmt]}`;
+  return `omi-${d.id}.${EXT[X.fmt]}`;
 }
 
 const scaleTimes = (s, k) =>
@@ -42,12 +42,11 @@ const scaleTimes = (s, k) =>
         (m, n) => (parseFloat(n) / k).toFixed(3) + "s",
       );
 function svgString(d, animated) {
-  const sh = shapes(d, X.body),
+  const sh = shapes(d),
     vb = frameBox(sh.box, +X.pad, RATIOS[X.ratio] || 1);
   const out = svgFor(d, {
     color: X.fg,
     bg: exportBg(),
-    body: X.body,
     animated,
     style: animated,
     vb,
@@ -74,7 +73,7 @@ function rasterize(svg, w, h) {
   });
 }
 async function ascii(d) {
-  const sh = shapes(d, X.body),
+  const sh = shapes(d),
     b = sh.box,
     padU = Math.round(((b.x2 - b.x) * +X.pad) / 20) * 20;
   const vb = {
@@ -86,7 +85,6 @@ async function ascii(d) {
   const svg = svgFor(d, {
     color: "#000",
     bg: null,
-    body: X.body,
     vb,
     size: vb.w,
   });
@@ -134,13 +132,12 @@ async function ascii(d) {
   return lines.join("\n") + "\n";
 }
 function geometry(d) {
-  const sh = shapes(d, X.body),
+  const sh = shapes(d),
     vb = frameBox(sh.box, +X.pad, RATIOS[X.ratio] || 1),
-    role = (r) => (r.c ? r.c.split(" ")[0] : "body");
+    role = (r) => r.role;
   const out = {
     name: "Omi — " + d.name,
     id: d.id,
-    fullBody: X.body && !d.noBody,
     color: X.fg,
     unit: 20,
     viewBox: [vb.x, vb.y, vb.w, vb.h].map((n) => +n.toFixed(2)),

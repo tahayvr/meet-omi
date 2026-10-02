@@ -208,16 +208,6 @@ const ANIM = {
       [1, { ty: 0, op: 0 }],
     ],
   },
-  arm: {
-    // wave (full body)
-    dur: 1.4,
-    ease: "ease-in-out",
-    keys: [
-      [0, { ty: 0 }],
-      [0.5, { ty: -12 }],
-      [1, { ty: 0 }],
-    ],
-  },
 
   /* emotions */
   // laughing: the mouth opens and closes, ha-ha

@@ -77,7 +77,7 @@ function buildPack() {
     // a square around the logo with room for the props; keeps Omi still
     // while it changes mode
     view: [MORPH_VB.x, MORPH_VB.y, MORPH_VB.w, MORPH_VB.h],
-    roles: ["frame", "eye", "brow", "mouth", "tear", "extra", "body"],
+    roles: ["frame", "eye", "brow", "mouth", "tear", "extra"],
     morph: {
       ...MORPH_TIME,
       ease: MORPH_EASE,
@@ -222,7 +222,7 @@ Each mode is a list of \`pieces\`. Every piece is a filled rectangle:
     { "x": 100, "y": 110, "w": 20, "h": 40, "role": "eye", "anim": "eye" }
 
 - \`role\`: what the piece is. frame (the logo, including the mouths it makes),
-  eye, brow, mouth, tear, extra (props: dots, z's, confetti, arrows) or body.
+  eye, brow, mouth, tear or extra (props: dots, z's, confetti, arrows).
 - \`opacity\`: 0..1, default 1.
 - \`anim\`: the animation this piece plays, from \`animations\`.
 - \`delay\`: how many seconds this piece lags behind its animation (staggers

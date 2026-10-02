@@ -77,7 +77,7 @@ detail = "Every loop is keyframes in js/motion.js; the page CSS and video export
 id = 2
 title = "Piece roles"
 status = "done"
-detail = "frame, eye, brow, mouth, tear, extra, body; morphs pair by role."
+detail = "frame, eye, brow, mouth, tear, extra; morphs pair by role."
 
 [[step]]
 id = 3
@@ -127,12 +127,6 @@ them end to end.
 
 [[step]]
 id = 8
-title = "Full-body variant in the pack"
-status = "todo"
-detail = "Arms and legs (body pieces, bodyFace) are off in the jig and left out of the pack for now."
-
-[[step]]
-id = 9
 title = "Publishing"
 status = "todo"
 detail = "Tag pack releases by version so apps can pin one; a changelog of format changes."

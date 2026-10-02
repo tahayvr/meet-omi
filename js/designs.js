@@ -108,23 +108,12 @@ const EGG = {
     ),
   },
 };
-const SLUMP = [
-  R(60, 300, 20, 20),
-  R(40, 320, 40, 20),
-  R(220, 300, 20, 20),
-  R(220, 320, 40, 20),
-  R(-40, 140, 40, 20),
-  R(-40, 160, 20, 40),
-  R(300, 140, 40, 20),
-  R(320, 160, 20, 40),
-];
 const DESIGNS_OLD = [
-  { id: "logo", name: "Logo", face: [], noBody: true, mood: "" },
+  { id: "logo", name: "Logo", face: [], mood: "" },
   {
     id: "idle",
     name: "Idle",
     face: F.idle,
-    bodyFace: F.smile,
     mood: "m-bob",
   },
   { id: "thinking", name: "Thinking", face: F.thinking, mood: "m-bob" },
@@ -150,7 +139,6 @@ const DESIGNS_OLD = [
       { ...R(110, 250, 20, 40, "eye"), clip: true },
       { ...R(190, 250, 20, 40, "eye"), clip: true },
     ],
-    body: [R(20, 310, 40, 20), R(240, 310, 40, 20)],
     mood: "",
   },
 ];
@@ -225,7 +213,6 @@ const DESIGNS = [
       id: "low-battery",
       name: "Low battery",
       face: F.lowbat,
-      body: SLUMP,
       mood: "m-slow",
     },
     byId("sleeping"),
@@ -280,8 +267,8 @@ DESIGNS.forEach((d) => {
   if (FRAMES[d.id]) d.logo = FRAMES[d.id];
 });
 /* Roles nobody set: what belongs to the logo is frame (anything outside the
-   logo's square, like the update arrows or peek's ledge, is extra), the
-   face is eyes, the body is body. See as() in geometry.js. */
+   logo's square, like the update arrows or peek's ledge, is extra), and the
+   face is eyes. See as() in geometry.js. */
 const inLogo = (r) =>
   r.x >= 0 && r.y >= 0 && r.x + r.w <= 300 && r.y + r.h <= 300;
 const withRole = (list, role) =>
@@ -289,7 +276,5 @@ const withRole = (list, role) =>
 DESIGNS.forEach((d) => {
   d.logo = withRole(d.logo, (r) => (inLogo(r) ? "frame" : "extra"));
   d.face = withRole(d.face, () => "eye");
-  d.bodyFace = withRole(d.bodyFace, () => "eye");
-  d.body = withRole(d.body, () => "body");
 });
 

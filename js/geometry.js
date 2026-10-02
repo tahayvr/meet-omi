@@ -7,9 +7,8 @@ const R = (x, y, w, h, c) => ({ x, y, w, h, c });
      eye    whatever sits where the eyes are (eyes, X's, hearts, shades)
      brow, mouth, tear
      extra  props around the face: thinking dots, z's, confetti, arrows
-     body   arms and legs (full-body variant)
-   Logo pieces default to frame, face pieces to eye, body pieces to body (see
-   the end of designs.js); as() labels the rest. */
+   Logo pieces default to frame and face pieces to eye (see the end of
+   designs.js); as() labels the rest. */
 const as = (role, rects) => rects.map((r) => ({ ...r, role }));
 const LOGO = [
   [0, 0, 300, 20],
@@ -51,11 +50,6 @@ const Z = (x, y, s, dl = 0) => {
 };
 const F = {
   idle: [R(100, 110, 20, 40, "eye"), R(180, 110, 20, 40, "eye")],
-  smile: [
-    R(100, 110, 20, 40, "eye"),
-    R(180, 110, 20, 40, "eye"),
-    ...as("mouth", [R(110, 180, 20, 20), R(130, 200, 40, 20), R(170, 180, 20, 20)]),
-  ],
   thinking: [
     R(120, 90, 20, 40, "eye"),
     R(200, 90, 20, 40, "eye"),
@@ -204,16 +198,6 @@ Object.assign(F, {
     R(160, 140, 40, 20, "cur"),
   ],
 });
-const BODY = as("body", [
-  R(60, 300, 20, 40),
-  R(40, 340, 40, 20),
-  R(220, 300, 20, 40),
-  R(220, 340, 40, 20),
-  R(-40, 140, 40, 20),
-  R(-40, 160, 20, 20),
-  R(300, 120, 40, 20, "arm"),
-  R(320, 80, 20, 40, "arm"),
-]);
 /* snake: inner frame split into 20-unit cells, in path order from the top gap clockwise */
 const INNER = new Set([
   "40,40,120,20",

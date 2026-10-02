@@ -27,9 +27,8 @@ function openExport(d) {
   xa.innerHTML = svgFor(d, {
     color: E.fg,
     bg: null,
-    body: S.body,
     animated: false,
-    vb: squareBox(shapes(d, S.body).box, 0.1),
+    vb: squareBox(shapes(d).box, 0.1),
     label: "Omi, " + d.name,
   });
   xsync();
