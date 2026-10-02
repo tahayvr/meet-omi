@@ -15,6 +15,9 @@
 const MORPH_VB = { x: -70, y: -70, w: 440, h: 440 };
 const MORPH_MARK = { id: "mark", name: "The mark", face: [], mood: "" };
 const MORPH_C = { x: 150, y: 140 }; // the ripple spreads out from the face
+// seconds at 1x speed; each pair starts up to `stagger` late
+const MORPH_TIME = { duration: 0.62, stagger: 0.22 },
+  MORPH_EASE = [0.65, 0, 0.35, 1];
 const morphDesign = (id) =>
   id === MORPH_MARK.id ? MORPH_MARK : DESIGNS.find((d) => d.id === id);
 
@@ -48,7 +51,9 @@ function atomsOf(d) {
     .rects.map(restOf)
     .map((r) => (r.clip ? clipTo(r, d.clip) : r))
     .filter(Boolean)
-    .flatMap((r) => cells(r).map((c) => ({ ...c, o: r.o ?? 1 })));
+    .flatMap((r) =>
+      cells(r).map((c) => ({ ...c, o: r.o ?? 1, role: r.role })),
+    );
 }
 // What an animated SVG shows right now, as atoms in its user space.
 function snapLayer(svg) {
@@ -66,7 +71,8 @@ function snapLayer(svg) {
     const o =
       +getComputedStyle(el).opacity * +(el.getAttribute("fill-opacity") ?? 1);
     if (o < 0.01) return;
-    const b = el.getBoundingClientRect(),
+    const role = el.dataset.role,
+      b = el.getBoundingClientRect(),
       a = pt(b.left, b.top),
       z = pt(b.right, b.bottom),
       sx = (z.x - a.x) / ow,
@@ -86,6 +92,7 @@ function snapLayer(svg) {
         w: c.w * sx,
         h: c.h * sy,
         o,
+        role,
       };
       if (box) r = clipTo(r, box);
       if (r) out.push(r);
@@ -149,13 +156,29 @@ const d2 = (a, b) => {
     q = ctr(b);
   return (p.x - q.x) ** 2 + (p.y - q.y) ** 2;
 };
+/* What may become what: a piece prefers its own role; the face's parts may
+   swap when counts differ (eyes into a question mark); the frame and the
+   face never trade pieces. */
+const FACE = new Set(["eye", "brow", "mouth", "tear"]),
+  BAN = 1e9,
+  rolePenalty = (a, b) =>
+    a.role === b.role
+      ? 0
+      : (a.role === "frame" && FACE.has(b.role)) ||
+          (b.role === "frame" && FACE.has(a.role))
+        ? BAN
+        : 100 ** 2;
+// The closest piece r may come from or go to; k is the plain distance².
 const nearest = (r, list) =>
   list.reduce(
     (best, c) => {
-      const k = d2(r, c);
-      return k < best.k ? { c, k } : best;
+      const pen = rolePenalty(r, c);
+      if (pen >= BAN) return best;
+      const k = d2(r, c),
+        score = k + pen;
+      return score < best.score ? { c, k, score } : best;
     },
-    { c: null, k: Infinity },
+    { c: null, k: Infinity, score: Infinity },
   );
 const dot = (r, o = 0) => {
   const c = ctr(r);
@@ -165,7 +188,8 @@ const SPLIT_REACH = 140 ** 2;
 
 // Pair what's on screen with the target. Each step: {a: from, b: to, pop}.
 function plan(src, dst) {
-  const key = (r) => [r.x, r.y, r.w, r.h].map((v) => Math.round(v * 2)).join();
+  const key = (r) =>
+    [r.x, r.y, r.w, r.h].map((v) => Math.round(v * 2)).join() + r.role;
   const steps = [];
   let S2 = src,
     D2 = dst;
@@ -177,6 +201,7 @@ function plan(src, dst) {
     const votes = new Map();
     S2.forEach((s) =>
       D2.forEach((d) => {
+        if (s.role !== d.role) return;
         if (Math.abs(s.w - d.w) > 0.5 || Math.abs(s.h - d.h) > 0.5) return;
         const ex = d.x - s.x,
           ey = d.y - s.y,
@@ -234,7 +259,7 @@ function plan(src, dst) {
   }
   // 2. the rest travel to their cheapest partner
   const cost = (a, b) =>
-    d2(a, b) + 0.5 * ((a.w - b.w) ** 2 + (a.h - b.h) ** 2);
+    d2(a, b) + 0.5 * ((a.w - b.w) ** 2 + (a.h - b.h) ** 2) + rolePenalty(a, b);
   const rowsSrc = S2.length <= D2.length,
     R = rowsSrc ? S2 : D2,
     C = rowsSrc ? D2 : S2,
@@ -258,34 +283,34 @@ function plan(src, dst) {
       paired.fill(0);
     }
     match.forEach((j, i) => {
-      if (j < 0) return;
+      // forced pairs across the frame/face line stay unpaired instead
+      if (j < 0 || rolePenalty(R[i], C[j]) >= BAN) return;
       paired[j] = 1;
       steps.push(rowsSrc ? { a: R[i], b: C[j] } : { a: C[j], b: R[i] });
     });
   }
   // 3. extras split off a neighbour (or pop in); leftovers merge (or shrink)
-  C.forEach((c, j) => {
-    if (paired[j]) return;
-    if (rowsSrc) {
-      const n = nearest(c, S2);
-      steps.push(
-        n.k < SPLIT_REACH
-          ? { a: { ...n.c }, b: c }
-          : { a: dot(c), b: c, pop: true },
-      );
-    } else {
-      const n = nearest(c, D2);
-      steps.push({
-        a: c,
-        b: n.k < SPLIT_REACH ? { ...n.c, o: 0 } : dot(c),
-      });
-    }
+  const usedSrc = new Set(steps.map((s) => s.a)),
+    usedDst = new Set(steps.map((s) => s.b));
+  D2.filter((d) => !usedDst.has(d)).forEach((d) => {
+    const n = nearest(d, S2);
+    steps.push(
+      n.k < SPLIT_REACH
+        ? { a: { ...n.c, role: d.role }, b: d }
+        : { a: { ...dot(d), role: d.role }, b: d, pop: true },
+    );
+  });
+  S2.filter((s) => !usedSrc.has(s)).forEach((s) => {
+    const n = nearest(s, D2);
+    steps.push({
+      a: s,
+      b: n.k < SPLIT_REACH ? { ...n.c, o: 0 } : dot(s),
+    });
   });
   return steps;
 }
 
-const easeIO = (p) =>
-  p < 0.5 ? 4 * p * p * p : 1 - Math.pow(-2 * p + 2, 3) / 2;
+const easeIO = bezier(MORPH_EASE);
 const easeBack = (p) => {
   const c = 1.70158;
   return 1 + (c + 1) * Math.pow(p - 1, 3) + c * Math.pow(p - 1, 2);
@@ -307,7 +332,9 @@ const morphOrder = () => [MORPH_MARK.id, ...DESIGNS.map((d) => d.id)];
 
 function liveAtoms() {
   if (M.layer && M.steps)
-    return M.steps.map((s) => s.now).filter((r) => r.o > 0.01);
+    return M.steps
+      .map((s) => ({ ...s.now, role: s.b.role || s.a.role }))
+      .filter((r) => r.o > 0.01);
   if (M.settled) return snapLayer(M.settled);
   return [];
 }
@@ -332,6 +359,7 @@ function settle(crossfade) {
     force: S.force,
     vb: MORPH_VB,
     label: "Omi, " + d.name,
+    roles: true,
   });
   const svg = tmp.firstChild;
   svg.classList.add("mlayer");
@@ -384,8 +412,8 @@ function morphTo(id) {
   }
   const steps = plan(src, atomsOf(d)),
     sp = Math.max(0.25, S.speed || 1),
-    DUR = 620 / sp,
-    STAGGER = 220 / sp;
+    DUR = (MORPH_TIME.duration * 1000) / sp,
+    STAGGER = (MORPH_TIME.stagger * 1000) / sp;
   const svg = document.createElementNS(SVGNS, "svg");
   svg.setAttribute(
     "viewBox",

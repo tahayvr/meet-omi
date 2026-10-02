@@ -41,7 +41,7 @@ const CONF = Array.from({ length: 22 }, (_, i) => {
 });
 const EGG = {
   party: {
-    face: [...F.success, ...CONF],
+    face: [...F.success, ...as("extra", CONF)],
     logo: [
       ...tint(MISC, "pop"),
       ...INNER_RECTS,
@@ -73,7 +73,10 @@ const EGG = {
         [86, 1.0],
         [204, 0.7],
         [132, 0.2],
-      ].map(([x, dl]) => withD(R(x, 60, 8, 16, "rain"), 1.4, dl)),
+      ].map(([x, dl]) => ({
+        ...withD(R(x, 60, 8, 16, "rain"), 1.4, dl),
+        role: "extra",
+      })),
     ],
   },
   vim: {
@@ -88,7 +91,7 @@ const EGG = {
     mood: "m-error",
   },
   tiling: {
-    face: [
+    face: as("extra", [
       ...outline(72, 72, 70, 156, 6, "tile").map((r) => withD(r, 3, 0)),
       ...outline(152, 72, 76, 73, 6, "tile").map((r) =>
         withD(r, 3, 0.35),
@@ -96,7 +99,7 @@ const EGG = {
       ...outline(152, 155, 76, 73, 6, "tile").map((r) =>
         withD(r, 3, 0.7),
       ),
-    ],
+    ]),
   },
   mindblown: {
     face: [R(80, 100, 40, 40), R(160, 100, 40, 40)],
@@ -276,3 +279,17 @@ const DESIGNS = [
 DESIGNS.forEach((d) => {
   if (FRAMES[d.id]) d.logo = FRAMES[d.id];
 });
+/* Roles nobody set: what belongs to the logo is frame (anything outside the
+   logo's square, like the update arrows or peek's ledge, is extra), the
+   face is eyes, the body is body. See as() in geometry.js. */
+const inLogo = (r) =>
+  r.x >= 0 && r.y >= 0 && r.x + r.w <= 300 && r.y + r.h <= 300;
+const withRole = (list, role) =>
+  list && list.map((r) => (r.role ? r : { ...r, role: role(r) }));
+DESIGNS.forEach((d) => {
+  d.logo = withRole(d.logo, (r) => (inLogo(r) ? "frame" : "extra"));
+  d.face = withRole(d.face, () => "eye");
+  d.bodyFace = withRole(d.bodyFace, () => "eye");
+  d.body = withRole(d.body, () => "body");
+});
+

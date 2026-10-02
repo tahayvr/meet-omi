@@ -32,9 +32,9 @@ function clipTo(r, b) {
     ? { ...r, x, y, w: x2 - x, h: y2 - y }
     : null;
 }
-const rectTag = (r) => {
+const rectTag = (r, roles) => {
   const s = pieceStyle(r);
-  return `<rect${r.c ? ` class="${r.c}"` : ""}${s ? ` style="${s}"` : ""}${r.o != null ? ` fill-opacity="${r.o}"` : ""} x="${r.x}" y="${r.y}" width="${r.w}" height="${r.h}"/>`;
+  return `<rect${roles && r.role ? ` data-role="${r.role}"` : ""}${r.c ? ` class="${r.c}"` : ""}${s ? ` style="${s}"` : ""}${r.o != null ? ` fill-opacity="${r.o}"` : ""} x="${r.x}" y="${r.y}" width="${r.w}" height="${r.h}"/>`;
 };
 
 /* All keyframes come from ANIM (motion.js); only the plumbing lives here. */
@@ -95,13 +95,13 @@ function squareBox(box, pad) {
   };
 }
 
-/* opts: {color,bg|null,body,animated,style,vb,size,label} */
+/* opts: {color,bg|null,body,animated,style,vb,size,label,roles} */
 function svgFor(d, o) {
   const sh = shapes(d, o.body);
   const vb = o.vb;
   // a still is frame 0 of the loops, so it matches where the animation starts
   const rects = o.animated ? sh.rects : sh.rects.map(restOf),
-    tags = (list) => list.map(rectTag).join("");
+    tags = (list) => list.map((r) => rectTag(r, o.roles)).join("");
   let inner = tags(rects.filter((r) => !r.clip));
   if (d.clip) {
     // pieces seen through a window (peek): an inner <svg> clips them, and the

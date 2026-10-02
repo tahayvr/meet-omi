@@ -1,5 +1,16 @@
 /* ---------- geometry (20-unit grid of the Omarchy logo) ---------- */
 const R = (x, y, w, h, c) => ({ x, y, w, h, c });
+/* Every piece has a role, so a morph knows what may become what and an app
+   knows what it is drawing:
+     frame  the logo, including the mouths it makes and the lights that run
+            around it
+     eye    whatever sits where the eyes are (eyes, X's, hearts, shades)
+     brow, mouth, tear
+     extra  props around the face: thinking dots, z's, confetti, arrows
+     body   arms and legs (full-body variant)
+   Logo pieces default to frame, face pieces to eye, body pieces to body (see
+   the end of designs.js); as() labels the rest. */
+const as = (role, rects) => rects.map((r) => ({ ...r, role }));
 const LOGO = [
   [0, 0, 300, 20],
   [0, 20, 20, 260],
@@ -14,7 +25,7 @@ const LOGO = [
   [40, 240, 220, 20],
   [20, 140, 20, 20],
   [140, 260, 20, 20],
-].map((a) => R(...a));
+].map((a) => ({ ...R(...a), role: "frame" }));
 const blk = (cx, cy, pts, c) =>
   pts.map(([dx, dy]) => R(cx + dx * 20, cy + dy * 20, 20, 20, c));
 const cellsOf = (path, extra = () => ({})) =>
@@ -36,23 +47,23 @@ const Z = (x, y, s, dl = 0) => {
     R(x + s - 2 * t, y + t, t, t, "z"),
     R(x + t, y + s - 2 * t, t, t, "z"),
     R(x, y + s - t, s, t, "z"),
-  ].map((r) => (dl ? { ...r, dl } : r));
+  ].map((r) => ({ ...r, role: "extra", ...(dl ? { dl } : {}) }));
 };
 const F = {
   idle: [R(100, 110, 20, 40, "eye"), R(180, 110, 20, 40, "eye")],
   smile: [
     R(100, 110, 20, 40, "eye"),
     R(180, 110, 20, 40, "eye"),
-    R(110, 180, 20, 20),
-    R(130, 200, 40, 20),
-    R(170, 180, 20, 20),
+    ...as("mouth", [R(110, 180, 20, 20), R(130, 200, 40, 20), R(170, 180, 20, 20)]),
   ],
   thinking: [
     R(120, 90, 20, 40, "eye"),
     R(200, 90, 20, 40, "eye"),
-    R(160, 40, 20, 20, "dot"),
-    { ...R(180, 40, 20, 20, "dot"), dl: 0.2 },
-    { ...R(200, 40, 20, 20, "dot"), dl: 0.4 },
+    ...as("extra", [
+      R(160, 40, 20, 20, "dot"),
+      { ...R(180, 40, 20, 20, "dot"), dl: 0.2 },
+      { ...R(200, 40, 20, 20, "dot"), dl: 0.4 },
+    ]),
   ],
   success: [
     ...blk(80, 130, [
@@ -101,8 +112,7 @@ const F = {
     R(80, 110, 60, 40, "shades"),
     R(140, 110, 20, 20, "shades"),
     R(160, 110, 60, 40, "shades"),
-    R(130, 200, 60, 20),
-    R(190, 180, 20, 20),
+    ...as("mouth", [R(130, 200, 60, 20), R(190, 180, 20, 20)]),
   ],
   typing: [
     ...blk(90, 100, [
@@ -134,7 +144,7 @@ Object.assign(F, {
   drift: [
     R(120, 90, 20, 40, "eye"),
     R(200, 90, 20, 40, "eye"),
-    R(160, 40, 20, 20, "trav"),
+    { ...R(160, 40, 20, 20, "trav"), role: "extra" },
   ],
   sideeye: [R(100, 90, 20, 40, "look"), R(180, 90, 20, 40, "look")],
   hmm: [R(80, 90, 20, 40, "eye"), R(160, 90, 20, 40, "eye")],
@@ -165,7 +175,8 @@ Object.assign(F, {
     R(100, 110, 20, 40, "pulse"),
     R(180, 110, 20, 40, "pulse"),
   ],
-  confused: [
+  // a question mark where the eyes were
+  confused: as("extra", [
     ...chase(
       [
         [100, 100],
@@ -182,7 +193,7 @@ Object.assign(F, {
       0.6,
     ),
     R(140, 200, 20, 20, "pulseop"),
-  ],
+  ]),
   surprised: [R(80, 100, 40, 40), R(160, 100, 40, 40)],
   wink: [
     ...blk(90, 100, [
@@ -193,7 +204,7 @@ Object.assign(F, {
     R(160, 140, 40, 20, "cur"),
   ],
 });
-const BODY = [
+const BODY = as("body", [
   R(60, 300, 20, 40),
   R(40, 340, 40, 20),
   R(220, 300, 20, 40),
@@ -202,7 +213,7 @@ const BODY = [
   R(-40, 160, 20, 20),
   R(300, 120, 40, 20, "arm"),
   R(320, 80, 20, 40, "arm"),
-];
+]);
 /* snake: inner frame split into 20-unit cells, in path order from the top gap clockwise */
 const INNER = new Set([
   "40,40,120,20",
@@ -259,7 +270,7 @@ Object.assign(F, {
   shy: [R(100, 110, 20, 40, "shy"), R(180, 110, 20, 40, "shy")],
   skeptical: [
     R(90, 125, 40, 10, "skq"),
-    R(170, 90, 40, 10, "skb"),
+    { ...R(170, 90, 40, 10, "skb"), role: "brow" },
     R(180, 110, 20, 40, "eye"),
   ],
   bored: [
@@ -270,13 +281,15 @@ Object.assign(F, {
   ],
   // worried brows, inner ends raised
   sad: [
-    R(90, 110, 20, 10),
-    R(110, 100, 20, 10),
-    R(170, 100, 20, 10),
-    R(190, 110, 20, 10),
+    ...as("brow", [
+      R(90, 110, 20, 10),
+      R(110, 100, 20, 10),
+      R(170, 100, 20, 10),
+      R(190, 110, 20, 10),
+    ]),
     R(100, 130, 20, 30, "eye"),
     R(180, 130, 20, 30, "eye"),
-    R(100, 170, 10, 10, "drop"),
+    { ...R(100, 170, 10, 10, "drop"), role: "tear" },
   ],
   // closed eyes tilted inward: outer ends low, inner ends high
   crying: [
@@ -284,15 +297,16 @@ Object.assign(F, {
     R(110, 130, 20, 10),
     R(170, 130, 20, 10),
     R(190, 140, 20, 10),
-    R(95, 160, 10, 10, "drop"),
-    R(195, 160, 10, 10, "drop"),
+    ...as("tear", [R(95, 160, 10, 10, "drop"), R(195, 160, 10, 10, "drop")]),
   ],
   scared: [R(100, 110, 20, 20, "tremble"), R(180, 110, 20, 20, "tremble")],
   angry: [
-    R(80, 100, 20, 10, "furrow"),
-    R(100, 110, 20, 10, "furrow"),
-    R(200, 100, 20, 10, "furrow"),
-    R(180, 110, 20, 10, "furrow"),
+    ...as("brow", [
+      R(80, 100, 20, 10, "furrow"),
+      R(100, 110, 20, 10, "furrow"),
+      R(200, 100, 20, 10, "furrow"),
+      R(180, 110, 20, 10, "furrow"),
+    ]),
     R(100, 130, 20, 30),
     R(180, 130, 20, 30),
   ],
