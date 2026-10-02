@@ -1,0 +1,127 @@
+# Omi as a building block: anything that can read JSON and fill rectangles
+# can show Omi, animate it and morph it, in any language or toolkit.
+#
+# This file is the plan and its progress. Update `status` as steps land
+# (todo, doing, done) rather than editing the prose around it.
+
+[architecture]
+summary = """
+The design jig is where Omi is designed. Everything an app needs comes out
+of it as the Omi pack: data plus a written spec. Apps build on the pack, not
+on the jig: they read omi.json and draw rectangles, either with the
+reference player (JavaScript) or with their own player in their own
+language, checked against the conformance data.
+"""
+
+# Each layer only depends on the ones above it.
+[[layer]]
+name = "Design jig"
+path = "index.html, js/"
+role = "Where modes and animations are designed. The source of truth."
+
+[[layer]]
+name = "Omi pack"
+path = "pack/"
+role = """
+The published contract: omi.json (every mode, animation and morph setting),
+README.md (the spec: units, pieces, roles, how to animate, how to morph),
+conformance.json (what a correct player draws). Versioned by `version`.
+"""
+built_by = "node tools/build-pack.js, or Export Omi pack in the jig"
+
+[[layer]]
+name = "Players"
+role = """
+Turn the pack into rectangles on screen. A player has three jobs: work out
+a mode's rects at time t, plan and play a morph, and fill rects. Drawing is
+the host's; the rest is the same everywhere.
+"""
+reference = "player/omi.js: JavaScript, no dependencies, browser or headless"
+others = """
+Any language can have one by following pack/README.md: a Rust app with serde,
+Swift with Codable, C++ or Python with any JSON library. A player passes when
+tools/check-player.js's procedure passes for it against conformance.json.
+"""
+
+[[layer]]
+name = "Apps and environments"
+role = """
+Embed a player and call set(mode). Optionally share one Omi across apps
+(see the shared state step).
+"""
+
+[principles]
+items = [
+  "The pack is the contract. Apps never depend on the jig's code.",
+  "Everything a player draws is axis-aligned rects with an opacity.",
+  "A mode at rest is frame 0 of its loops; a morph lands there and the loops start at t = 0.",
+  "Every rule a player needs is in pack/README.md, and conformance.json proves it.",
+  "Format changes that an existing player would misread bump the pack version.",
+]
+
+[[step]]
+id = 1
+title = "Animations as data"
+status = "done"
+detail = "Every loop is keyframes in js/motion.js; the page CSS and video export are generated from it."
+
+[[step]]
+id = 2
+title = "Piece roles"
+status = "done"
+detail = "frame, eye, brow, mouth, tear, extra, body; morphs pair by role."
+
+[[step]]
+id = 3
+title = "The Omi pack and its spec"
+status = "done"
+detail = "omi.json + README.md, exported from the jig."
+
+[[step]]
+id = 4
+title = "Reference player"
+status = "done"
+detail = "player/omi.js; the jig's Morph section runs on it, fed the exported pack."
+
+[[step]]
+id = 5
+title = "Conformance data and pack build"
+status = "done"
+detail = """
+pack/conformance.json (every mode at 0, 0.9 and 3.3 s; 8 morphs),
+tools/build-pack.js writes pack/ without a browser, tools/check-player.js
+checks the reference player against it.
+"""
+
+[[step]]
+id = 6
+title = "Integration examples"
+status = "todo"
+detail = """
+Small, copyable starting points that show the pack used in different
+environments: a plain web page, a QML item running omi.js in QML's
+JavaScript engine, a terminal renderer (rects to block characters).
+"""
+
+[[step]]
+id = 7
+title = "Shared state across apps (optional)"
+status = "todo"
+detail = """
+A written protocol so several apps on one machine can show the same Omi in
+sync: a service holds the current mode and when it started, apps subscribe
+and play it locally with their own player. Spec first; any language can
+implement either side.
+"""
+
+[[step]]
+id = 8
+title = "Full-body variant in the pack"
+status = "todo"
+detail = "Arms and legs (body pieces, bodyFace) are off in the jig and left out of the pack for now."
+
+[[step]]
+id = 9
+title = "Publishing"
+status = "todo"
+detail = "Tag pack releases by version so apps can pin one; a changelog of format changes."

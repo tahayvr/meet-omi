@@ -1,8 +1,10 @@
 /* ---------- Omi pack: everything an app needs to draw, animate and morph Omi ----------
    omi.json holds every mode as plain rects (with roles), every animation as
    keyframes, and the numbers the morph uses. README.md (PACK_README) explains
-   the format to whoever writes a player for it. Bump PACK_VERSION whenever
-   the format changes in a way an existing player would misread. */
+   the format to whoever writes a player for it, in any language, and
+   conformance.json lets that player check itself. Bump PACK_VERSION whenever
+   the format changes in a way an existing player would misread.
+   tools/build-pack.js writes the same files into pack/. */
 const PACK_VERSION = 1;
 // "mark": the plain logo, with nothing in the middle
 const MORPH_MARK = { id: "mark", name: "The mark", face: [], mood: "" };
@@ -92,16 +94,101 @@ function buildPack() {
   };
 }
 
+/* What a correct player draws, made by the reference player (player/omi.js).
+   modes: every mode's rects at a few times. morphs: a few morphs, from the
+   first frame to the landing; frames in between depend on how a player
+   pairs pieces, so they are a reference, not a requirement. */
+const CONFORMANCE_TIMES = [0, 0.9, 3.3],
+  CONFORMANCE_MORPHS = [
+    ["mark", "idle"],
+    ["idle", "error"],
+    ["idle", "thinking"],
+    ["working", "happy"],
+    ["sleeping", "party"],
+    ["idle", "peek"],
+    ["peek", "sudo"],
+    ["thinking-snake", "love"],
+  ];
+function buildConformance(pack) {
+  const canvas = {
+      width: 1,
+      height: 1,
+      getContext: () => ({
+        setTransform() {},
+        clearRect() {},
+        fillRect() {},
+      }),
+    },
+    omi = new Omi(canvas, pack, { color: "#000" }),
+    num = (v) => +v.toFixed(4),
+    rect = (r) => [num(r.x), num(r.y), num(r.w), num(r.h), num(r.o), r.role],
+    shown = (list) => list.filter((r) => r.o > 0.001).map(rect);
+  const modes = {};
+  for (const m of pack.modes)
+    modes[m.id] = Object.fromEntries(
+      CONFORMANCE_TIMES.map((t) => [t, shown(omi.modeRects(m, t))]),
+    );
+  const { duration, stagger } = pack.morph,
+    total = duration + stagger,
+    morphs = CONFORMANCE_MORPHS.map(([from, to]) => {
+      omi.set(from, { instant: true });
+      const start = shown(omi.rects());
+      omi.set(to);
+      // drive the player by hand at 100 fps
+      const frames = {};
+      let ms = 1000;
+      omi.frame(ms);
+      for (const at of [0.2, 0.4]) {
+        while (ms < 1000 + at * 1000) omi.frame((ms += 10));
+        frames[at] = shown(omi.rects());
+      }
+      while (omi.morph) omi.frame((ms += 10));
+      return { from, to, start, frames, end: shown(omi.rects()) };
+    });
+  omi.destroy();
+  return {
+    format: "omi-conformance",
+    version: 1,
+    pack_version: pack.version,
+    tolerance: { position: 0.01, opacity: 0.001 },
+    rect: ["x", "y", "w", "h", "opacity", "role"],
+    modes,
+    morph_seconds: total,
+    morphs,
+  };
+}
+// The pack's files, as { name: text }.
+function packFiles() {
+  const pack = JSON.parse(JSON.stringify(buildPack()));
+  return {
+    "omi.json": JSON.stringify(pack, null, 2) + "\n",
+    "README.md": PACK_README,
+    "conformance.json": JSON.stringify(buildConformance(pack)) + "\n",
+  };
+}
+
 const PACK_README = `# Omi pack
 
 Everything an app needs to draw Omi, animate every mode, and morph between
 modes. Made by the Meet Omi design jig. This file describes format version
 ${PACK_VERSION}.
 
+## Files
+
+- omi.json: every mode, every animation, and the morph settings.
+- omi.js: the reference player, for web pages and anything with a
+  JavaScript engine (Electron, QML, GJS).
+- conformance.json: what a correct player draws, to test your own.
+
+Nothing here is tied to one language or toolkit. omi.json is plain JSON and
+this file describes every rule, so any app can read it and draw Omi itself:
+a Rust app with serde, a Swift app with Codable, a C++ or Python app with
+any JSON library. All a player has to draw is filled rectangles.
+
 ## Using the player
 
-omi.js (in this folder) is a small player for web pages and Electron apps,
-and the reference for players on other platforms:
+omi.js is a small player for web pages and Electron apps, and the reference
+for players in other languages:
 
     <canvas id="omi" style="width: 240px; height: 240px; color: #9ece6a"></canvas>
     <script src="omi.js"></script>
@@ -207,19 +294,35 @@ always match.
    late, the further from \`center\` the later, so the change ripples out from
    the face.
 5. When it lands, start the new mode's animations at t = 0.
+
+## Checking your own player
+
+conformance.json lists what a correct player draws. Every rect is
+[x, y, w, h, opacity, role], and only rects with opacity above 0.001 are
+listed, in drawing order.
+
+- \`modes\`: for every mode, the rects at a few times (in seconds), with body
+  motion on. Yours must match within \`tolerance\`.
+- \`morphs\`: a few morphs. \`start\` is the old mode at rest, \`end\` is what
+  the morph lands on (\`morph_seconds\` in): yours must match both, in any
+  order. \`frames\` (0.2 s and 0.4 s in) are the reference player's frames in
+  between; a player that pairs pieces exactly as described above matches
+  them too, but other pairings are allowed.
 `;
 
-$("savePack").addEventListener("click", async () => {
-  const enc = new TextEncoder(),
-    file = (name, text) => ({ name: "omi-pack/" + name, data: enc.encode(text) }),
-    files = [
-      file("omi.json", JSON.stringify(buildPack(), null, 2) + "\n"),
-      file("README.md", PACK_README),
-    ];
-  try {
-    const res = await fetch("player/omi.js");
-    if (res.ok) files.push(file("omi.js", await res.text()));
-  } catch (e) {}
-  if (files.length < 3) toast("Couldn\u2019t include the player (omi.js).");
-  await save("omi-pack.zip", zip(files));
-});
+// on the page only (tools/build-pack.js loads this file without one)
+if (typeof $ === "function" && $("savePack"))
+  $("savePack").addEventListener("click", async () => {
+    const enc = new TextEncoder(),
+      files = Object.entries(packFiles()).map(([name, text]) => ({
+        name: "omi-pack/" + name,
+        data: enc.encode(text),
+      }));
+    try {
+      const res = await fetch("player/omi.js");
+      if (res.ok)
+        files.push({ name: "omi-pack/omi.js", data: enc.encode(await res.text()) });
+    } catch (e) {}
+    if (files.length < 4) toast("Couldn\u2019t include the player (omi.js).");
+    await save("omi-pack.zip", zip(files));
+  });
