@@ -109,7 +109,7 @@ detail = """
 examples/: a plain web page, a QML item running omi.js in QML's JavaScript
 engine, and a terminal renderer (rects to half-block characters). The player
 needs no browser: it runs in any JavaScript engine and hands hosts its rects.
-The QML example has not been run in Qt yet.
+The QML example runs in Qt 6 (checked headless with qml6) since step 9.
 """
 
 [[step]]
@@ -123,6 +123,41 @@ every app with its own player. Changes carry `since`, and players run shared
 changes on the wall clock, so every app shows the same frame. service/ has a
 reference service, omictl and a Node client; tools/check-service.js checks
 them end to end.
+"""
+
+[[step]]
+id = 9
+title = "Runs in the Omarchy shell"
+status = "done"
+detail = """
+Qt 6's JavaScript (Quickshell, the Omarchy shell) couldn't load the player:
+no object spread, Object.fromEntries or Array flat/flatMap. player/omi.js now
+avoids them and draws the same frames. tools/conformance.js is the check,
+in plain JavaScript; tools/check-player.js runs it in Node, again without
+those built-ins, and fails on object spread; tools/check-quickshell.js runs
+it inside Quickshell.
+"""
+
+[[step]]
+id = 10
+title = "Omarchy shell example and guide"
+status = "done"
+detail = """
+examples/omarchy: an Omarchy shell plugin (omi.example) with a reusable
+Omi.qml: the pack read with FileView, rects drawn as Rectangles snapped to
+device pixels (crisp at fractional scales), the theme's accent, no work while
+hidden, and react() for short reactions. install.sh installs it with the pack
+copied in. docs/omarchy.md is the guide, including the modes to use for
+common situations.
+"""
+
+[[step]]
+id = 11
+title = "Ideas from Omarchy apps"
+status = "doing"
+detail = """
+docs/ideas.md collects new modes, reactions and format ideas as they come up
+in real apps (first: the Omarchy onboarding), each with where it came from.
 """
 
 [[step]]

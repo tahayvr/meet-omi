@@ -38,6 +38,10 @@ state protocol: every app then shows the same frame at the same moment. Outside 
 null for the canvas and a color, call omi.frame(milliseconds) on every
 display frame, and fill the rects in omi.rects() yourself.
 
+omi.js runs in Qt Quick's JavaScript (Qt 6), the engine behind the Omarchy
+shell, so Omarchy shell plugins use it as is: see examples/omarchy in the
+Meet Omi repo for a ready Omi.qml.
+
 ## Units
 
 All sizes are in grid units. The Omarchy logo is a 300 × 300 square starting

@@ -1,0 +1,13 @@
+{
+  "schemaVersion": 1,
+  "id": "omi.example",
+  "name": "Omi",
+  "version": "0.1.0",
+  "author": "tahayvr",
+  "license": "MIT",
+  "description": "Omi, the Omarchy mascot, in the theme's accent: try every mode, and drive it from scripts.",
+  "kinds": ["overlay"],
+  "entryPoints": {
+    "overlay": "Overlay.qml"
+  }
+}

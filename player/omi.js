@@ -25,9 +25,23 @@
    there is none.
 
    README.md in the pack describes the format and the morph step by step;
-   this file follows it. */
+   this file follows it.
+
+   Written for the JavaScript Qt Quick runs (Qt 6, the engine behind the
+   Omarchy shell), which has no object spread ({ ...o }), Object.fromEntries,
+   Array flat/flatMap/at or String replaceAll: use Object.assign and the
+   helpers below. tools/check-player.js holds the player to that. */
 var Omi = (function () {
   "use strict";
+
+  /* ---------- for Qt's JavaScript ---------- */
+  function fromEntries(pairs) {
+    const out = {};
+    for (const [k, v] of pairs) out[k] = v;
+    return out;
+  }
+  // one list from a list of lists
+  const concat = (lists) => [].concat(...lists);
 
   /* ---------- animations ---------- */
   const REST = { tx: 0, ty: 0, sx: 1, sy: 1, op: 1 },
@@ -62,7 +76,7 @@ var Omi = (function () {
   }
   // How an animated piece looks t seconds in, on top of its rest position.
   function look(a, t, piece) {
-    const out = { ...REST };
+    const out = Object.assign({}, REST);
     if (!a) return out;
     const dur = piece.duration || a.duration,
       p = ((((t - (piece.delay || 0)) / dur) % 1) + 1) % 1,
@@ -92,7 +106,7 @@ var Omi = (function () {
       x2 = Math.min(r.x + r.w, b.x + b.w),
       y2 = Math.min(r.y + r.h, b.y + b.h);
     return x2 - x > 0.01 && y2 - y > 0.01
-      ? { ...r, x, y, w: x2 - x, h: y2 - y }
+      ? Object.assign({}, r, { x, y, w: x2 - x, h: y2 - y })
       : null;
   }
   const center = (r) => ({ x: r.x + r.w / 2, y: r.y + r.h / 2 });
@@ -160,7 +174,7 @@ var Omi = (function () {
       const m = pack.morph;
       this.reach2 = m.splitReach ** 2;
       this.penalty = m.rolePenalty ** 2;
-      this.roleIx = Object.fromEntries(pack.roles.map((r, i) => [r, i]));
+      this.roleIx = fromEntries(pack.roles.map((r, i) => [r, i]));
       // the logo itself: the plain "mark" mode
       const mark = pack.modes.find((d) => d.id === "mark");
       this.logo = mark ? mark.pieces : [];
@@ -194,13 +208,12 @@ var Omi = (function () {
         out = [];
       for (let i = 0; i < xs.length - 1; i++)
         for (let j = 0; j < ys.length - 1; j++)
-          out.push({
-            ...r,
+          out.push(Object.assign({}, r, {
             x: xs[i],
             y: ys[j],
             w: xs[i + 1] - xs[i],
             h: ys[j + 1] - ys[j],
-          });
+          }));
       return out;
     }
     // A number that is equal for two rects in the same place, of the same
@@ -288,7 +301,7 @@ var Omi = (function () {
           steps.push({ a: s, b: l.pop(), rigid: shared });
           return false;
         });
-        D = [...left.values()].flat();
+        D = concat([...left.values()]);
         if (!shared) break;
       }
       // 2. The rest travel to their cheapest partner, by distance, size and
@@ -319,8 +332,8 @@ var Omi = (function () {
         const n = this.nearest(d, S);
         steps.push(
           n.k < this.reach2
-            ? { a: { ...n.c, role: d.role }, b: d }
-            : { a: { ...center(d), w: 0, h: 0, o: 0, role: d.role }, b: d, pop: true },
+            ? { a: Object.assign({}, n.c, { role: d.role }), b: d }
+            : { a: Object.assign({}, center(d), { w: 0, h: 0, o: 0, role: d.role }), b: d, pop: true },
         );
       }
       for (const s of S) {
@@ -328,7 +341,7 @@ var Omi = (function () {
         const n = this.nearest(s, D);
         steps.push({
           a: s,
-          b: n.k < this.reach2 ? { ...n.c, o: 0 } : { ...center(s), w: 0, h: 0, o: 0 },
+          b: n.k < this.reach2 ? Object.assign({}, n.c, { o: 0 }) : Object.assign({}, center(s), { w: 0, h: 0, o: 0 }),
         });
       }
       return steps;
@@ -353,8 +366,8 @@ var Omi = (function () {
       this.pack = pack;
       this.anims = {};
       for (const [k, a] of Object.entries(pack.animations))
-        this.anims[k] = prepare({ ...a });
-      this.modes = Object.fromEntries(pack.modes.map((m) => [m.id, m]));
+        this.anims[k] = prepare(Object.assign({}, a));
+      this.modes = fromEntries(pack.modes.map((m) => [m.id, m]));
       this.planner = new Planner(pack);
       this.morphEase = bezier(pack.morph.ease);
       this.color = opts.color ?? null;
@@ -453,7 +466,7 @@ var Omi = (function () {
         return;
       }
       const P = this.planner,
-        cut = (list) => list.flatMap((r) => P.cells(r)),
+        cut = (list) => concat(list.map((r) => P.cells(r))),
         steps = P.plan(cut(from), cut(to)),
         { stagger, center: [cx, cy] } = this.pack.morph;
       for (const s of steps) {
@@ -461,7 +474,7 @@ var Omi = (function () {
         s.delay = s.rigid
           ? stagger * 0.25
           : Math.min(1, Math.hypot(c.x - cx, c.y - cy) / 260) * stagger;
-        s.now = { ...s.a };
+        s.now = Object.assign({}, s.a);
       }
       this.morph = { steps, t: 0 };
       if (late) {
@@ -504,13 +517,12 @@ var Omi = (function () {
           if (!r) continue;
         }
         if (body)
-          r = {
-            ...r,
+          r = Object.assign({}, r, {
             x: cx + (r.x - cx) * body.sx + body.tx,
             y: cy + (r.y - cy) * body.sy + body.ty,
             w: r.w * body.sx,
             h: r.h * body.sy,
-          };
+          });
         out.push(r);
       }
       return out;
@@ -520,7 +532,7 @@ var Omi = (function () {
     }
     // What is on screen right now.
     rects() {
-      if (this.morph) return this.morph.steps.map((s) => ({ ...s.now, role: s.b.role || s.a.role }));
+      if (this.morph) return this.morph.steps.map((s) => Object.assign({}, s.now, { role: s.b.role || s.a.role }));
       return this.modeRects(this.modes[this.mode], this._animate ? this.t : 0).filter(
         (r) => r.o > 0.001,
       );

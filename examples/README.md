@@ -6,8 +6,9 @@ project and start from the example closest to your environment.
 
 | Example | Environment | How it draws |
 |---|---|---|
+| [omarchy](omarchy/) | Omarchy shell plugins (Quickshell) | The player runs in QML's JavaScript engine; `Rectangle`s snapped to device pixels draw its rects, in the theme's accent |
 | [web](web/index.html) | Web pages, Electron | The player draws on a `<canvas>` by itself |
-| [qml](qml/Omi.qml) | Qt Quick (Qt 6.4+) | The player runs in QML's JavaScript engine; a QML `Canvas` fills its rects |
+| [qml](qml/Omi.qml) | Qt Quick apps (Qt 6.4+) | The player runs in QML's JavaScript engine; a QML `Canvas` fills its rects |
 | [terminal](terminal/omi-tty.js) | Any terminal with 24-bit color (Node) | Rects become half-block characters |
 
 ## The pattern
@@ -33,11 +34,20 @@ state instead of calling `set` yourself: see the
 
 ## Running them
 
+- **Omarchy:** `examples/omarchy/install.sh` installs the example as the
+  shell plugin `omi.example`, with the pack copied in. Then
+  `omarchy-shell shell summon omi.example` opens it (← → step through the
+  modes), and `omarchy-shell shell call omi.example set thinking` or
+  `… react success` drives it from a script. `install.sh --remove` takes it
+  out. [docs/omarchy.md](../docs/omarchy.md) covers building Omi into your
+  own plugin.
 - **Web:** serve the repo (for example `python3 -m http.server`) and open
   `/examples/web/`.
 - **QML:** `QML_XHR_ALLOW_FILE_READ=1 qml examples/qml/main.qml`. The
   environment variable lets QML read the pack from disk; in an app, ship the
-  pack in your resources instead.
+  pack in your resources instead. Inside the Omarchy shell, use the Omarchy
+  example: it reads the pack with Quickshell's `FileView`, which needs no
+  environment variable.
 - **Terminal:** `node examples/terminal/omi-tty.js` tours every mode;
   `node examples/terminal/omi-tty.js idle thinking` cycles the modes you name;
   `--once error` prints one still; `--follow` shows the shared Omi (start

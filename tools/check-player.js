@@ -3,69 +3,77 @@
    in any other language should check itself (see "Checking your own player"
    in pack/README.md).
 
-     node tools/check-player.js */
+     node tools/check-player.js
+
+   The player has to run in Qt Quick's JavaScript too (the Omarchy shell's),
+   so it is also loaded where the built-ins that engine lacks are removed, and
+   its source is checked for object spread, which that engine can't parse.
+   tools/check-quickshell.js runs the same check inside Quickshell itself. */
 const fs = require("fs"),
   path = require("path"),
-  Omi = require("../player/omi.js");
+  vm = require("vm"),
+  checkConformance = require("./conformance.js");
 
-const dir = path.join(__dirname, "..", "pack"),
+const root = path.join(__dirname, ".."),
+  dir = path.join(root, "pack"),
   read = (f) => JSON.parse(fs.readFileSync(path.join(dir, f), "utf8")),
   pack = read("omi.json"),
   conf = read("conformance.json"),
-  { position: tp, opacity: to } = conf.tolerance;
+  source = fs.readFileSync(path.join(root, "player/omi.js"), "utf8");
 
-const canvas = {
-    width: 1,
-    height: 1,
-    getContext: () => ({ setTransform() {}, clearRect() {}, fillRect() {} }),
-  },
-  omi = new Omi(canvas, pack, { color: "#000" }),
-  row = (r) => [r.x, r.y, r.w, r.h, r.o, r.role],
-  shown = (list) => list.filter((r) => r.o > 0.001).map(row);
+// What Qt 6's JavaScript doesn't have, as of Qt 6.11.
+const QT_LACKS = [
+  "Object.fromEntries",
+  "Array.prototype.flat",
+  "Array.prototype.flatMap",
+  "Array.prototype.at",
+  "String.prototype.replaceAll",
+];
 
-const same = (a, b) =>
-  a.length === 6 &&
-  [0, 1, 2, 3].every((i) => Math.abs(a[i] - b[i]) <= tp) &&
-  Math.abs(a[4] - b[4]) <= to &&
-  a[5] === b[5];
-// in drawing order
-const sameList = (a, b) => a.length === b.length && a.every((r, i) => same(r, b[i]));
-// in any order: every expected rect is matched by a different drawn one
-const sameSet = (a, b) => {
-  const left = [...a];
-  return (
-    a.length === b.length &&
-    b.every((r) => {
-      const i = left.findIndex((q) => same(q, r));
-      return i >= 0 && left.splice(i, 1);
-    })
-  );
+let failed = false;
+const report = (name, { checks, fails }) => {
+  if (fails.length) {
+    failed = true;
+    console.log(`FAIL ${name}: ${fails.length} of ${checks}:\n  ${fails.join("\n  ")}`);
+  } else console.log(`ok: ${name}: ${checks} checks (${pack.modes.length} modes, ${conf.morphs.length} morphs)`);
 };
 
-const fails = [];
-let checks = 0;
-for (const m of pack.modes)
-  for (const [t, want] of Object.entries(conf.modes[m.id] || {})) {
-    checks++;
-    if (!sameList(shown(omi.modeRects(m, +t)), want))
-      fails.push(`${m.id} at ${t}s`);
-  }
-for (const c of conf.morphs) {
-  omi.set(c.from, { instant: true });
-  checks++;
-  if (!sameSet(shown(omi.rects()), c.start)) fails.push(`${c.from} > ${c.to}: start`);
-  omi.set(c.to);
-  let ms = 1000;
-  omi.frame(ms);
-  while (omi.morph && ms < 1000 + conf.morph_seconds * 1000 + 1000)
-    omi.frame((ms += 10));
-  checks++;
-  if (!sameSet(shown(omi.rects()), c.end)) fails.push(`${c.from} > ${c.to}: end`);
-}
-omi.destroy();
+// 1. As written, in Node.
+report("node", checkConformance(require("../player/omi.js"), pack, conf));
 
-if (fails.length) {
-  console.log(`FAIL ${fails.length} of ${checks}:\n  ${fails.join("\n  ")}`);
-  process.exit(1);
+// 2. Without what Qt's JavaScript lacks. The conformance data crosses into
+// the context as JSON, so it is built from that context's own arrays.
+const ctx = vm.createContext({});
+vm.runInContext(QT_LACKS.map((p) => `delete ${p};`).join("\n"), ctx);
+vm.runInContext(source, ctx, { filename: "player/omi.js" });
+vm.runInContext(fs.readFileSync(path.join(__dirname, "conformance.js"), "utf8"), ctx, {
+  filename: "tools/conformance.js",
+});
+ctx.packJson = JSON.stringify(pack);
+ctx.confJson = JSON.stringify(conf);
+try {
+  report(
+    "Qt's built-ins only",
+    vm.runInContext("checkConformance(Omi, JSON.parse(packJson), JSON.parse(confJson))", ctx),
+  );
+} catch (e) {
+  failed = true;
+  console.log(`FAIL Qt's built-ins only: ${e.message} (one of ${QT_LACKS.join(", ")}?)`);
 }
-console.log(`ok: ${checks} checks (${pack.modes.length} modes, ${conf.morphs.length} morphs)`);
+
+// 3. Object spread: Qt's parser rejects { ...o } and { a, ...o }. Comments
+// and strings are blanked first; this catches a spread that opens an object
+// or follows a key, which is how it appears in practice.
+const code = source
+  .replace(/\/\*[\s\S]*?\*\//g, " ")
+  .replace(/\/\/.*$/gm, "")
+  .replace(/(["'`])(?:\\.|(?!\1).)*\1/g, '""');
+const spread = /\{\s*\.\.\.|[\w$\])]\s*,\s*\.\.\.[\w$.]+\s*\}/g;
+const lines = [];
+for (let m; (m = spread.exec(code)); ) lines.push(code.slice(0, m.index).split("\n").length);
+if (lines.length) {
+  failed = true;
+  console.log(`FAIL object spread at player/omi.js line ${lines.join(", ")}: use Object.assign`);
+} else console.log("ok: no object spread");
+
+if (failed) process.exit(1);
