@@ -32,7 +32,9 @@ for players in other languages:
 Options: color (null follows the canvas's CSS color), speed, animate,
 bodyMotion (false leaves out whole-body bobs), mode (where to start), view
 (an [x, y, w, h] to show instead of the pack's view). omi.on("settled", fn)
-runs fn when a morph lands. omi.set(mode, { since }) plays a change that
+runs fn when a morph lands. omi.loopSeconds(mode) is how long a mode takes
+to play every piece's loop once: show it at least that long in a tour.
+omi.set(mode, { since }) plays a change that
 happened at `since` (Unix ms), for apps sharing one Omi through the Omi
 state protocol: every app then shows the same frame at the same moment. Outside a browser (QML, GJS, Node, tests), pass
 null for the canvas and a color, call omi.frame(milliseconds) on every
@@ -132,6 +134,27 @@ always match.
    late, the further from `center` the later, so the change ripples out from
    the face.
 5. When it lands, start the new mode's animations at t = 0.
+
+## Drawing Omi crisp
+
+Omi is pixel art: the logo is a grid of square cells (`grid` units each).
+These hold for every host, a canvas, Qt, a terminal or a GPU:
+
+- Snap each rect's edges to device pixels (round the edges, not the size),
+  so edges are sharp and neighbouring pieces meet exactly.
+- Draw at a scale where one cell is a whole number of device pixels. The
+  view is view[2] / grid = 22 cells across, so a view 44, 66, 88… device
+  pixels wide keeps every bar the same thickness; anything in between makes
+  some cells a pixel wider than others. Fit the largest such size into the
+  space you have (the reference player's `even` option does).
+- 44 device pixels across (two per cell) is the smallest size where the
+  props stay readable; 22 still shows the logo and the eyes.
+- At small sizes whole-body motion (bobs, hops) moves a pixel at a time and
+  reads as a stutter: turn it off, or apply it to the whole of Omi as one
+  sub-pixel transform instead of per rect.
+- Omi is one color: use the host's accent (an Omarchy theme's `accent`).
+  Where you can't draw a rect's opacity, blend into the background, or treat
+  an opacity of 0.5 or more as on.
 
 ## Gaze: where the eyes look
 

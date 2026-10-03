@@ -9,7 +9,7 @@ project and start from the example closest to your environment.
 | [omarchy](omarchy/) | Omarchy shell plugins (Quickshell) | The player runs in QML's JavaScript engine; `Rectangle`s snapped to device pixels draw its rects, in the theme's accent |
 | [web](web/index.html) | Web pages, Electron | The player draws on a `<canvas>` by itself |
 | [qml](qml/Omi.qml) | Qt Quick apps (Qt 6.4+) | The player runs in QML's JavaScript engine; a QML `Canvas` fills its rects |
-| [terminal](terminal/omi-tty.js) | Any terminal with 24-bit color (Node) | Rects become half-block characters |
+| [terminal](terminal/omi-tty.js) | Any terminal (Node) | Rects become half-block characters, in the Omarchy theme's accent or the terminal's own colors |
 
 ## The pattern
 
@@ -52,7 +52,12 @@ state instead of calling `set` yourself: see the
   `node examples/terminal/omi-tty.js idle thinking` cycles the modes you name;
   `--once error` prints one still; `--follow` shows the shared Omi (start
   `node service/omi-service.js` first, and change it with
-  `node service/omictl.js set thinking`).
+  `node service/omictl.js set thinking`). It sizes Omi to a multiple of 22
+  pixels so it stays crisp, refits when the window is resized, draws empty
+  pixels in the terminal's own background (no box), and only redraws rows
+  that change. `--look 0,-1` turns the eyes, `--fg` / `--bg` pick colors.
+  Whole-body motion is off, since at terminal sizes it stutters a pixel at a
+  time; `--bounce` turns it on.
 
 ## Another language
 

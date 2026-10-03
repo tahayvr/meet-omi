@@ -9,6 +9,8 @@
      omi.set("idle", { since: 1767225600000 });  // a change made at that
                                           // Unix time (ms): shared state
      omi.on("settled", () => …);          // a morph landed
+     omi.loopSeconds("bored");            // 10: how long until every piece of
+                                          // a mode has played its loop once
      omi.look(0, -1);                     // the eyes look up, on top of any
                                           // mode; omi.look(0, 0) looks ahead
 
@@ -17,6 +19,9 @@
      speed        animation and morph speed, 1 = normal
      animate      false shows each mode at rest, with no loops
      bodyMotion   false leaves out whole-body moves (bob, hop, shake)
+     even         true (default) draws each logo cell a whole number of
+                  device pixels, so every bar is the same thickness; Omi may
+                  be a little smaller than the canvas. Drawing only.
      mode         the mode to start in (default "mark", the plain logo)
      view         [x, y, w, h] to show, instead of the pack's view
 
@@ -382,6 +387,7 @@ var Omi = (function () {
       this.view = opts.view || pack.view;
       this._animate = opts.animate ?? true;
       this._bodyMotion = opts.bodyMotion ?? true;
+      this.even = opts.even ?? true;
       this.mode = this.modes[opts.mode] ? opts.mode : "mark";
       this.t = 0; // seconds into the current mode's loops
       this.morph = null;
@@ -490,6 +496,25 @@ var Omi = (function () {
         if (!this.morph && this._animate) this.t = late - total;
       }
       this.wake();
+    }
+
+    /* How long a mode takes to play every piece's loop once: the longest of
+       its animations' duration (a piece's own duration if it sets one) plus
+       the piece's delay, the body and clip window included. 0 for a still
+       mode. For tours and demos: show a mode at least this long after its
+       morph lands. */
+    loopSeconds(id) {
+      const mode = this.modes[id];
+      if (!mode) return 0;
+      const A = this.pack.animations;
+      let t = 0;
+      const use = (name, delay, duration) => {
+        if (name && A[name]) t = Math.max(t, (duration ?? A[name].duration) + (delay || 0));
+      };
+      use(mode.anim);
+      if (mode.clip) use(mode.clip.anim);
+      for (const p of mode.pieces) use(p.anim, p.delay, p.duration);
+      return t;
     }
 
     /* Gaze. look(dx, dy) turns the eyes toward a direction, each axis -1..1
@@ -655,7 +680,10 @@ var Omi = (function () {
       if (cv.width !== W || cv.height !== H) (cv.width = W), (cv.height = H);
       const ctx = this.ctx,
         [vx, vy, vw, vh] = this.view,
-        s = Math.min(W / vw, H / vh),
+        g = this.pack.grid,
+        fit = Math.min(W / vw, H / vh),
+        // even: the largest scale at which one grid cell is whole pixels
+        s = this.even && fit * g >= 1 ? Math.floor(fit * g + 1e-6) / g : fit,
         ox = (W - vw * s) / 2 - vx * s,
         oy = (H - vh * s) / 2 - vy * s;
       ctx.setTransform(1, 0, 0, 1, 0, 0);

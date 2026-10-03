@@ -172,6 +172,21 @@ up at the bar from the workspaces card.
 """
 
 [[step]]
+id = 13
+title = "Crisp on every host"
+status = "done"
+detail = """
+"Drawing Omi crisp" in the pack README: snap edges to device pixels, a
+whole number of pixels per logo cell (multiples of 22 across), the smallest
+readable size, body motion at small sizes, one color. The player's canvas
+draw and Omi.qml do it with `even` (default on); the terminal example sizes
+to multiples of 22, uses the terminal's own background and the Omarchy
+accent, leaves out whole-body motion (it stutters at that size; --bounce
+brings it back), refits on resize and redraws only changed rows (20 KB instead of
+4.8 MB over 4 s of idle). Drawing only: omi.json and conformance unchanged.
+"""
+
+[[step]]
 id = 8
 title = "Publishing"
 status = "todo"

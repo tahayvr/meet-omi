@@ -29,7 +29,12 @@ Omi {
 - **Color.** Omi is one color, by design. Bind it to `Color.accent` from
   `qs.Commons`, so it changes with the theme like the rest of the shell.
 - **Size.** Omi stays crisp at any size and scale: its pieces are snapped to
-  device pixels. Below about 40 px the face gets hard to read.
+  device pixels, and with `even` (on by default) every logo cell is a whole
+  number of device pixels, so all bars have the same thickness. Omi then
+  draws at the largest such size that fits the item, which can be a little
+  smaller than the item: size the item so its width in device pixels is a
+  multiple of 22 for no loss. Below about 44 device pixels the face gets hard
+  to read. See "Drawing Omi crisp" in the pack README.
 - **Cost.** Omi only animates while its window is on screen. Hidden, it costs
   nothing.
 - **Calmer motion.** In small places, such as next to a title or in the bar,

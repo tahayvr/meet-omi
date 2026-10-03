@@ -32,6 +32,10 @@ Item {
     // Where the eyes look, [x, y], each -1..1 (x right, y down): toward
     // something on screen, on top of any mode. [0, 0] is straight ahead.
     property var look: [0, 0]
+    // true: each logo cell is a whole number of device pixels, so every bar
+    // has the same thickness ("Drawing Omi crisp" in the pack README). Omi
+    // may then draw a little smaller than this item.
+    property bool even: true
     // The pack's omi.json; by default the one next to this file.
     property string packPath: decodeURIComponent(Qt.resolvedUrl("omi.json").toString().replace(/^file:\/\//, ""))
 
@@ -115,7 +119,12 @@ Item {
 
     // The pack's `view` square, fitted into this item and centered.
     readonly property var view: player ? player.view : [0, 0, 1, 1]
-    readonly property real unit: Math.min(width / view[2], height / view[3])
+    readonly property real fit: Math.min(width / view[2], height / view[3])
+    readonly property real grid: player ? player.pack.grid : 20
+    // (+ 1e-6: a width meant to be exact, like 88 device pixels, can come out
+    // 87.99999 after the scale.)
+    readonly property real unit: even && fit * dpr * grid >= 1
+        ? Math.floor(fit * dpr * grid + 1e-6) / (dpr * grid) : fit
     readonly property real ox: (width - view[2] * unit) / 2 - view[0] * unit
     readonly property real oy: (height - view[3] * unit) / 2 - view[1] * unit
     readonly property real dpr: Window.window ? Window.window.devicePixelRatio : 1
