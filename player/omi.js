@@ -13,6 +13,9 @@
                                           // a mode has played its loop once
      omi.look(0, -1);                     // the eyes look up, on top of any
                                           // mode; omi.look(0, 0) looks ahead
+     omi.hold("success");                 // 1.2: how long to show a reaction
+                                          // after its morph lands
+     omi.kind("success");                 // "reaction" (or "state")
 
    Options (also settable later as properties):
      color        fill color; null follows the canvas's CSS `color`
@@ -467,7 +470,7 @@ var Omi = (function () {
           this.t = instant ? late : Math.max(0, late - total);
         return;
       }
-      const from = this.rects(),
+      const from = this.rawRects(),
         to = this.restRects(mode);
       this.mode = id;
       this.t = 0;
@@ -542,17 +545,51 @@ var Omi = (function () {
     get gazing() {
       return this._gaze.p < 1;
     }
-    // Moves the gaze roles' rects by the current gaze.
+    // Moves the gaze roles' rects by the current gaze, kept inside
+    // gaze.inside: over the gazing rects that fit in the box on an axis, the
+    // move is at most the smallest room on the far side and at least the
+    // largest on the near side; limits that cross mean no room on that axis.
     withGaze(list) {
       const G = this.gazeSpec;
       if (!G) return list;
       const [gx, gy] = this.gaze();
       if (!gx && !gy) return list;
-      const dx = gx * G.reach[0],
-        dy = gy * G.reach[1];
+      const eyes = list.filter((r) => G.roles.indexOf(r.role) >= 0);
+      if (!eyes.length) return list;
+      const room = (d, lo, hi, at, size) => {
+        if (!G.inside) return d;
+        let min = -Infinity,
+          max = Infinity;
+        for (const r of eyes) {
+          if (r[at] < lo || r[at] + r[size] > hi) continue;
+          min = Math.max(min, lo - r[at]);
+          max = Math.min(max, hi - (r[at] + r[size]));
+        }
+        if (min > max) return 0;
+        return Math.max(min, Math.min(max, d));
+      };
+      const [bx, by, bw, bh] = G.inside || [0, 0, 0, 0],
+        dx = room(gx * G.reach[0], bx, bx + bw, "x", "w"),
+        dy = room(gy * G.reach[1], by, by + bh, "y", "h");
+      if (!dx && !dy) return list;
       return list.map((r) =>
         G.roles.indexOf(r.role) >= 0 ? Object.assign({}, r, { x: r.x + dx, y: r.y + dy }) : r,
       );
+    }
+
+    /* A mode's kind, "state" or "reaction", from the pack. */
+    kind(id) {
+      const mode = this.modes[id];
+      return mode && mode.kind === "reaction" ? "reaction" : "state";
+    }
+
+    /* How long to show a mode as a reaction after its morph lands, in
+       seconds: its `hold`, or its loop time kept between 1.2 and 2.5 s. Add
+       the morph time (duration + stagger) to time the whole reaction. */
+    hold(id) {
+      const mode = this.modes[id];
+      if (mode && typeof mode.hold === "number") return mode.hold;
+      return Math.min(2.5, Math.max(1.2, this.loopSeconds(id)));
     }
 
     // The rects of a mode t seconds into its loops (t = 0: at rest).
@@ -600,13 +637,14 @@ var Omi = (function () {
     restRects(mode) {
       return this.modeRects(mode, 0).filter((r) => r.o > 0.001);
     }
+    // What is on screen right now, before the gaze: what a morph starts from.
+    rawRects() {
+      if (this.morph) return this.morph.steps.map((s) => Object.assign({}, s.now, { role: s.b.role || s.a.role }));
+      return this.modeRects(this.modes[this.mode], this._animate ? this.t : 0).filter((r) => r.o > 0.001);
+    }
     // What is on screen right now.
     rects() {
-      if (this.morph)
-        return this.withGaze(this.morph.steps.map((s) => Object.assign({}, s.now, { role: s.b.role || s.a.role })));
-      return this.withGaze(
-        this.modeRects(this.modes[this.mode], this._animate ? this.t : 0).filter((r) => r.o > 0.001),
-      );
+      return this.withGaze(this.rawRects());
     }
 
     // Keep drawing while something moves; sleep otherwise.

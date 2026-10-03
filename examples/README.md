@@ -71,4 +71,6 @@ A player is small: work out a mode's rects at time t, plan and play morphs,
 fill rects. [`../pack/README.md`](../pack/README.md) describes every rule, and
 [`../pack/conformance.json`](../pack/conformance.json) lists what a correct
 player draws; [`../tools/check-player.js`](../tools/check-player.js) shows how
-to check yours against it.
+to check yours against it. [`../player/rust`](../player/rust) is one written
+that way, in Rust: a crate to use from a Rust app, and proof that the README
+is enough.

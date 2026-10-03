@@ -201,6 +201,46 @@ was checked over the DevTools protocol (keys, pointer, click, swatches).
 """
 
 [[step]]
+id = 15
+title = "What a mode is for"
+status = "done"
+detail = """
+Each mode says whether it's a state or a reaction (`kind`), reactions carry
+a `hold` (seconds to show after the morph lands), modes that mean the same
+thing share a `family` (thinking, offline, transfer), and the jokes are
+`easter`. The player has hold(mode) and kind(mode); Omi.qml's react() and
+the web example time reactions from the pack, so every app reacts alike.
+From onboarding: three hosts had three reaction lengths.
+"""
+
+[[step]]
+id = 16
+title = "Gaze stays inside the logo"
+status = "done"
+detail = """
+gaze.inside: a box the gazing pieces never leave. The player limits each
+look to the room the eyes have, so wide eyes (success, error) turn less far
+by themselves and an app can always ask for a full look. Conformance has
+success and error gaze cases. From onboarding: it had capped diagonals at
+0.6 to keep success's eyes off the frame.
+"""
+
+[[step]]
+id = 17
+title = "A second player, in Rust"
+status = "done"
+detail = """
+player/rust: an independent player written from pack/README.md and checked
+against conformance.json (152 checks, and all 16 of the reference player's
+in-between morph frames). It found the README short of a contract in 14
+places: drawing order, the clip window's motion, delayed pieces at rest,
+the clocks, which rects get cut, the rigid-group pairing, the assignment
+cost, splits and fades, the stagger's 260-unit ripple, and more. The README
+now states each exactly, and the reference player no longer applies the
+gaze twice during a morph (its morph source is taken before the gaze).
+"""
+
+[[step]]
 id = 8
 title = "Publishing"
 status = "todo"

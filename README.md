@@ -11,6 +11,8 @@ any other, and it's drawn as plain rectangles, so any app can show it.
   animations are made. Serve the repo (`python3 -m http.server`) and open it.
 - **[pack/](pack/):** what apps use: `omi.json` (every mode), `omi.js` (the
   player) and the spec.
+- **[player/rust/](player/rust/):** a second player, a Rust crate written
+  from the spec alone and checked against the same conformance data.
 - **[examples/](examples/):** Omi in an Omarchy shell plugin, a web page, a Qt
   Quick app and a terminal.
 - **[docs/omarchy.md](docs/omarchy.md):** building Omi into Omarchy, and which
@@ -20,5 +22,6 @@ any other, and it's drawn as plain rectangles, so any app can show it.
 - **[docs/ideas.md](docs/ideas.md):** modes and reactions still to make.
 
 Checks: `node tools/check-player.js`, `node tools/check-quickshell.js` (in a
-Wayland session), `node tools/check-service.js`, and the Qt Quick item:
-`QML_XHR_ALLOW_FILE_READ=1 /usr/lib/qt6/bin/qmltestrunner -input tools/qml`.
+Wayland session), `node tools/check-service.js`, the Qt Quick item:
+`QML_XHR_ALLOW_FILE_READ=1 /usr/lib/qt6/bin/qmltestrunner -input tools/qml`,
+and the Rust player: `cargo test` in `player/rust`.

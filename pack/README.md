@@ -34,6 +34,8 @@ bodyMotion (false leaves out whole-body bobs), mode (where to start), view
 (an [x, y, w, h] to show instead of the pack's view). omi.on("settled", fn)
 runs fn when a morph lands. omi.loopSeconds(mode) is how long a mode takes
 to play every piece's loop once: show it at least that long in a tour.
+omi.hold(mode) is how long to show a reaction after its morph lands, and
+omi.kind(mode) whether the pack calls it one.
 omi.set(mode, { since }) plays a change that
 happened at `since` (Unix ms), for apps sharing one Omi through the Omi
 state protocol: every app then shows the same frame at the same moment. Outside a browser (QML, GJS, Node, tests), pass
@@ -72,9 +74,32 @@ A mode can also have:
 - `anim`: an animation that moves the whole of Omi (a bob, a hop, a shake),
   applied about the center of `bounds`.
 - `clip`: { x, y, w, h, anim? }: a window. Pieces with `clip: true` are
-  drawn clipped to it, on their own layer, moved by the window's `anim`.
+  drawn clipped to it, on their own layer, moved by the window's `anim`:
+  only its tx and ty move them (sx, sy and op are ignored), and the window
+  itself stays put. Cut each such piece to the window; drop it when less
+  than 0.01 unit of it is left in either direction. The body motion is
+  applied after that.
+
+Drawing order is the order of `pieces`, except that in a mode with a
+window the pieces seen through it come first, then the rest.
 
 "mark" is the plain logo, with nothing in the middle.
+
+What a mode is for:
+
+- `kind`: "state" or "reaction". A state stands for something going on
+  (thinking, updating, listening) and stays as long as it does. A reaction
+  is something that just happened (success, surprised, a wink): show it,
+  then go back to the state Omi was in.
+- `hold`: on a reaction, how many seconds to show it after its morph lands
+  before going back. For a mode without one, hold it for its loop time
+  (`loopSeconds` in the reference player), kept between 1.2 and 2.5 s. The
+  reference player's `omi.hold(mode)` gives either.
+- `family`: modes that mean the same thing ("thinking", "offline",
+  "transfer"). Pick one per family for a situation; the rest are variations.
+- `easter`: true on the jokes (vim, glitch, code-rain). Leave them out of a
+  generic picker.
+- `group`: where the jig files it. For people, not for apps.
 
 ## Animations
 
@@ -108,31 +133,78 @@ To draw: scale the piece about its center by sx, sy, move it by tx, ty, then
 fill it with opacity × op. With a body `anim` (`body: true`), move and scale
 the whole of Omi about the center of the mode's `bounds`.
 
-A mode at rest is time 0: every piece at its animations' first frame. Start a
-mode's animations at t = 0 when you show it, and a still and its animation
-always match.
+A mode at rest is time 0. Start a mode's animations at t = 0 when you show
+it, and a still and its animation always match. Note that a piece with a
+`delay` is then (−delay mod duration) into its loop (progress wraps), so
+at rest it shows the end of its loop, not the start.
+
+A mode's loop time (`loopSeconds` in the reference player) is the longest
+of (duration + delay) over its pieces, its body `anim` and its window's,
+where duration is the piece's own if it sets one. 0 for a still mode.
+
+## Time
+
+A player keeps one clock for a mode's loops and one for a morph. On every
+display frame it is given the time in milliseconds and advances both by
+dt = (now − last) / 1000, kept between 0 and 0.1 s (a host's clock may
+restart, or pause), times `speed`; the first frame advances nothing. A
+mode change made between two frames starts its morph at 0 and moves from
+the next frame on. Only rects with opacity above 0.001 are on screen: drop
+the rest before drawing, and before taking them as a morph's source.
+Changing to the mode Omi is already in, with no morph running, does
+nothing.
 
 ## Morphing from one mode to another
 
-1. Take the pieces as they are on screen now (in the middle of an animation,
-   or in the middle of a morph), and the new mode's pieces at rest (t = 0).
-2. Cut pieces that sit on the grid or touch the logo into grid cells, along
-   the grid lines (a frame bar becomes a row of cells), so a cell that is in
-   both modes can stay where it is.
-3. Pair pieces:
-   - Pieces that exist in both, in the same place with the same role, stay
-     and only change opacity.
-   - Then pair the rest by distance, preferring the same role (an extra
-     `rolePenalty` units of distance for a different role). Frame pieces and
-     face pieces (eye, brow, mouth, tear) never pair with each other.
-   - A new piece with no partner starts on top of its nearest piece within
-     `splitReach` units (it splits off it), or else grows from its own
-     center. An old piece with no partner slides into its nearest new piece
-     and fades out, or else shrinks away.
-4. Move each pair from old to new over `duration` seconds with `ease`,
-   blending x, y, w, h and opacity. Start each pair up to `stagger` seconds
-   late, the further from `center` the later, so the change ripples out from
-   the face.
+Every step here is exact: two players that follow them draw the same
+morph. (The conformance data only requires the start and the landing, so a
+player may pair differently, but then its morphs look different.)
+
+1. Take the rects on screen now, before the gaze is applied (in the middle
+   of an animation, or in the middle of a morph: whatever is drawn), with
+   opacity above 0.001, and the new mode's rects at rest (t = 0).
+2. Cut rects into grid cells, along the grid lines, so a cell that is in
+   both modes can stay where it is: a rect whose four edges all sit on
+   multiples of `grid` (within 1e-6), or that overlaps any piece of
+   `mark` (the logo), is cut at every grid line it crosses; the end cells
+   keep their partial size. Other rects stay whole.
+3. Pair the old cells (S) with the new ones (D):
+   - *Rigid groups.* Cells that moved together as a whole, or didn't move
+     at all, pair first. Two cells are "the same" when x, y, w, h match to
+     half a unit and the role is equal. Each pair of an old and a new cell
+     with the same role and size (w and h within 0.5) votes for the offset
+     (new − old), rounded to whole units, averaging the exact offsets of its
+     voters. The zero offset is always a candidate. An offset fits as many
+     old cells as find a distinct new cell that is the same once shifted by
+     it. It needs at least max(12, 0.3 × min(|S|, |D|)) fits; a non-zero
+     offset is chosen over the zero one only if it fits more than 1.2× as
+     many. The chosen offset pairs every old cell that fits (each new cell
+     once). If it was non-zero the pairs are *rigid* and the search runs
+     again on what is left, up to 4 times; the zero offset, or no fit, ends
+     it.
+   - *The rest* pair by a minimum-cost one-to-one assignment (the smaller
+     side is matched in full), cost = squared distance between centers +
+     0.5 × ((Δw)² + (Δh)²) + `rolePenalty`² when the roles differ. A frame
+     cell and a face cell (eye, brow, mouth, tear) never pair: their cost
+     is infinite, and an assignment that lands on one is dropped.
+   - *New cells with no partner* split off their nearest old cell (paired
+     ones too, but never a banned role), nearest by squared distance +
+     `rolePenalty`² for a different role: they start as a copy of it, with
+     the new cell's role, when its plain squared distance is under
+     `splitReach`². Otherwise they grow from their own center: from size 0
+     with the "back" ease on size (1 + 2.70158 (p − 1)³ + 1.70158 (p − 1)²),
+     and opacity = target × min(1, 3p), p being the raw progress.
+   - *Old cells with no partner* slide into their nearest new cell (found
+     the same way) with opacity going to 0, taking its role, when it is
+     within `splitReach`; otherwise they shrink to a zero-size rect at
+     their own center with opacity 0.
+4. Each pair starts late by its delay: the distance from the center of its
+   new rect (its old one if the new has no size) to `center`, divided by
+   260 and capped at 1, times `stagger`; a rigid pair's delay is
+   stagger / 4. Its progress is (t − delay) / `duration`, kept in 0..1 and
+   put through `ease`, blending x, y, w, h and opacity from old to new.
+   The whole morph lands at t = duration + stagger. While it runs, a pair's
+   rect has the role of its new cell.
 5. When it lands, start the new mode's animations at t = 0.
 
 ## Drawing Omi crisp
@@ -162,17 +234,30 @@ These hold for every host, a canvas, Qt, a terminal or a GPU:
 eyes toward something on screen, on top of any mode:
 
     "gaze": { "reach": [30, 30], "duration": 0.35, "ease": [0.3, 0, 0.2, 1],
-              "roles": ["eye"] }
+              "roles": ["eye"], "inside": [60, 60, 180, 180] }
 
 - A look is a direction, each axis -1..1: x to the right, y down. (0, 0) is
   straight ahead, where every mode is drawn.
 - At a look (gx, gy), every rect whose role is in `roles` moves by
   gx × reach[0], gy × reach[1] grid units. Everything else stays.
+- `inside` (optional) is a box [x, y, w, h] the gazing rects stay in, so wide
+  eyes don't run into the frame. Limit the move on each axis before applying
+  it: over the gazing rects that fit inside the box on that axis (left edge
+  at or past the box's, right edge at or before it), dx may be at most the
+  smallest (box right − rect right) and at least the largest (box left −
+  rect left); the same for dy with top and bottom. Rects that don't fit are
+  ignored, and if the two limits cross there is no room: no move on that
+  axis. Work it out from the rects as they are at that moment, loops and
+  morphs included, so an app can always ask for a full look.
 - It applies to whatever is on screen: a mode at any time in its loops, or a
-  morph in progress, after the body motion.
-- A new look eases from wherever the eyes are to the new direction over
-  `duration` seconds with `ease` (the same cubic-bezier as
-  animations), on its own clock: a mode change doesn't interrupt it.
+  morph in progress, after the body motion. It is the last thing done: a
+  morph takes its source rects before the gaze, so a look is never applied
+  twice.
+- A new look eases from wherever the eyes are at that moment (the last
+  frame's direction) to the new one over `duration` seconds with `ease`
+  (the same cubic-bezier as animations), on its own clock, advanced like
+  the others (see Time): a mode change doesn't interrupt it. Each axis is
+  kept in −1..1, and asking for the direction already set does nothing.
 - The look is the app's own, not part of the shared state protocol.
 
 The reference player has `omi.look(dx, dy)`, `omi.gaze()` (the
