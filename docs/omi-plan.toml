@@ -187,6 +187,20 @@ brings it back), refits on resize and redraws only changed rows (20 KB instead o
 """
 
 [[step]]
+id = 14
+title = "Showcase examples"
+status = "done"
+detail = """
+The web and Qt Quick examples present Omi at its best: centered with room
+above, square corners like Omi, an entrance from the plain logo, eyes that
+follow the pointer, a reaction on click or Space, arrows through the modes,
+accent swatches, light and dark. examples/qml/Omi.qml is now the same item
+as the Omarchy one (snapped Rectangles, even, look, react, rests when
+hidden). tools/qml/tst_omi.qml checks it with qmltestrunner; the web page
+was checked over the DevTools protocol (keys, pointer, click, swatches).
+"""
+
+[[step]]
 id = 8
 title = "Publishing"
 status = "todo"

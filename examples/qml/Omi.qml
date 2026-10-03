@@ -1,88 +1,154 @@
-// An Omi item for QML (Qt 6.4+), running the reference player in QML's own
-// JavaScript engine. No native code.
+// Omi for Qt Quick apps (Qt 6.4+): the reference player in QML's own
+// JavaScript engine, no native code. The same item as the Omarchy example
+// (examples/omarchy/Omi.qml), but it reads the pack with XMLHttpRequest
+// instead of Quickshell's FileView.
 //
 //     Omi {
 //         width: 240; height: 240
-//         color: "#9ece6a"
-//         mode: "thinking"        // change it and Omi morphs there
+//         color: palette.highlight     // one color: your accent
+//         mode: "thinking"             // change it and Omi morphs there
+//         look: [0, -1]                // the eyes look up, on top of any mode
 //     }
 //
-// In your app, copy omi.js and omi.json from the pack next to this file and
-// change the two paths below.
+//     omi.react("happy")               // a short reaction, then back to `mode`
+//
+// Omi is drawn as Rectangles snapped to device pixels, so it stays crisp at
+// any scale, fractional ones included. In your app, ship omi.js and
+// omi.json in your resources and point `pack` and the import at them;
+// reading a local file over XMLHttpRequest needs QML_XHR_ALLOW_FILE_READ=1.
 import QtQuick
 import "../../pack/omi.js" as OmiJs
 
 Item {
-    id: root
+    id: omi
 
+    // What Omi is doing. Changing it morphs there from wherever Omi is.
     property string mode: "mark"
-    property color color: "#9ece6a"
+    // One color: Omi is the Omarchy logo.
+    property color color: "white"
     property real speed: 1
+    // false: each mode at rest, no loops (morphs still play).
     property bool animate: true
-    // where the pack is; reading a local file over XMLHttpRequest needs
-    // QML_XHR_ALLOW_FILE_READ=1 (or put the pack in your app's resources)
+    // false: no whole-body bobs, hops and shakes. Calmer in small places.
+    property bool bodyMotion: true
+    // Where the eyes look, [x, y], each -1..1 (x right, y down).
+    property var look: [0, 0]
+    // true: each logo cell is a whole number of device pixels, so every bar
+    // has the same thickness. Omi may then draw a little smaller than the item.
+    property bool even: true
+    // The pack's omi.json.
     property url pack: Qt.resolvedUrl("../../pack/omi.json")
 
+    // Every mode in the pack: [{ id, name, ... }].
+    readonly property var modes: player ? player.pack.modes : []
+    // The mode on screen: `mode`, or a reaction playing over it.
+    readonly property string showing: reaction !== "" ? reaction : mode
+
     signal settled()
+    signal loaded()
 
     property var player: null
+    property string reaction: ""
+    property bool moving: false
+    property bool gazing: false
+    property var rects: []
 
-    onModeChanged: if (player) player.set(mode)
-    onSpeedChanged: if (player) player.speed = speed
-    onAnimateChanged: if (player) player.animate = animate
+    // Plays `reactionMode` for `seconds` (its loop, 1.2 to 2.5 s, by
+    // default), then morphs back to `omi.mode`.
+    function react(reactionMode, seconds) {
+        reaction = reactionMode;
+        const loop = player ? player.loopSeconds(reactionMode) : 1.4;
+        reactionTimer.interval = Math.round(1000 * (seconds || Math.min(2.5, Math.max(1.2, loop))));
+        reactionTimer.restart();
+    }
+
+    Timer {
+        id: reactionTimer
+        onTriggered: omi.reaction = ""
+    }
 
     Component.onCompleted: {
-        const xhr = new XMLHttpRequest()
+        const xhr = new XMLHttpRequest();
         xhr.onreadystatechange = function () {
-            if (xhr.readyState !== XMLHttpRequest.DONE) return
-            // no canvas: QML paints the player's rects itself, below
-            const p = new OmiJs.Omi(null, JSON.parse(xhr.responseText), {
-                color: root.color.toString(),
-                speed: root.speed,
-                animate: root.animate,
-            })
-            p.on("settled", function () { root.settled() })
-            root.player = p
-            if (root.mode !== p.mode) p.set(root.mode, { instant: true })
-            canvas.requestPaint()
-        }
-        xhr.open("GET", root.pack)
-        xhr.send()
-    }
-
-    // one tick per display frame: advance the player, then repaint
-    FrameAnimation {
-        running: root.player !== null
-        onTriggered: {
-            root.player.frame(Date.now())
-            canvas.requestPaint()
-        }
-    }
-
-    Canvas {
-        id: canvas
-        anchors.fill: parent
-        onPaint: {
-            const ctx = getContext("2d")
-            ctx.reset()
-            const p = root.player
-            if (!p) return
-            // fit the pack's view square into the item, centered
-            const v = p.view,
-                s = Math.min(width / v[2], height / v[3]),
-                ox = (width - v[2] * s) / 2 - v[0] * s,
-                oy = (height - v[3] * s) / 2 - v[1] * s
-            ctx.fillStyle = root.color
-            for (const r of p.rects()) {
-                if (r.o <= 0.001) continue
-                // snap edges to pixels: crisp, and neighbours meet exactly
-                const x0 = Math.round(r.x * s + ox), y0 = Math.round(r.y * s + oy),
-                      x1 = Math.round((r.x + r.w) * s + ox), y1 = Math.round((r.y + r.h) * s + oy)
-                if (x1 <= x0 || y1 <= y0) continue
-                ctx.globalAlpha = Math.min(1, r.o)
-                ctx.fillRect(x0, y0, x1 - x0, y1 - y0)
+            if (xhr.readyState !== XMLHttpRequest.DONE) return;
+            if (!xhr.responseText) {
+                console.warn("Omi: couldn't read " + omi.pack + " (local files need QML_XHR_ALLOW_FILE_READ=1)");
+                return;
             }
-            ctx.globalAlpha = 1
+            const p = new OmiJs.Omi(null, JSON.parse(xhr.responseText), {
+                color: String(omi.color),
+                speed: omi.speed,
+                animate: omi.animate,
+                bodyMotion: omi.bodyMotion,
+                mode: omi.showing
+            });
+            p.on("settled", function () {
+                omi.moving = false;
+                omi.settled();
+            });
+            p.look(omi.look[0] || 0, omi.look[1] || 0);
+            omi.player = p;
+            omi.step();
+            omi.loaded();
+        };
+        xhr.open("GET", omi.pack);
+        xhr.send();
+    }
+    Component.onDestruction: if (player) player.destroy()
+
+    onShowingChanged: if (player) {
+        moving = true;
+        player.set(showing);
+    }
+    onSpeedChanged: if (player) player.speed = speed
+    onAnimateChanged: if (player) player.animate = animate
+    onBodyMotionChanged: if (player) player.bodyMotion = bodyMotion
+    onLookChanged: if (player) {
+        player.look(look[0] || 0, look[1] || 0);
+        gazing = player.gazing;
+    }
+
+    // Advance the player and take its rects.
+    function step() {
+        player.frame(Date.now());
+        if (gazing && !player.gazing) gazing = false;
+        rects = player.rects().filter(function (r) { return r.o > 0.001; });
+    }
+
+    // Only while something moves on screen: loops, a morph or the eyes.
+    readonly property bool onScreen: visible && !!Window.window && Window.window.visible
+    FrameAnimation {
+        running: omi.onScreen && omi.player !== null && (omi.animate || omi.moving || omi.gazing)
+        onTriggered: omi.step()
+    }
+
+    // The pack's `view` square, fitted into this item and centered.
+    readonly property var view: player ? player.view : [0, 0, 1, 1]
+    readonly property real dpr: Window.window ? Window.window.devicePixelRatio : 1
+    readonly property real fit: Math.min(width / view[2], height / view[3])
+    readonly property real grid: player ? player.pack.grid : 20
+    readonly property real unit: even && fit * dpr * grid >= 1
+        ? Math.floor(fit * dpr * grid + 1e-6) / (dpr * grid) : fit
+    readonly property real ox: (width - view[2] * unit) / 2 - view[0] * unit
+    readonly property real oy: (height - view[3] * unit) / 2 - view[1] * unit
+
+    // Edges snapped to device pixels: crisp, and neighbours meet exactly.
+    function snap(v) { return Math.round(v * dpr) / dpr; }
+
+    Repeater {
+        model: omi.rects.length
+        delegate: Rectangle {
+            required property int index
+            readonly property var r: omi.rects[index] || { x: 0, y: 0, w: 0, h: 0, o: 0 }
+            readonly property real x0: omi.snap(r.x * omi.unit + omi.ox)
+            readonly property real y0: omi.snap(r.y * omi.unit + omi.oy)
+            x: x0
+            y: y0
+            width: Math.max(0, omi.snap((r.x + r.w) * omi.unit + omi.ox) - x0)
+            height: Math.max(0, omi.snap((r.y + r.h) * omi.unit + omi.oy) - y0)
+            color: omi.color
+            opacity: Math.min(1, r.o)
+            antialiasing: false
         }
     }
 }

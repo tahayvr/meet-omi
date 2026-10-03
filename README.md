@@ -20,4 +20,5 @@ any other, and it's drawn as plain rectangles, so any app can show it.
 - **[docs/ideas.md](docs/ideas.md):** modes and reactions still to make.
 
 Checks: `node tools/check-player.js`, `node tools/check-quickshell.js` (in a
-Wayland session) and `node tools/check-service.js`.
+Wayland session), `node tools/check-service.js`, and the Qt Quick item:
+`QML_XHR_ALLOW_FILE_READ=1 /usr/lib/qt6/bin/qmltestrunner -input tools/qml`.

@@ -8,7 +8,13 @@ project and start from the example closest to your environment.
 |---|---|---|
 | [omarchy](omarchy/) | Omarchy shell plugins (Quickshell) | The player runs in QML's JavaScript engine; `Rectangle`s snapped to device pixels draw its rects, in the theme's accent |
 | [web](web/index.html) | Web pages, Electron | The player draws on a `<canvas>` by itself |
-| [qml](qml/Omi.qml) | Qt Quick apps (Qt 6.4+) | The player runs in QML's JavaScript engine; a QML `Canvas` fills its rects |
+| [qml](qml/Omi.qml) | Qt Quick apps (Qt 6.4+) | The same item as the Omarchy one (Rectangles snapped to device pixels, `even`, `look`, `react()`), reading the pack with XMLHttpRequest |
+
+The web and Qt examples are small showcases: Omi enters as the plain logo
+and comes to life, its eyes follow the pointer, a click or Space plays a
+reaction, ← → step through the modes, and the swatches show it takes any one
+color. The web page follows the system's light or dark setting and, with
+reduced motion on, holds still.
 | [terminal](terminal/omi-tty.js) | Any terminal (Node) | Rects become half-block characters, in the Omarchy theme's accent or the terminal's own colors |
 
 ## The pattern
