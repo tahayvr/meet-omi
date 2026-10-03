@@ -67,6 +67,8 @@
         width: min(352px, 80vw);
         aspect-ratio: 1;
         color: var(--accent);
+        /* a new color fades in; the player follows the canvas's color */
+        transition: color 0.35s;
         cursor: pointer;
         touch-action: manipulation;
       }
@@ -162,14 +164,14 @@
         if (!reacting) omi.set(id, { instant: still });
         show();
       };
-      // A reaction: a mode for a moment (its loop, between 1.2 and 2.5 s), then back.
+      // A reaction: a mode for the pack's hold after its morph lands, then back.
       const react = (id) => {
         clearTimeout(reacting);
         omi.set(id, { instant: still });
         reacting = setTimeout(() => {
           reacting = null;
           omi.set(mode, { instant: still });
-        }, (Math.min(2.5, Math.max(1.2, omi.loopSeconds(id))) + pack.morph.duration) * 1000);
+        }, (omi.hold(id) + pack.morph.duration + pack.morph.stagger) * 1000);
       };
 
       // --- the eyes follow the pointer, and look ahead again when it rests
@@ -212,6 +214,8 @@
         omi.draw();
         showAccent();
       });
+      // With reduced motion nothing redraws by itself: draw the faded-in color.
+      canvas.addEventListener("transitionend", () => omi.draw());
       const showAccent = () =>
         accents.querySelectorAll("button").forEach((b) =>
           b.setAttribute("aria-pressed", String(b.dataset.color === canvas.style.color || (!b.dataset.color && !canvas.style.color))),

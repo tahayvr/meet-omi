@@ -27,14 +27,16 @@ Omi {
 ```
 
 - **Color.** Omi is one color, by design. Bind it to `Color.accent` from
-  `qs.Commons`, so it changes with the theme like the rest of the shell.
+  `qs.Commons`, so it changes with the theme like the rest of the shell. A
+  new color fades in over `colorFade` milliseconds (350 by default; 0 snaps).
 - **Size.** Omi stays crisp at any size and scale: its pieces are snapped to
   device pixels, and with `even` (on by default) every logo cell is a whole
   number of device pixels, so all bars have the same thickness. Omi then
   draws at the largest such size that fits the item, which can be a little
   smaller than the item: size the item so its width in device pixels is a
-  multiple of 22 for no loss. Below about 44 device pixels the face gets hard
-  to read. See "Drawing Omi crisp" in the pack README.
+  multiple of 22 for no loss, or lay out around `drawn`, the size Omi is
+  really drawn at. Below about 44 device pixels the face gets hard to read.
+  See "Drawing Omi crisp" in the pack README.
 - **Cost.** Omi only animates while its window is on screen. Hidden, it costs
   nothing.
 - **Calmer motion.** In small places, such as next to a title or in the bar,
@@ -51,9 +53,12 @@ Omi has two layers:
 - **`mode` is what's going on.** Set it from your app's state, and leave it
   there as long as that state lasts: checking for updates, offline, waiting
   for a key press.
-- **`react(mode)` is something that just happened.** It plays a mode for a
-  moment, 1.4 s by default, then goes back to `mode`. Use it for events: a
-  step done, a file saved, a command failed.
+- **`react(mode)` is something that just happened.** It morphs to a mode,
+  holds it for the time the pack gives that mode (`hold`, 1.2 to 2.5 s;
+  the player's `hold(mode)`), then goes back to `mode`. Every app that uses
+  the pack's hold reacts alike. Use it for events: a step done, a file
+  saved, a command failed. The pack says which modes are reactions
+  (`kind`); a state used as a reaction works too.
 
 So that Omi means the same thing in every Omarchy app, use the same modes for
 the same situations:
@@ -72,6 +77,11 @@ the same situations:
 | Failed (reaction, or the mode while it stays failed) | `error` |
 | Not sure what happened | `confused` |
 | A real milestone, like finishing setup | `party` |
+
+Modes come in families (`family`: thinking, offline, transfer): pick one per
+family for a situation and treat the rest as variations, so two apps don't
+mean the same thing with different faces. Modes marked `easter` (vim,
+glitch, code-rain) are jokes: leave them out of anything generic.
 
 Some rules of thumb:
 
@@ -100,8 +110,9 @@ Omi {
 
 Use it to draw the eye to what the user should look at next: the bar, a
 window that just opened, a panel. Keep it to something that's really there,
-and look ahead again once it's gone. Modes without eyes (`mark`, `tiling`,
-`confused`) ignore it.
+and look ahead again once it's gone. A full look is always safe: the pack
+keeps the eyes inside the logo, so wide eyes (success, error) turn less far
+by themselves. Modes without eyes (`mark`, `tiling`, `confused`) ignore it.
 
 ## One Omi for the whole machine
 

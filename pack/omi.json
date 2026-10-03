@@ -46,6 +46,12 @@
     ],
     "roles": [
       "eye"
+    ],
+    "inside": [
+      60,
+      60,
+      180,
+      180
     ]
   },
   "animations": {
@@ -1922,6 +1928,7 @@
     {
       "id": "mark",
       "name": "The mark",
+      "kind": "state",
       "bounds": [
         0,
         0,
@@ -2026,6 +2033,7 @@
       "id": "idle",
       "name": "Idle",
       "group": "Core",
+      "kind": "state",
       "bounds": [
         0,
         0,
@@ -2147,6 +2155,8 @@
       "id": "thinking",
       "name": "Thinking",
       "group": "Thinking",
+      "kind": "state",
+      "family": "thinking",
       "bounds": [
         0,
         0,
@@ -2294,6 +2304,8 @@
       "id": "thinking-drift",
       "name": "Thinking, drift",
       "group": "Thinking",
+      "kind": "state",
+      "family": "thinking",
       "bounds": [
         0,
         0,
@@ -2423,6 +2435,8 @@
       "id": "thinking-sideeye",
       "name": "Thinking, side-eye",
       "group": "Thinking",
+      "kind": "state",
+      "family": "thinking",
       "bounds": [
         0,
         0,
@@ -2544,6 +2558,8 @@
       "id": "thinking-hmm",
       "name": "Thinking, hmm",
       "group": "Thinking",
+      "kind": "state",
+      "family": "thinking",
       "bounds": [
         0,
         0,
@@ -3032,6 +3048,8 @@
       "id": "thinking-stack",
       "name": "Thinking, rising",
       "group": "Thinking",
+      "kind": "state",
+      "family": "thinking",
       "bounds": [
         0,
         0,
@@ -3822,6 +3840,8 @@
       "id": "thinking-snake",
       "name": "Thinking, snake",
       "group": "Thinking",
+      "kind": "state",
+      "family": "thinking",
       "bounds": [
         0,
         0,
@@ -4239,6 +4259,8 @@
       "id": "updating",
       "name": "Updating / downloading",
       "group": "System states",
+      "kind": "state",
+      "family": "transfer",
       "bounds": [
         0,
         0,
@@ -4915,6 +4937,8 @@
       "id": "uploading",
       "name": "Uploading",
       "group": "System states",
+      "kind": "state",
+      "family": "transfer",
       "bounds": [
         0,
         -80,
@@ -5591,6 +5615,7 @@
       "id": "working",
       "name": "Working",
       "group": "System states",
+      "kind": "state",
       "bounds": [
         0,
         0,
@@ -6170,6 +6195,8 @@
       "id": "success",
       "name": "Success",
       "group": "System states",
+      "kind": "reaction",
+      "hold": 1.2,
       "bounds": [
         0,
         0,
@@ -6325,6 +6352,7 @@
       "id": "warning",
       "name": "Warning",
       "group": "System states",
+      "kind": "state",
       "bounds": [
         0,
         0,
@@ -6466,6 +6494,7 @@
       "id": "error",
       "name": "Error",
       "group": "System states",
+      "kind": "state",
       "bounds": [
         0,
         0,
@@ -6641,6 +6670,8 @@
       "id": "offline-standby",
       "name": "Offline, standby",
       "group": "System states",
+      "kind": "state",
+      "family": "offline",
       "bounds": [
         0,
         0,
@@ -6753,6 +6784,8 @@
       "id": "offline-searching",
       "name": "Offline, searching",
       "group": "System states",
+      "kind": "state",
+      "family": "offline",
       "bounds": [
         0,
         0,
@@ -7330,6 +7363,7 @@
       "id": "low-battery",
       "name": "Low battery",
       "group": "System states",
+      "kind": "state",
       "bounds": [
         0,
         0,
@@ -7842,6 +7876,7 @@
       "id": "sleeping",
       "name": "Sleeping",
       "group": "System states",
+      "kind": "state",
       "bounds": [
         0,
         -114,
@@ -8080,6 +8115,7 @@
       "id": "typing",
       "name": "Typing",
       "group": "Omi reactions",
+      "kind": "state",
       "bounds": [
         0,
         0,
@@ -8591,6 +8627,7 @@
       "id": "listening",
       "name": "Listening",
       "group": "Omi reactions",
+      "kind": "state",
       "bounds": [
         0,
         0,
@@ -8719,6 +8756,8 @@
       "id": "happy",
       "name": "Happy",
       "group": "Emotions",
+      "kind": "reaction",
+      "hold": 1.8,
       "bounds": [
         0,
         0,
@@ -8869,6 +8908,8 @@
       "id": "laughing",
       "name": "Laughing",
       "group": "Emotions",
+      "kind": "reaction",
+      "hold": 1.6,
       "bounds": [
         0,
         0,
@@ -9061,6 +9102,8 @@
       "id": "excited",
       "name": "Excited",
       "group": "Emotions",
+      "kind": "reaction",
+      "hold": 1.8,
       "bounds": [
         0,
         0,
@@ -9197,6 +9240,8 @@
       "id": "love",
       "name": "Love",
       "group": "Emotions",
+      "kind": "reaction",
+      "hold": 2,
       "bounds": [
         0,
         0,
@@ -9401,6 +9446,8 @@
       "id": "wink",
       "name": "Wink",
       "group": "Emotions",
+      "kind": "reaction",
+      "hold": 1.2,
       "bounds": [
         0,
         0,
@@ -9535,6 +9582,8 @@
       "id": "shy",
       "name": "Shy",
       "group": "Emotions",
+      "kind": "reaction",
+      "hold": 2,
       "bounds": [
         0,
         0,
@@ -9673,6 +9722,8 @@
       "id": "surprised",
       "name": "Surprised",
       "group": "Emotions",
+      "kind": "reaction",
+      "hold": 1.4,
       "bounds": [
         0,
         0,
@@ -9800,6 +9851,7 @@
       "id": "confused",
       "name": "Confused",
       "group": "Emotions",
+      "kind": "state",
       "bounds": [
         0,
         0,
@@ -10002,6 +10054,7 @@
       "id": "skeptical",
       "name": "Skeptical",
       "group": "Emotions",
+      "kind": "state",
       "bounds": [
         0,
         0,
@@ -10163,6 +10216,7 @@
       "id": "bored",
       "name": "Bored",
       "group": "Emotions",
+      "kind": "state",
       "bounds": [
         0,
         0,
@@ -10329,6 +10383,7 @@
       "id": "sad",
       "name": "Sad",
       "group": "Emotions",
+      "kind": "state",
       "bounds": [
         0,
         0,
@@ -10485,6 +10540,7 @@
       "id": "crying",
       "name": "Crying",
       "group": "Emotions",
+      "kind": "state",
       "bounds": [
         0,
         0,
@@ -10633,6 +10689,8 @@
       "id": "scared",
       "name": "Scared",
       "group": "Emotions",
+      "kind": "reaction",
+      "hold": 1.6,
       "bounds": [
         0,
         0,
@@ -10786,6 +10844,7 @@
       "id": "angry",
       "name": "Angry",
       "group": "Emotions",
+      "kind": "state",
       "bounds": [
         0,
         0,
@@ -10952,6 +11011,7 @@
       "id": "sudo",
       "name": "Sudo",
       "group": "Easter eggs",
+      "kind": "state",
       "bounds": [
         0,
         0,
@@ -11081,6 +11141,7 @@
       "id": "peek",
       "name": "Peek",
       "group": "Easter eggs",
+      "kind": "state",
       "bounds": [
         -20,
         160,
@@ -11246,6 +11307,7 @@
       "id": "party",
       "name": "Party",
       "group": "Easter eggs",
+      "kind": "state",
       "bounds": [
         0,
         0,
@@ -11642,6 +11704,9 @@
       "id": "glitch",
       "name": "Glitch",
       "group": "Easter eggs",
+      "kind": "reaction",
+      "hold": 1.8,
+      "easter": true,
       "bounds": [
         0,
         0,
@@ -11785,6 +11850,8 @@
       "id": "code-rain",
       "name": "Code rain",
       "group": "Easter eggs",
+      "kind": "state",
+      "easter": true,
       "bounds": [
         0,
         0,
@@ -11968,6 +12035,8 @@
       "id": "vim",
       "name": "Can’t quit vim",
       "group": "Easter eggs",
+      "kind": "state",
+      "easter": true,
       "bounds": [
         0,
         0,
@@ -12115,6 +12184,7 @@
       "id": "tiling",
       "name": "Tiling",
       "group": "Easter eggs",
+      "kind": "state",
       "bounds": [
         0,
         0,
@@ -12323,6 +12393,8 @@
       "id": "mind-blown",
       "name": "Mind blown",
       "group": "Easter eggs",
+      "kind": "reaction",
+      "hold": 2.4,
       "bounds": [
         0,
         0,

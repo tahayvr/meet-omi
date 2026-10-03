@@ -26,6 +26,10 @@ Item {
     property string mode: "mark"
     // One color: Omi is the Omarchy logo.
     property color color: "white"
+    // A new color fades in over this many milliseconds (0: at once), so a
+    // theme change doesn't snap.
+    property int colorFade: 350
+    Behavior on color { ColorAnimation { duration: omi.colorFade } }
     property real speed: 1
     // false: each mode at rest, no loops (morphs still play).
     property bool animate: true
@@ -53,12 +57,15 @@ Item {
     property bool gazing: false
     property var rects: []
 
-    // Plays `reactionMode` for `seconds` (its loop, 1.2 to 2.5 s, by
-    // default), then morphs back to `omi.mode`.
+    // Plays `reactionMode`, then morphs back to `omi.mode`: for `seconds`
+    // after its morph lands, or the pack's hold for that mode (omi.hold(),
+    // 1.2 to 2.5 s) so every app reacts alike. A new reaction replaces one
+    // still playing.
     function react(reactionMode, seconds) {
         reaction = reactionMode;
-        const loop = player ? player.loopSeconds(reactionMode) : 1.4;
-        reactionTimer.interval = Math.round(1000 * (seconds || Math.min(2.5, Math.max(1.2, loop))));
+        const hold = seconds || (player ? player.hold(reactionMode) : 1.4),
+              morph = player ? player.pack.morph.duration + player.pack.morph.stagger : 0.84;
+        reactionTimer.interval = Math.round(1000 * (hold + morph));
         reactionTimer.restart();
     }
 
@@ -129,6 +136,9 @@ Item {
     readonly property real grid: player ? player.pack.grid : 20
     readonly property real unit: even && fit * dpr * grid >= 1
         ? Math.floor(fit * dpr * grid + 1e-6) / (dpr * grid) : fit
+    // The size Omi is drawn at, in this item's units: the view square's side.
+    // With `even` it can be a little under the item; lay out around this.
+    readonly property real drawn: view[2] * unit
     readonly property real ox: (width - view[2] * unit) / 2 - view[0] * unit
     readonly property real oy: (height - view[3] * unit) / 2 - view[1] * unit
 
