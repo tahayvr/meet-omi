@@ -9,6 +9,8 @@
      omi.set("idle", { since: 1767225600000 });  // a change made at that
                                           // Unix time (ms): shared state
      omi.on("settled", () => …);          // a morph landed
+     omi.look(0, -1);                     // the eyes look up, on top of any
+                                          // mode; omi.look(0, 0) looks ahead
 
    Options (also settable later as properties):
      color        fill color; null follows the canvas's CSS `color`
@@ -370,6 +372,11 @@ var Omi = (function () {
       this.modes = fromEntries(pack.modes.map((m) => [m.id, m]));
       this.planner = new Planner(pack);
       this.morphEase = bezier(pack.morph.ease);
+      // Gaze: where the eyes look, on top of the mode (look()). Optional in
+      // the pack; without it look() does nothing.
+      this.gazeSpec = pack.gaze || null;
+      this.gazeEase = this.gazeSpec ? bezier(this.gazeSpec.ease) : null;
+      this._gaze = { from: [0, 0], to: [0, 0], p: 1 };
       this.color = opts.color ?? null;
       this.speed = opts.speed ?? 1;
       this.view = opts.view || pack.view;
@@ -485,6 +492,44 @@ var Omi = (function () {
       this.wake();
     }
 
+    /* Gaze. look(dx, dy) turns the eyes toward a direction, each axis -1..1
+       (dx right, dy down), eased over the pack's gaze.duration from wherever
+       they are. It moves the pieces whose role is in gaze.roles by
+       gaze.reach grid units at full tilt, on top of any mode, its loops and
+       morphs included. look(0, 0) looks straight ahead again. */
+    look(dx, dy) {
+      if (!this.gazeSpec) return;
+      const clamp = (v) => Math.max(-1, Math.min(1, +v || 0)),
+        to = [clamp(dx), clamp(dy)],
+        g = this._gaze;
+      if (g.to[0] === to[0] && g.to[1] === to[1]) return;
+      this._gaze = { from: this.gaze(), to, p: 0 };
+      this.wake();
+    }
+    // Where the eyes look now, each axis -1..1.
+    gaze() {
+      const g = this._gaze;
+      if (g.p >= 1) return g.to.slice();
+      const e = this.gazeEase(g.p);
+      return [lerp(g.from[0], g.to[0], e), lerp(g.from[1], g.to[1], e)];
+    }
+    // Whether the eyes are still on their way.
+    get gazing() {
+      return this._gaze.p < 1;
+    }
+    // Moves the gaze roles' rects by the current gaze.
+    withGaze(list) {
+      const G = this.gazeSpec;
+      if (!G) return list;
+      const [gx, gy] = this.gaze();
+      if (!gx && !gy) return list;
+      const dx = gx * G.reach[0],
+        dy = gy * G.reach[1];
+      return list.map((r) =>
+        G.roles.indexOf(r.role) >= 0 ? Object.assign({}, r, { x: r.x + dx, y: r.y + dy }) : r,
+      );
+    }
+
     // The rects of a mode t seconds into its loops (t = 0: at rest).
     modeRects(mode, t) {
       const A = this.anims,
@@ -532,9 +577,10 @@ var Omi = (function () {
     }
     // What is on screen right now.
     rects() {
-      if (this.morph) return this.morph.steps.map((s) => Object.assign({}, s.now, { role: s.b.role || s.a.role }));
-      return this.modeRects(this.modes[this.mode], this._animate ? this.t : 0).filter(
-        (r) => r.o > 0.001,
+      if (this.morph)
+        return this.withGaze(this.morph.steps.map((s) => Object.assign({}, s.now, { role: s.b.role || s.a.role })));
+      return this.withGaze(
+        this.modeRects(this.modes[this.mode], this._animate ? this.t : 0).filter((r) => r.o > 0.001),
       );
     }
 
@@ -557,8 +603,10 @@ var Omi = (function () {
         if (!this.morph && this._animate) this.t = Math.max(0, el - this._sync.after);
       } else if (this.morph) this.stepMorph(dt * sp);
       else if (this._animate) this.t += dt * sp;
+      // the gaze eases on its own clock, whatever the mode is doing
+      if (this._gaze.p < 1) this._gaze.p = Math.min(1, this._gaze.p + (dt * sp) / this.gazeSpec.duration);
       this.draw();
-      this._raf = raf && (this.morph || this._animate) ? raf(this._tick) : 0;
+      this._raf = raf && (this.morph || this._animate || this.gazing) ? raf(this._tick) : 0;
     }
     stepMorph(dt) {
       const M = this.morph,

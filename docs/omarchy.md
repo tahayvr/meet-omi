@@ -80,6 +80,24 @@ Some rules of thumb:
   logo with nothing in the middle, and it morphs into any mode, which makes a
   good entrance: start at `mark`, then set `idle`.
 
+## Where Omi looks
+
+`look` turns Omi's eyes toward something on screen, on top of any mode:
+`[x, y]`, each -1..1 (x right, y down), and `[0, 0]` is straight ahead.
+The eyes ease there and stay until `look` changes.
+
+```qml
+Omi {
+    mode: "idle"
+    look: [0, -1]   // up at the bar
+}
+```
+
+Use it to draw the eye to what the user should look at next: the bar, a
+window that just opened, a panel. Keep it to something that's really there,
+and look ahead again once it's gone. Modes without eyes (`mark`, `tiling`,
+`confused`) ignore it.
+
 ## One Omi for the whole machine
 
 When several apps show Omi at once, they can share one state so they move

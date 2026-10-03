@@ -5,10 +5,12 @@
 //     omarchy-shell shell summon omi.example '{"mode":"party"}'
 //     omarchy-shell shell call omi.example set thinking       # morph there
 //     omarchy-shell shell call omi.example react success      # then back
+//     omarchy-shell shell call omi.example look 0,-1          # eyes up
 //     omarchy-shell shell hide omi.example
 //
-// With it open, ← and → step through the modes, Space plays a success
-// reaction, and Esc closes it.
+// With it open, ← and → step through the modes, Shift + arrows move the
+// eyes (Shift + Space looks ahead again), Space plays a success reaction,
+// and Esc closes it.
 import QtQuick
 import Quickshell
 import Quickshell.Wayland
@@ -60,8 +62,16 @@ Item {
         return "ok";
     }
 
+    // `shell call omi.example look <x,y>`: where the eyes look, each -1..1.
+    function look(xy) {
+        const parts = String(xy).split(",").map(Number);
+        if (parts.length !== 2 || parts.some(isNaN)) return "expected x,y, e.g. 0,-1";
+        omi.look = parts;
+        return "ok";
+    }
+
     function info() {
-        return JSON.stringify({ opened: opened, mode: omi.mode, showing: omi.showing });
+        return JSON.stringify({ opened: opened, mode: omi.mode, showing: omi.showing, look: omi.look });
     }
 
     function stepMode(by) {
@@ -99,9 +109,15 @@ Item {
 
             focus: true
             Keys.onEscapePressed: root.dismiss()
-            Keys.onLeftPressed: root.stepMode(-1)
-            Keys.onRightPressed: root.stepMode(1)
-            Keys.onSpacePressed: omi.react("success")
+            Keys.onPressed: function (event) {
+                const shift = event.modifiers & Qt.ShiftModifier;
+                const eyes = { [Qt.Key_Left]: [-1, 0], [Qt.Key_Right]: [1, 0], [Qt.Key_Up]: [0, -1], [Qt.Key_Down]: [0, 1] };
+                if (shift && eyes[event.key]) { omi.look = eyes[event.key]; event.accepted = true; }
+                else if (shift && event.key === Qt.Key_Space) { omi.look = [0, 0]; event.accepted = true; }
+                else if (event.key === Qt.Key_Left) { root.stepMode(-1); event.accepted = true; }
+                else if (event.key === Qt.Key_Right) { root.stepMode(1); event.accepted = true; }
+                else if (event.key === Qt.Key_Space) { omi.react("success"); event.accepted = true; }
+            }
 
             // Swallow clicks so they don't reach the scrim.
             MouseArea { anchors.fill: parent }
@@ -133,7 +149,7 @@ Item {
 
                 Text {
                     anchors.horizontalCenter: parent.horizontalCenter
-                    text: "← →  modes      Space  react      Esc  close"
+                    text: "← →  modes      Shift + arrows  look      Space  react      Esc  close"
                     color: Qt.rgba(Color.foreground.r, Color.foreground.g, Color.foreground.b, 0.62)
                     font.family: Style.font.family
                     font.pixelSize: Style.font.bodySmall

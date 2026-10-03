@@ -85,6 +85,13 @@ function buildPack() {
       splitReach: SPLIT_REACH,
       rolePenalty: 100,
     },
+    // where the eyes can look, on top of any mode (player look())
+    gaze: {
+      reach: [30, 30],
+      duration: 0.35,
+      ease: [0.3, 0, 0.2, 1],
+      roles: ["eye"],
+    },
     animations: Object.fromEntries(
       Object.keys(ANIM)
         .filter((k) => used.has(k))
@@ -108,6 +115,12 @@ const CONFORMANCE_TIMES = [0, 0.9, 3.3],
     ["idle", "peek"],
     ["peek", "sudo"],
     ["thinking-snake", "love"],
+  ],
+  // [mode, direction]: the eyes turned there, from looking ahead
+  CONFORMANCE_GAZES = [
+    ["idle", [0, -1]],
+    ["idle", [-1, 0.5]],
+    ["tiling", [1, 0]],
   ];
 function buildConformance(pack) {
   const canvas = {
@@ -145,6 +158,23 @@ function buildConformance(pack) {
       while (omi.morph) omi.frame((ms += 10));
       return { from, to, start, frames, end: shown(omi.rects()) };
     });
+  // The gaze: from straight ahead, halfway (eased) and landed.
+  const gazes = CONFORMANCE_GAZES.map(([mode, look]) => {
+    omi.set(mode, { instant: true });
+    omi.animate = false;
+    omi.look(0, 0);
+    let ms = 5000;
+    omi.frame(ms);
+    omi.look(look[0], look[1]);
+    while (ms < 5000 + (pack.gaze.duration / 2) * 1000) omi.frame((ms += 5));
+    const half = { at: (ms - 5000) / 1000, rects: shown(omi.rects()) };
+    while (omi.gazing) omi.frame((ms += 10));
+    const end = shown(omi.rects());
+    omi.animate = true;
+    omi.look(0, 0);
+    while (omi.gazing) omi.frame((ms += 10));
+    return { mode, look, half, end };
+  });
   omi.destroy();
   return {
     format: "omi-conformance",
@@ -155,6 +185,7 @@ function buildConformance(pack) {
     modes,
     morph_seconds: total,
     morphs,
+    gazes,
   };
 }
 // The pack's files, as { name: text }.
@@ -302,6 +333,28 @@ always match.
    the face.
 5. When it lands, start the new mode's animations at t = 0.
 
+## Gaze: where the eyes look
+
+\`gaze\` (optional; a player without it ignores it) lets an app turn Omi's
+eyes toward something on screen, on top of any mode:
+
+    "gaze": { "reach": [30, 30], "duration": 0.35, "ease": [0.3, 0, 0.2, 1],
+              "roles": ["eye"] }
+
+- A look is a direction, each axis -1..1: x to the right, y down. (0, 0) is
+  straight ahead, where every mode is drawn.
+- At a look (gx, gy), every rect whose role is in \`roles\` moves by
+  gx × reach[0], gy × reach[1] grid units. Everything else stays.
+- It applies to whatever is on screen: a mode at any time in its loops, or a
+  morph in progress, after the body motion.
+- A new look eases from wherever the eyes are to the new direction over
+  \`duration\` seconds with \`ease\` (the same cubic-bezier as
+  animations), on its own clock: a mode change doesn't interrupt it.
+- The look is the app's own, not part of the shared state protocol.
+
+The reference player has \`omi.look(dx, dy)\`, \`omi.gaze()\` (the
+direction now) and \`omi.gazing\` (still on the way).
+
 ## Checking your own player
 
 conformance.json lists what a correct player draws. Every rect is
@@ -315,6 +368,9 @@ listed, in drawing order.
   order. \`frames\` (0.2 s and 0.4 s in) are the reference player's frames in
   between; a player that pairs pieces exactly as described above matches
   them too, but other pairings are allowed.
+- \`gazes\`: a mode at rest with no loops (animate off), looking ahead, then
+  turned to \`look\`: \`half\` is \`half.at\` seconds in, \`end\` is
+  once it has landed. Yours must match both, in drawing order.
 `;
 
 // on the page only (tools/build-pack.js loads this file without one)

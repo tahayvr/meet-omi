@@ -60,6 +60,25 @@ var checkConformance = function (Omi, pack, conf) {
     checks++;
     if (!sameSet(shown(omi.rects()), c.end)) fails.push(`${c.from} > ${c.to}: end`);
   }
+  // The gaze (optional in the pack): a mode at rest, looking ahead, turned to
+  // a direction; checked halfway and landed.
+  for (const g of conf.gazes || []) {
+    omi.set(g.mode, { instant: true });
+    omi.animate = false;
+    omi.look(0, 0);
+    let ms = 5000;
+    omi.frame(ms);
+    omi.look(g.look[0], g.look[1]);
+    while (ms < 5000 + g.half.at * 1000 - 0.5) omi.frame((ms += 5));
+    checks++;
+    if (!sameList(shown(omi.rects()), g.half.rects)) fails.push(`gaze ${g.mode} ${g.look}: halfway`);
+    while (omi.gazing && ms < 20000) omi.frame((ms += 10));
+    checks++;
+    if (!sameList(shown(omi.rects()), g.end)) fails.push(`gaze ${g.mode} ${g.look}: landed`);
+    omi.animate = true;
+    omi.look(0, 0);
+    while (omi.gazing && ms < 30000) omi.frame((ms += 10));
+  }
   omi.destroy();
   return { checks, fails };
 };

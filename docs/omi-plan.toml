@@ -161,6 +161,17 @@ in real apps (first: the Omarchy onboarding), each with where it came from.
 """
 
 [[step]]
+id = 12
+title = "Gaze"
+status = "done"
+detail = """
+Where the eyes look, on top of any mode: pack.gaze (reach, duration, ease,
+roles) and the player's look(dx, dy), gaze() and gazing; Omi.qml's `look`.
+Conformance has gaze cases (halfway and landed). From onboarding: Omi looks
+up at the bar from the workspaces card.
+"""
+
+[[step]]
 id = 8
 title = "Publishing"
 status = "todo"

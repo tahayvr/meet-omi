@@ -8,6 +8,7 @@
 //     }
 //
 //     omi.react("success")         // a short reaction, then back to `mode`
+//     look: [0, -1]                // the eyes look up, on top of any mode
 //
 // Omi is drawn as Rectangles snapped to device pixels, so it stays crisp at
 // any scale, fractional ones included. The pack is read with FileView
@@ -28,6 +29,9 @@ Item {
     property bool animate: true
     // false: no whole-body bobs, hops and shakes. Calmer in small places.
     property bool bodyMotion: true
+    // Where the eyes look, [x, y], each -1..1 (x right, y down): toward
+    // something on screen, on top of any mode. [0, 0] is straight ahead.
+    property var look: [0, 0]
     // The pack's omi.json; by default the one next to this file.
     property string packPath: decodeURIComponent(Qt.resolvedUrl("omi.json").toString().replace(/^file:\/\//, ""))
 
@@ -41,6 +45,8 @@ Item {
     property var player: null
     property string reaction: ""
     property bool moving: false
+    // The eyes are on their way to a new look.
+    property bool gazing: false
     property var rects: []
 
     // Plays `mode` for `seconds` (1.4 by default), then morphs back to
@@ -75,6 +81,7 @@ Item {
             omi.settled();
         });
         player = p;
+        p.look(look[0] || 0, look[1] || 0);
         step();
     }
     Component.onDestruction: if (player) player.destroy()
@@ -86,10 +93,15 @@ Item {
     onSpeedChanged: if (player) player.speed = speed
     onAnimateChanged: if (player) player.animate = animate
     onBodyMotionChanged: if (player) player.bodyMotion = bodyMotion
+    onLookChanged: if (player) {
+        player.look(look[0] || 0, look[1] || 0);
+        gazing = player.gazing;
+    }
 
     // Advance the player and take its rects.
     function step() {
         player.frame(Date.now());
+        if (gazing && !player.gazing) gazing = false;
         rects = player.rects().filter(function (r) { return r.o > 0.001; });
     }
 
@@ -97,7 +109,7 @@ Item {
     // hidden layer window keeps its items "visible", so it is checked too.
     readonly property bool onScreen: visible && !!Window.window && Window.window.visible
     FrameAnimation {
-        running: omi.onScreen && omi.player !== null && (omi.animate || omi.moving)
+        running: omi.onScreen && omi.player !== null && (omi.animate || omi.moving || omi.gazing)
         onTriggered: omi.step()
     }
 

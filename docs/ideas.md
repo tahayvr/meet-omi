@@ -13,7 +13,7 @@ Status: **idea** (written down), **designing** (in the jig), **in pack**
 | Idea | What Omi does | Came from | Status |
 |---|---|---|---|
 | Hello | Omi waves, or the frame opens like a greeting, once. The first thing a new user sees on first boot, as `mark` comes to life. | Onboarding: the welcome page | idea |
-| Pointing | Omi looks or points in a direction: up, down, left, right. Draws the eye to something on screen, such as the workspace numbers in the bar or a window that just opened. One mode per direction, or one mode with a direction. | Onboarding: teaching where things are | idea |
+| Pointing | Omi looks or points in a direction: up, down, left, right. Draws the eye to something on screen, such as the workspace numbers in the bar or a window that just opened. | Onboarding: teaching where things are | looking: in the pack (gaze, `look()`); pointing with a limb: idea |
 | Pressing a key | Omi presses down, as if on a key, while waiting for a shortcut. Between `listening` and `typing`. | Onboarding: "press Super + Space" | idea |
 | Night | Omi with dimmed eyes, calm, when the night light turns on. Close to `sleeping`, but awake. | Onboarding: the display step | idea |
 
