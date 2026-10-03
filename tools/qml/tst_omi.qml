@@ -28,7 +28,7 @@ TestCase {
     function initTestCase() {
         if (!omi.player) loaded.wait(5000);
         verify(omi.player !== null, "the pack loads");
-        compare(omi.modes.length, 42);
+        compare(omi.modes.length, 49);
     }
 
     function test_1_draws() {

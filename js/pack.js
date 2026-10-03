@@ -37,6 +37,11 @@ const REACTIONS = {
   scared: 1.6,
   "mind-blown": 2.4,
   glitch: 1.8,
+  hello: 1.6,
+  goodbye: 1.4,
+  attention: 1.2,
+  nod: 0.9,
+  shake: 0.9,
 };
 const FAMILIES = {
   thinking: [

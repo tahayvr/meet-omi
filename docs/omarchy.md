@@ -77,6 +77,12 @@ the same situations:
 | Failed (reaction, or the mode while it stays failed) | `error` |
 | Not sure what happened | `confused` |
 | A real milestone, like finishing setup | `party` |
+| Waiting for the user to decide (an agent wants approval, a dialog) | `asking` |
+| Something wants a look: a notification, a finished job (reaction) | `attention` |
+| The screen is shared or recorded | `recording` |
+| A first meeting (reaction) | `hello` |
+| Logout, shutdown, reboot (reaction, then `mark`) | `goodbye` |
+| Yes / no, lightly (reactions) | `nod` / `shake` |
 
 Modes come in families (`family`: thinking, offline, transfer): pick one per
 family for a situation and treat the rest as variations, so two apps don't

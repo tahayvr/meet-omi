@@ -108,6 +108,63 @@ const EGG = {
     ),
   },
 };
+/* ---------- hello, goodbye, asking, attention, recording, nod, shake ----------
+   Designed from the sketches in docs/ideas.md. */
+// the eyes with a direction each, for the head tilt (the left eye goes up
+// first, the right one down)
+const TILT = (c) => [
+  { ...R(100, 110, 20, 40, c), my: -20 },
+  { ...R(180, 110, 20, 40, c), my: 20 },
+];
+// Signs live in the corner outside the frame's top-right, the 70-unit
+// margin of the view: x 300..370, y -70..0. Big enough to read at 44 px.
+// A question mark of 10-unit strokes, 50 wide and 70 tall, filling the corner.
+const BIG_QMARK = as(
+  "extra",
+  [
+    R(320, -70, 30, 10),
+    R(310, -60, 10, 10),
+    R(350, -60, 10, 20),
+    R(330, -40, 20, 10),
+    R(330, -30, 10, 10),
+    R(330, -10, 10, 10),
+  ].map((r) => ({ ...r, c: "pulseop" })),
+);
+// the ping: a 30-unit dot in the corner, and four sparks that fly out of it
+const PING = withD(R(320, -50, 30, 30, "ping"), 1.2, 0);
+const SPARKS = [
+  [302, -68, -14, -14],
+  [358, -68, 14, -14],
+  [302, -12, -14, 14],
+  [358, -12, 14, 14],
+].map(([x, y, mx, my]) => withD(R(x, y, 10, 10, "ring"), 1.2, 0, { mx, my }));
+const MORE = {
+  hello: { face: TILT("tilt"), mood: "" },
+  goodbye: { face: TILT("farewell"), mood: "" },
+  asking: {
+    face: [
+      R(100, 110, 20, 40, "glance"),
+      R(180, 110, 20, 40, "glance"),
+      { ...R(180, 80, 20, 10, "liftb"), role: "brow" },
+      ...BIG_QMARK,
+    ],
+    mood: "",
+  },
+  attention: {
+    face: [
+      R(100, 110, 20, 40, "peekup"),
+      R(180, 110, 20, 40, "peekup"),
+      ...as("extra", [PING, ...SPARKS]),
+    ],
+    mood: "",
+  },
+  recording: {
+    face: [R(100, 110, 20, 40, "eye"), R(180, 110, 20, 40, "eye"), { ...R(80, 80, 20, 20, "rec"), role: "extra" }],
+    mood: "",
+  },
+  nod: { face: [R(100, 110, 20, 40, "nod"), R(180, 110, 20, 40, "nod")], mood: "" },
+  shake: { face: [R(100, 110, 20, 40, "shake"), R(180, 110, 20, 40, "shake")], mood: "" },
+};
 const DESIGNS_OLD = [
   { id: "logo", name: "Logo", face: [], mood: "" },
   {
@@ -216,10 +273,17 @@ const DESIGNS = [
       mood: "m-slow",
     },
     byId("sleeping"),
+    { id: "asking", name: "Asking", ...MORE.asking },
+    { id: "attention", name: "Attention", ...MORE.attention },
+    { id: "recording", name: "Recording", ...MORE.recording },
   ]),
   ...G_("Omi reactions", [
     byId("typing"),
     { id: "listening", name: "Listening", face: F.listening, mood: "" },
+    { id: "hello", name: "Hello", ...MORE.hello },
+    { id: "goodbye", name: "Goodbye", ...MORE.goodbye },
+    { id: "nod", name: "Nod", ...MORE.nod },
+    { id: "shake", name: "Shake", ...MORE.shake },
   ]),
   ...G_("Emotions", [
     { id: "happy", name: "Happy", face: F.happy, mood: "" },

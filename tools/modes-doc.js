@@ -65,6 +65,13 @@ const USE = {
   vim: "An easter egg: can't quit vim",
   tiling: "Windows being arranged (the Omarchy tiling tutorial)",
   "mind-blown": "Something impressive just happened, then back",
+  hello: "A greeting: first boot, a first open, then back",
+  goodbye: "Logout, shutdown, reboot: a tilt and the eyes close, then the host shows the plain logo",
+  asking: "Waiting for the user to decide: an agent wants approval, a dialog needs an answer",
+  attention: "A ping: a notification arrived, a background job finished, then back",
+  recording: "The screen is being shared or recorded, as long as it lasts",
+  nod: "Yes: a small agreement, lighter than success, then back",
+  shake: "No: the gentle no that error is too strong for, then back",
 };
 
 // --- stills

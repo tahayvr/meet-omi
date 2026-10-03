@@ -253,6 +253,19 @@ through the jig to the pack, and which checks to run.
 """
 
 [[step]]
+id = 19
+title = "Seven modes from the ideas"
+status = "done"
+detail = """
+hello, goodbye, asking, attention, recording, nod and shake, designed from
+their sketches in ideas.md: a head tilt for hello and a tilt then closing
+eyes for goodbye, a question mark and a ping with sparks in the corner
+outside the frame's top-right (with a glance up at them), a camera light,
+and the eyes alone for yes and no. Everything is the eyes or a sign in the
+corner: a hand beside the frame was tried and didn't belong. 49 modes.
+"""
+
+[[step]]
 id = 8
 title = "Publishing"
 status = "todo"

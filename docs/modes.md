@@ -1,6 +1,6 @@
 # Every Omi mode
 
-Omi has 42 modes, each a set of rectangles with a looping
+Omi has 49 modes, each a set of rectangles with a looping
 animation, and it morphs from any one to any other. This page is made by
 `node tools/modes-doc.js` from the pack, so it always matches
 `pack/omi.json`; the stills are each mode at rest (time 0 of its loops),
@@ -41,8 +41,15 @@ drawn by the reference player.
 | ![Offline, searching](modes/offline-searching.svg) | `offline-searching` | Offline, searching | state | 7.9 s | Offline, looking for a network (family: offline) |
 | ![Low battery](modes/low-battery.svg) | `low-battery` | Low battery | state | 5 s | The battery is low |
 | ![Sleeping](modes/sleeping.svg) | `sleeping` | Sleeping | state | 4.3 s | Paused, put off until later, or the night light |
+| ![Asking](modes/asking.svg) | `asking` | Asking | state | 3 s | Waiting for the user to decide: an agent wants approval, a dialog needs an answer |
+| ![Attention](modes/attention.svg) | `attention` | Attention | reaction, 1.2 s | 1.2 s | A ping: a notification arrived, a background job finished, then back |
+| ![Recording](modes/recording.svg) | `recording` | Recording | state | 4 s | The screen is being shared or recorded, as long as it lasts |
 | ![Typing](modes/typing.svg) | `typing` | Typing | state | 3.1 s | The user is typing, or something is being written for them |
 | ![Listening](modes/listening.svg) | `listening` | Listening | state | 1 s | Waiting for the user to press a key |
+| ![Hello](modes/hello.svg) | `hello` | Hello | reaction, 1.6 s | 1.6 s | A greeting: first boot, a first open, then back |
+| ![Goodbye](modes/goodbye.svg) | `goodbye` | Goodbye | reaction, 1.4 s | 1.4 s | Logout, shutdown, reboot: a tilt and the eyes close, then the host shows the plain logo |
+| ![Nod](modes/nod.svg) | `nod` | Nod | reaction, 0.9 s | 0.7 s | Yes: a small agreement, lighter than success, then back |
+| ![Shake](modes/shake.svg) | `shake` | Shake | reaction, 0.9 s | 0.7 s | No: the gentle no that error is too strong for, then back |
 | ![Happy](modes/happy.svg) | `happy` | Happy | reaction, 1.8 s | 4 s | Pleased, then back |
 | ![Laughing](modes/laughing.svg) | `laughing` | Laughing | reaction, 1.6 s | 0.7 s | A joke landed, then back |
 | ![Excited](modes/excited.svg) | `excited` | Excited | reaction, 1.8 s | 0.9 s | Something good is about to happen (a theme picker, a download that's nearly done) |
