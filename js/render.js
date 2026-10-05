@@ -94,18 +94,34 @@ function squareBox(box, pad) {
 function svgFor(d, o) {
   const sh = shapes(d);
   const vb = o.vb;
-  // a still is frame 0 of the loops, so it matches where the animation starts
-  const rects = o.animated ? sh.rects : sh.rects.map(restOf),
-    tags = (list) => list.map((r) => rectTag(r, o.roles)).join("");
-  let inner = tags(rects.filter((r) => !r.clip));
-  if (d.clip) {
-    // pieces seen through a window (peek): an inner <svg> clips them, and the
-    // window's own layer can move (d.clip.mood)
-    const c = d.clip,
-      held = rects.filter((r) => r.clip);
-    inner =
-      `<svg x="${c.x}" y="${c.y}" width="${c.w}" height="${c.h}" viewBox="${c.x} ${c.y} ${c.w} ${c.h}" overflow="hidden"><g${c.mood ? ` class="${c.mood}"` : ""}>${tags(held)}</g></svg>` +
-      inner;
+  const tags = (list) => list.map((r) => rectTag(r, o.roles)).join("");
+  let inner;
+  if (!o.animated) {
+    // a still is what the player draws at time 0, where every loop starts:
+    // plain rects, already cut to the window if the mode has one
+    const n = (v) => +v.toFixed(4);
+    inner = tags(
+      playerRects(d, 0).map((r) => ({
+        x: n(r.x),
+        y: n(r.y),
+        w: n(r.w),
+        h: n(r.h),
+        role: r.role,
+        ...(n(r.o) !== 1 ? { o: n(r.o) } : {}),
+      })),
+    );
+  } else {
+    // looping, as CSS: the pieces carry their animation's class (motion.js)
+    inner = tags(sh.rects.filter((r) => !r.clip));
+    if (d.clip) {
+      // pieces seen through a window (peek): an inner <svg> clips them, and
+      // the window's own layer can move (d.clip.mood)
+      const c = d.clip,
+        held = sh.rects.filter((r) => r.clip);
+      inner =
+        `<svg x="${c.x}" y="${c.y}" width="${c.w}" height="${c.h}" viewBox="${c.x} ${c.y} ${c.w} ${c.h}" overflow="hidden"><g${c.mood ? ` class="${c.mood}"` : ""}>${tags(held)}</g></svg>` +
+        inner;
+    }
   }
   const content = `<g fill="${o.color}"${d.mood ? ` class="${d.mood}"` : ""}>${inner}</g>`;
   const bg = o.bg

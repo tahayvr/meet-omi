@@ -37,7 +37,13 @@ The rules it's drawn by, in short (the long form is in
 [docs/modes.md](docs/modes.md) shows every mode with what it's for.
 
 - **[index.html](index.html):** the design jig, where Omi's modes and
-  animations are made. `npm run dev` serves it at http://localhost:8000.
+  animations are made, and where any mode is exported as a picture or a
+  video. `npm run dev` serves it at http://localhost:8000; the site,
+  https://tahayvr.github.io/meet-omi/, is the same page, published from
+  `master` once its checks pass
+  ([.github/workflows/publish.yml](.github/workflows/publish.yml)). What it
+  shows is the pack, played by the player: add `?check` to either address
+  and the page checks that itself.
 - **[pack/](pack/):** what apps use: `omi.json` (every mode), `omi.js` (the
   player) and the spec.
 - **[player/rust/](player/rust/):** a second player, a Rust crate written
@@ -57,8 +63,9 @@ The rules it's drawn by, in short (the long form is in
 Checks: `npm run check` runs the ones that only need Node: that pack/ and
 docs/modes are built from what's committed (`tools/build-pack.js --check`,
 `tools/modes-doc.js --check`), the reference player (`tools/check-player.js`)
-and the service (`tools/check-service.js`). Then `npm run check:rust` (the
-Rust player), `npm run check:qt` (the Qt Quick item) and, in a Wayland
-session, `npm run check:quickshell`. `npm run build` rebuilds pack/ and
-docs/modes. All but the Quickshell one run on every push
-([.github/workflows/check.yml](.github/workflows/check.yml)).
+and the service (`tools/check-service.js`). Then `npm run check:site` (the
+site, in Chrome: it shows the pack in pack/, and its CSS draws what the
+player draws), `npm run check:rust` (the Rust player), `npm run check:qt`
+(the Qt Quick item) and, in a Wayland session, `npm run check:quickshell`.
+`npm run build` rebuilds pack/ and docs/modes. All but the Quickshell one
+run on every push ([.github/workflows/check.yml](.github/workflows/check.yml)).

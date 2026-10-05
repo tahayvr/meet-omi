@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 /* Builds the Omi pack into pack/ from the jig's own sources, without a
-   browser: the same files "Export Omi pack" downloads.
+   browser: the same files "Export Omi pack" downloads, and the same pack
+   the site plays (tools/check-site.js holds the site to it).
 
      node tools/build-pack.js           write pack/
      node tools/build-pack.js --check   fail if pack/ isn't what it would write

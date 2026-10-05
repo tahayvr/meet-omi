@@ -266,6 +266,40 @@ corner: a hand beside the frame was tried and didn't belong. 49 modes.
 """
 
 [[step]]
+id = 20
+title = "The site shows the pack"
+status = "done"
+detail = """
+Everything the jig shows or exports is the pack it builds, played by the
+reference player: the hero and Morph are players, and stills and video
+frames are the player's rects (playerRects in js/morph.js; motion.js no
+longer samples for them). The one other reader of the animations is the
+browser's CSS, for modes that loop without a script (tiles, the single view,
+the animated SVG export). index.html?check (js/check.js) holds that CSS to
+the player, and the pack the page builds to pack/, file for file;
+tools/check-site.js runs it in Chrome on every push. Its first run found
+two drifts, both fixed: CSS delays rounded to the millisecond, and a
+conformance.json exported in a browser that was one frame behind in the
+gaze cases.
+"""
+
+[[step]]
+id = 21
+title = "The site is published by its checks"
+status = "done"
+detail = """
+.github/workflows/publish.yml publishes the site from master: npm run check,
+tools/publish-site.js (the repo as a folder, index.html stamped with the
+commit and the commit on every script and stylesheet address), the site
+check in Chrome on that folder, the upload, then the site check again on
+the live address, which must be that build. Needs the repo's Pages source
+set to GitHub Actions. Vite was looked at and left out: the jig's scripts
+are plain scripts sharing one scope, which build-pack.js and Quickshell
+load as they are, so a bundler would mean rewriting them as modules for
+what the stamp already gives.
+"""
+
+[[step]]
 id = 8
 title = "Publishing"
 status = "todo"

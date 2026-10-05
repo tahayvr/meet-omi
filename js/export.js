@@ -39,7 +39,7 @@ const scaleTimes = (s, k) =>
     ? s
     : s.replace(
         /(-?\d*\.?\d+)s(?=[\s;,)"}])/g,
-        (m, n) => (parseFloat(n) / k).toFixed(3) + "s",
+        (m, n) => +(parseFloat(n) / k).toFixed(6) + "s",
       );
 function svgString(d, animated) {
   const sh = shapes(d),

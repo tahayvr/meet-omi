@@ -17,6 +17,17 @@ jobs:
           node-version: 22
       - run: npm run check
 
+  # the site, in Chrome: what it shows is the pack in pack/, played by the
+  # player, and its CSS draws what the player draws
+  site:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm run check:site
+
   # the Rust player, against the same conformance data
   rust:
     runs-on: ubuntu-latest

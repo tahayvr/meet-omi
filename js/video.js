@@ -1,4 +1,4 @@
-/* ---------- video: draws each frame from the motion table (motion.js) ---------- */
+/* ---------- video: every frame is the player's (playerRects, morph.js) ---------- */
 const HAS_ENCODER = typeof VideoEncoder !== "undefined";
 const MP4 =
   HAS_ENCODER ||
@@ -16,19 +16,6 @@ const WEBM =
       MediaRecorder.isTypeSupported(t),
     )
   );
-function drawRects(ctx, rects, t) {
-  for (const r of rects) {
-    const a = motionAt(r.c, t, r);
-    if (a.op <= 0.001) continue;
-    ctx.globalAlpha = Math.min(1, a.op) * (r.o != null ? r.o : 1);
-    const cx = r.x + r.w / 2,
-      cy = r.y + r.h / 2,
-      w = r.w * a.sx,
-      h = r.h * a.sy;
-    ctx.fillRect(cx - w / 2 + a.tx, cy - h / 2 + a.ty, w, h);
-  }
-  ctx.globalAlpha = 1;
-}
 function drawFrame(ctx, d, t, vb, size, color, bg, hgt) {
   ctx.setTransform(1, 0, 0, 1, 0, 0);
   ctx.fillStyle = bg;
@@ -36,33 +23,12 @@ function drawFrame(ctx, d, t, vb, size, color, bg, hgt) {
   const s = size / vb.w;
   ctx.setTransform(s, 0, 0, s, -vb.x * s, -vb.y * s);
   ctx.fillStyle = color;
-  const sh = shapes(d);
-  ctx.save();
-  if (d.mood && ANIM[d.mood]) {
-    // body moods move and scale the whole of Omi about its center
-    const m = motionAt(d.mood, t),
-      cx = (sh.box.x + sh.box.x2) / 2,
-      cy = (sh.box.y + sh.box.y2) / 2;
-    ctx.translate(cx + m.tx, cy + m.ty);
-    ctx.scale(m.sx, m.sy);
-    ctx.translate(-cx, -cy);
+  // the player's rects, t seconds into the mode's loops
+  for (const r of playerRects(d, t)) {
+    ctx.globalAlpha = Math.min(1, r.o);
+    ctx.fillRect(r.x, r.y, r.w, r.h);
   }
-  if (d.clip) {
-    // pieces seen through a window, on a layer of their own that can move
-    const c = d.clip;
-    ctx.save();
-    ctx.beginPath();
-    ctx.rect(c.x, c.y, c.w, c.h);
-    ctx.clip();
-    if (c.mood) {
-      const m = motionAt(c.mood, t);
-      ctx.translate(m.tx, m.ty);
-    }
-    drawRects(ctx, sh.rects.filter((r) => r.clip), t);
-    ctx.restore();
-  }
-  drawRects(ctx, sh.rects.filter((r) => !r.clip), t);
-  ctx.restore();
+  ctx.globalAlpha = 1;
 }
 /* ---------- video encoding ---------- */
 // Preferred path: WebCodecs renders every frame at its exact time (no dropped

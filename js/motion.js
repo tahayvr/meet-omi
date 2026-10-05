@@ -1,7 +1,9 @@
 /* ---------- motion: every animation, as data ----------
-   One definition per animation. The page's CSS and the video engine are both
-   generated from this table, so the two can never drift apart, and any other
-   player (an app, a terminal) only needs this table and motionAt().
+   One definition per animation. The pack's animations are this table
+   (pack.js), and the player plays them: stills, video frames, the hero and
+   the Morph section are all the player's. The one other reader is the CSS at
+   the end of this file, for modes that loop without a script (the tiles, the
+   animated SVG export); index.html?check holds it to the player.
 
    An animation loops every `dur` seconds. `keys` are [progress 0..1, values]:
      tx, ty   move, in grid units
@@ -20,7 +22,7 @@
    animations move the whole of Omi (d.mood); everything else moves one piece.
 
    The rule that makes modes morph cleanly: a mode at rest IS frame 0 of its
-   loops (restOf). Stills, the morph's landing pose and the loop's first
+   loops. Stills, the morph's landing pose and the loop's first
    frame are one and the same, so handing over from a morph to the loop, or
    from a still to the animation, never jumps. Loops whose natural start
    isn't a good still are started further in (START, below). */
@@ -594,8 +596,8 @@ function prep(a) {
 }
 const keyVal = (v, q, r) =>
   v == null ? REST[q] : Array.isArray(v) ? (r[v[0]] || 0) * v[1] : v;
-const loopPhase = (t, dur, dl = 0) => ((((t - dl) / dur) % 1) + 1) % 1;
-// An animation at progress p (0..1).
+// An animation at progress p (0..1). Only rotate() below asks: what a piece
+// looks like at a time is the player's to say.
 function sample(a, p, r = {}) {
   const out = { ...REST };
   for (const [ks, props] of [
@@ -658,31 +660,6 @@ const START = {
   ring: 0.15, // the sparks just lit, still at the ping
 };
 for (const [k, by] of Object.entries(START)) ANIM[k] = prep(rotate(ANIM[k], by));
-/* How a piece looks t seconds in: { tx, ty, sx, sy, op } on top of its rest
-   pose. r supplies the piece's own dl, dur and vars. */
-function motionAt(name, t, r = {}) {
-  const a = ANIM[name];
-  if (!a) return { ...REST };
-  return sample(a, loopPhase(t, r.dur || a.dur, r.dl || 0), r);
-}
-// A piece at rest: frame 0 of its loop, baked into a plain rect.
-function restOf(r) {
-  const { c, dl, dur, ...rest } = r;
-  if (!c || !ANIM[c]) return rest;
-  const m = motionAt(c, 0, r),
-    w = r.w * m.sx,
-    h = r.h * m.sy,
-    o = (r.o ?? 1) * m.op;
-  return {
-    ...rest,
-    x: +(r.x + r.w / 2 - w / 2 + m.tx).toFixed(4),
-    y: +(r.y + r.h / 2 - h / 2 + m.ty).toFixed(4),
-    w: +w.toFixed(4),
-    h: +h.toFixed(4),
-    ...(o !== 1 || r.o != null ? { o: +o.toFixed(4) } : {}),
-  };
-}
-
 /* ---------- the same table, as CSS ---------- */
 const easeCSS = (e) =>
   e === "steps"
@@ -715,9 +692,10 @@ function pieceStyle(r) {
   const dur = r.dur || a.dur,
     s = [];
   if (dur !== a.dur) s.push(`animation-duration:${dur}s`);
-  // run dl seconds behind the loop, as motionAt does (a negative delay, so
-  // it is already mid-loop on the first frame instead of waiting)
-  if (r.dl) s.push(`animation-delay:${((r.dl % dur) - dur).toFixed(3)}s`);
+  // run dl seconds behind the loop, as the player does: a negative delay,
+  // so it is already mid-loop on the first frame instead of waiting. To the
+  // microsecond, since a millisecond off shows in a fast fade.
+  if (r.dl) s.push(`animation-delay:${+((r.dl % dur) - dur).toFixed(6)}s`);
   (a.vars || []).forEach((v) => s.push(`--${v}:${r[v]}`));
   return s.join(";");
 }

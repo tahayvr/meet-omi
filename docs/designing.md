@@ -85,6 +85,7 @@ it: apps never read the jig's code. Ideas waiting to be designed are in
    `npm run build` does both.
 7. **Run every check.** `npm run check`: that the pack and the gallery
    are built from what's committed, the reference player and the service.
+   `npm run check:site`: the jig itself, in Chrome (see below).
    `npm run check:rust`: the Rust player. `npm run check:qt`: the Qt item.
    In an Omarchy session, `npm run check:quickshell`: the player inside
    the shell itself. A new mode is only data,
@@ -94,6 +95,36 @@ it: apps never read the jig's code. Ideas waiting to be designed are in
 8. **Commit `pack/` and `docs/` with the source.** Apps copy the pack, so
    a mode that isn't in `pack/` doesn't exist to them. Mark the idea as
    "in pack" in `ideas.md`.
+
+## What the jig shows is what apps get
+
+The jig doesn't have a way of its own to draw Omi. It builds the pack from
+its sources as the page loads and hands it to the reference player, the same
+two things an app copies out of `pack/`:
+
+- The hero and the Morph section are players on a canvas.
+- Stills and video frames, and so every picture or video exported from the
+  jig, are the player's rects (`playerRects` in `js/morph.js`).
+- A mode looping in a tile, in the single view or in an exported animated
+  SVG has to run without a script, so there the browser's CSS plays the
+  animations (the end of `js/motion.js`). That is the one other reader of
+  them.
+
+`npm run check:site` holds this together. It opens the jig in Chrome
+without a window with `?check` on the address, and the page (`js/check.js`)
+checks that the pack it builds is the one in `pack/`, file for file, that the
+player it runs is the pack's, and that every mode as CSS is, at several
+moments, what the player draws. Open `http://localhost:8000/?check` to see
+the same report on the page.
+
+The site, https://tahayvr.github.io/meet-omi/, is this page, published on
+every push to `master` by `.github/workflows/publish.yml`, and only when
+it passes: `npm run check`, then the same check in Chrome on the folder
+that goes up (`tools/publish-site.js` puts it together, with the commit on
+the address of every script and stylesheet, so a browser never runs files
+of two builds together), then once more on the live address.
+`node tools/check-site.js https://tahayvr.github.io/meet-omi/` asks it of
+what is live at any time.
 
 A change to the format itself (a new field a player must understand, a
 rule that changes what a correct player draws) is a different thing from

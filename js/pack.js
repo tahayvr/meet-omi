@@ -219,6 +219,10 @@ function buildConformance(pack) {
     let ms = 5000;
     omi.frame(ms);
     omi.look(look[0], look[1]);
+    // a look wakes a player that draws itself, and the frame after a wake
+    // advances nothing: take that frame here, so the count below is the
+    // same in a browser as in Node
+    omi.frame(ms);
     while (ms < 5000 + (pack.gaze.duration / 2) * 1000) omi.frame((ms += 5));
     const half = { at: (ms - 5000) / 1000, rects: shown(omi.rects()) };
     while (omi.gazing) omi.frame((ms += 10));
@@ -543,7 +547,9 @@ if (typeof $ === "function" && $("savePack"))
         data: enc.encode(text),
       }));
     try {
-      const res = await fetch("player/omi.js");
+      // the player this page runs, by the address it was loaded from
+      const running = document.querySelector('script[src*="player/omi.js"]'),
+        res = await fetch(running ? running.src : "player/omi.js");
       if (res.ok)
         files.push({ name: "omi-pack/omi.js", data: enc.encode(await res.text()) });
     } catch (e) {}

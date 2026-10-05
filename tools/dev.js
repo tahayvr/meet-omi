@@ -4,6 +4,7 @@
 
      npm run dev              http://localhost:8000, or the next free port
      npm run dev -- 3000      that port, or fail
+     node tools/dev.js 3000 _site    another folder (the site as published)
 
    It answers on this machine only (localhost, 127.0.0.1), so the page is
    one the browser trusts and nothing else on the network can reach it.
@@ -12,7 +13,7 @@ const fs = require("fs"),
   http = require("http"),
   path = require("path");
 
-const root = path.join(__dirname, ".."),
+const root = path.resolve(process.argv[3] || path.join(__dirname, "..")),
   asked = Number(process.argv[2] || process.env.PORT) || 0,
   FIRST = 8000,
   TRIES = 20;
