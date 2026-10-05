@@ -59,9 +59,10 @@ function serve(port) {
   });
 }
 
-/* The page as Chrome has it once its scripts, the pack's files and the check
-   are done. Chrome prints it and then doesn't always leave, so this takes
-   the page as soon as it is whole and stops Chrome itself. */
+/* The page as Chrome has it once it has loaded: the check runs as part of
+   loading, so its report is in there. Chrome prints the page and then
+   doesn't always leave, so this takes the page as soon as it is whole and
+   stops Chrome itself. */
 function dump(chrome, profile, url) {
   return new Promise((resolve) => {
     const browser = spawn(
@@ -74,17 +75,18 @@ function dump(chrome, profile, url) {
         "--disable-background-networking",
         "--disable-component-update",
         `--user-data-dir=${profile}`,
-        // a CI runner has no sandbox to offer
-        ...(process.env.CI ? ["--no-sandbox"] : []),
-        // time enough for the page to finish, without waiting for it
-        "--virtual-time-budget=60000",
+        // a CI runner has no sandbox to offer, and little shared memory
+        ...(process.env.CI ? ["--no-sandbox", "--disable-dev-shm-usage"] : []),
         "--dump-dom",
         url,
       ],
-      { stdio: ["ignore", "pipe", "ignore"] },
+      { stdio: ["ignore", "pipe", "pipe"] },
     );
     let dom = "",
+      said = "",
       late = false;
+    browser.stderr.setEncoding("utf8");
+    browser.stderr.on("data", (text) => (said = (said + text).slice(-4000)));
     const stop = () => browser.kill("SIGKILL"),
       timer = setTimeout(() => ((late = true), stop()), 120000);
     browser.stdout.setEncoding("utf8");
@@ -92,10 +94,26 @@ function dump(chrome, profile, url) {
       dom += text;
       if (/<\/html>\s*$/.test(dom)) stop();
     });
-    const done = () => (clearTimeout(timer), resolve({ dom, late }));
+    const done = () => (clearTimeout(timer), resolve({ dom, late, said }));
     browser.on("error", done);
     browser.on("exit", done);
   });
+}
+
+// The page, asked for again if Chrome falls over on its way up (it can,
+// started right after another one was stopped).
+async function load(chrome, url) {
+  for (let tries = 3; ; tries--) {
+    const profile = fs.mkdtempSync(path.join(os.tmpdir(), "omi-check-site-")),
+      page = await dump(chrome, profile, url);
+    // Chrome's helpers may still be letting go of it: try a few times, and
+    // a folder left in the temporary directory is no reason to fail
+    try {
+      fs.rmSync(profile, { recursive: true, force: true, maxRetries: 10, retryDelay: 200 });
+    } catch (e) {}
+    if (page.dom.includes("</html>") || page.late || tries === 1) return page;
+    await new Promise((later) => setTimeout(later, 1000));
+  }
 }
 
 (async () => {
@@ -114,13 +132,7 @@ function dump(chrome, profile, url) {
   // a site just published may still be the one before for a moment
   let page, built;
   for (let tries = wanted && remote ? 18 : 1; tries > 0; tries--) {
-    const profile = fs.mkdtempSync(path.join(os.tmpdir(), "omi-check-site-"));
-    page = await dump(chrome, profile, url + (url.includes("?") ? "&" : "?") + "check");
-    // Chrome's helpers may still be letting go of it: try a few times, and
-    // a folder left in the temporary directory is no reason to fail
-    try {
-      fs.rmSync(profile, { recursive: true, force: true, maxRetries: 10, retryDelay: 200 });
-    } catch (e) {}
+    page = await load(chrome, url + (url.includes("?") ? "&" : "?") + "check");
     built = (/<meta name="omi-build" content="([^"]*)"/.exec(page.dom) || [])[1];
     if (!wanted || built === wanted || tries === 1) break;
     console.log(`      ${url} is ${built ? `build ${built}` : "an unstamped build"}, waiting for ${wanted}`);
@@ -131,6 +143,13 @@ function dump(chrome, profile, url) {
   const dom = page.dom,
     report = /<pre id="sitecheck"[^>]*>([\s\S]*?)<\/pre>/.exec(dom),
     result = /<html[^>]*\sdata-check="(\w+)"/.exec(dom);
+  if (!dom.includes("</html>")) {
+    console.log(`FAIL Chrome printed no page for ${url}` + (page.late ? " in two minutes" : ""));
+    // what Chrome said last, less its own chatter
+    const said = page.said.split("\n").filter((l) => l.trim() && !/updater|VERBOSE/.test(l));
+    if (said.length) console.log(said.slice(-8).join("\n"));
+    process.exit(1);
+  }
   if (wanted && built !== wanted) {
     console.log(`FAIL the page at ${url} is ${built ? `build ${built}` : "an unstamped build"}, not ${wanted}`);
     process.exit(1);
@@ -139,7 +158,7 @@ function dump(chrome, profile, url) {
     console.log(
       !dom.includes("js/check.js") && dom.includes("</html>")
         ? `FAIL the page at ${url} has no check in it: it was published before js/check.js was`
-        : `FAIL the page at ${url} never finished its check` + (page.late ? " (Chrome took too long)" : ""),
+        : `FAIL the page at ${url} never finished its check`,
     );
     process.exit(1);
   }

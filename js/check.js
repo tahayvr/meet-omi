@@ -12,8 +12,12 @@
    rects (playerRects, morph.js), so they have nothing to drift from.
 
    tools/check-site.js opens this in Chrome without a window, and anyone can
-   open it by hand, here or on the live site. */
-async function checkSite() {
+   open it by hand, here or on the live site.
+
+   It runs in one go as the page loads, reading the pack's files with requests
+   that wait for their answer, so the report is in the page by the time the
+   page has loaded: that is all the tool has to wait for. */
+function checkSite() {
   // a published page says which commit it was made from (tools/publish-site.js)
   const build = document.querySelector('meta[name="omi-build"]'),
     lines = build ? [`      build ${build.content}`] : [];
@@ -24,16 +28,19 @@ async function checkSite() {
   };
 
   // 1. the same build as pack/
-  const read = async (url) => {
-    const res = await fetch(url, { cache: "no-store" });
-    if (!res.ok) throw new Error(`${url}: ${res.status}`);
-    return res.text();
+  const read = (url) => {
+    const req = new XMLHttpRequest();
+    // the file as it is now, not as a browser remembers it
+    req.open("GET", `${url}?now=${Date.now()}`, false);
+    req.send();
+    if (req.status !== 200) throw new Error(`${url}: ${req.status}`);
+    return req.responseText;
   };
   try {
     const built = packFiles();
     for (const name of Object.keys(built))
-      say((await read("pack/" + name)) === built[name], `pack/${name} is the one this page builds`);
-    say((await read("pack/omi.js")) === (await read("player/omi.js")), "pack/omi.js is the player this page runs");
+      say(read("pack/" + name) === built[name], `pack/${name} is the one this page builds`);
+    say(read("pack/omi.js") === read("player/omi.js"), "pack/omi.js is the player this page runs");
     if (failed) lines.push("      run node tools/build-pack.js and commit pack/");
   } catch (err) {
     say(false, `the pack could not be read (${err.message})`);
