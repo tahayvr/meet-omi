@@ -54,7 +54,9 @@ The rules it's drawn by, in short (the long form is in
 - **[docs/ideas.md](docs/ideas.md):** modes and reactions still to make, each
   with a sketch.
 
-Checks: `node tools/check-player.js`, `node tools/check-quickshell.js` (in a
+Checks: `node tools/build-pack.js --check` (pack/ is up to date, including
+its copy of the player), `node tools/check-player.js`,
+`node tools/check-quickshell.js` (in a
 Wayland session), `node tools/check-service.js`, the Qt Quick item:
 `QML_XHR_ALLOW_FILE_READ=1 /usr/lib/qt6/bin/qmltestrunner -input tools/qml`,
 and the Rust player: `cargo test` in `player/rust`.

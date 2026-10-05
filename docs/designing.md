@@ -79,9 +79,12 @@ it: apps never read the jig's code. Ideas waiting to be designed are in
    Check it at the small end too: 44 device pixels across is where props
    must still read.
 6. **Build the pack.** `node tools/build-pack.js` writes `pack/omi.json`,
-   `pack/README.md` and `pack/conformance.json`. Then
+   `pack/README.md`, `pack/conformance.json` and `pack/omi.js` (a copy of
+   `player/omi.js`, so the pack ships with its player: edit the source,
+   never the copy). Then
    `node tools/modes-doc.js` for the gallery.
-7. **Run every check.** The reference player: `node tools/check-player.js`
+7. **Run every check.** That the pack is built from what's committed:
+   `node tools/build-pack.js --check`. The reference player: `node tools/check-player.js`
    and, in an Omarchy session, `node tools/check-quickshell.js`. The Qt
    item: `QML_XHR_ALLOW_FILE_READ=1 /usr/lib/qt6/bin/qmltestrunner -input tools/qml`.
    The Rust player: `cargo test` in `player/rust`. A new mode is only data,
