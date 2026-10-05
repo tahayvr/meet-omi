@@ -627,7 +627,8 @@ function rotate(a, by) {
       (x, y) => x - y,
     ),
     keyed = (ks, p) =>
-      ks && ks.some(([kp]) => Math.abs(kp - p) < 1e-6 || Math.abs(kp - p - 1) < 1e-6);
+      ks &&
+      ks.some(([kp]) => Math.abs(kp - p) < 1e-6 || Math.abs(kp - p - 1) < 1e-6);
   return {
     ...a,
     keys: qs.map((q) => {
@@ -635,7 +636,8 @@ function rotate(a, by) {
         s = sample(a, p),
         v = {},
         edge = q === 0 || q === 1;
-      if (a.move && (edge || keyed(a.move, p))) MOVE.forEach((k) => (v[k] = s[k]));
+      if (a.move && (edge || keyed(a.move, p)))
+        MOVE.forEach((k) => (v[k] = s[k]));
       if (a.fade && (edge || keyed(a.fade, p))) v.op = s.op;
       return [q, v];
     }),
@@ -659,7 +661,8 @@ const START = {
   ping: 0.3, // popped
   ring: 0.15, // the sparks just lit, still at the ping
 };
-for (const [k, by] of Object.entries(START)) ANIM[k] = prep(rotate(ANIM[k], by));
+for (const [k, by] of Object.entries(START))
+  ANIM[k] = prep(rotate(ANIM[k], by));
 /* ---------- the same table, as CSS ---------- */
 const easeCSS = (e) =>
   e === "steps"

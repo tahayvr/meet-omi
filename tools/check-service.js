@@ -37,7 +37,9 @@ const start = () => {
   return proc;
 };
 const listening = (proc) =>
-  new Promise((resolve) => proc.stdout.on("data", (d) => /listening/.test(d) && resolve()));
+  new Promise((resolve) =>
+    proc.stdout.on("data", (d) => /listening/.test(d) && resolve()),
+  );
 const player = () => new Omi(null, pack, { color: "#000" });
 // the largest difference between two players' rects, drawn at one moment
 function gap(a, b) {
@@ -50,7 +52,10 @@ function gap(a, b) {
   return Math.max(
     0,
     ...ra.map((r, i) =>
-      Math.max(...["x", "y", "w", "h"].map((k) => Math.abs(r[k] - rb[i][k])), Math.abs(r.o - rb[i].o) * 100),
+      Math.max(
+        ...["x", "y", "w", "h"].map((k) => Math.abs(r[k] - rb[i][k])),
+        Math.abs(r.o - rb[i].o) * 100,
+      ),
     ),
   );
 }
@@ -64,11 +69,23 @@ function gap(a, b) {
 
   // 1. the command line
   let r = ctl("get");
-  check("omictl get", r.status === 0 && /^mark/.test(r.stdout), r.stdout.trim());
+  check(
+    "omictl get",
+    r.status === 0 && r.stdout.startsWith("mark"),
+    r.stdout.trim(),
+  );
   r = ctl("set", "thinkng");
-  check("unknown mode is refused", r.status === 1 && /no mode/.test(r.stderr), r.stderr.trim());
+  check(
+    "unknown mode is refused",
+    r.status === 1 && /no mode/.test(r.stderr),
+    r.stderr.trim(),
+  );
   r = ctl("set", "idle");
-  check("omictl set", r.status === 0 && /^idle from mark/.test(r.stdout), r.stdout.trim());
+  check(
+    "omictl set",
+    r.status === 0 && r.stdout.startsWith("idle from mark"),
+    r.stdout.trim(),
+  );
 
   // 2. two apps follow along, frame for frame, however their frames are timed
   const A = player(),
@@ -90,7 +107,11 @@ function gap(a, b) {
     fc = follow(C, { name: "C" });
   const tickC = setInterval(() => C.frame(Date.now()), 31);
   await wait(1200);
-  check("all land on the same frame", A.mode === "error" && gap(A, B) < 0.01 && gap(A, C) < 0.01, `${A.mode}/${B.mode}/${C.mode}, A-B ${gap(A, B).toFixed(4)}, A-C ${gap(A, C).toFixed(4)}`);
+  check(
+    "all land on the same frame",
+    A.mode === "error" && gap(A, B) < 0.01 && gap(A, C) < 0.01,
+    `${A.mode}/${B.mode}/${C.mode}, A-B ${gap(A, B).toFixed(4)}, A-C ${gap(A, C).toFixed(4)}`,
+  );
   await wait(900);
   check("their loops stay together", gap(A, B) < 0.01 && gap(A, C) < 0.01);
 
@@ -101,12 +122,19 @@ function gap(a, b) {
   await wait(100);
   await watcher.set("success", { for: 0.4, then: "idle" });
   await wait(700);
-  check("for/then changes back", A.mode === "idle" && seen.join() === "error,success,idle", seen.join(" > "));
+  check(
+    "for/then changes back",
+    A.mode === "idle" && seen.join() === "error,success,idle",
+    seen.join(" > "),
+  );
   // ...and a later change cancels the timer
   await watcher.set("wink", { for: 0.3, then: "idle" });
   await watcher.set("sudo");
   await wait(500);
-  check("a later change cancels the timer", (await watcher.get()).mode === "sudo");
+  check(
+    "a later change cancels the timer",
+    (await watcher.get()).mode === "sudo",
+  );
 
   // 5. setting the current mode changes nothing
   const before = (await watcher.get()).since;
@@ -136,6 +164,10 @@ function gap(a, b) {
   await new Promise((r) => fresh.on("exit", r));
 
   const failed = results.filter((ok) => !ok).length;
-  console.log(failed ? `${failed} of ${results.length} failed` : `ok: ${results.length} checks`);
+  console.log(
+    failed
+      ? `${failed} of ${results.length} failed`
+      : `ok: ${results.length} checks`,
+  );
   process.exit(failed ? 1 : 0);
 })();

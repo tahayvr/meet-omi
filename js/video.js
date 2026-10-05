@@ -41,7 +41,13 @@ const MUXERS = {
 };
 const ENCODER_CODECS = {
   // H.264 High profile, levels 5.2 → 4.0, then Main / Baseline as fallbacks
-  mp4: ["avc1.640034", "avc1.640033", "avc1.640028", "avc1.4d0034", "avc1.42003e"],
+  mp4: [
+    "avc1.640034",
+    "avc1.640033",
+    "avc1.640028",
+    "avc1.4d0034",
+    "avc1.42003e",
+  ],
   // VP9 profile 0, levels 5.1 → 4.1 → 1.0
   webm: ["vp09.00.51.08", "vp09.00.41.08", "vp09.00.10.08"],
 };
@@ -98,7 +104,9 @@ async function encodeVideo(d, kind) {
   }
   if (!config) return null;
   if (width !== o.w)
-    toast(`${width}\u00d7${height} is the largest ${kind.toUpperCase()} size here.`);
+    toast(
+      `${width}\u00d7${height} is the largest ${kind.toUpperCase()} size here.`,
+    );
   const M = MUXERS[kind];
   await loadScript(M.src);
   const lib = window[M.global];
@@ -118,11 +126,7 @@ async function encodeVideo(d, kind) {
   c.width = width;
   c.height = height;
   const ctx = c.getContext("2d", { alpha: false });
-  const vb = frameBox(
-    shapes(d).box,
-    Math.max(+X.pad, 0.1),
-    width / height,
-  );
+  const vb = frameBox(shapes(d).box, Math.max(+X.pad, 0.1), width / height);
   const bg = exportBg(),
     color = X.fg,
     us = 1e6 / VIDEO_FPS;
@@ -130,7 +134,10 @@ async function encodeVideo(d, kind) {
   for (let i = 0; i < frames; i++) {
     if (failed) throw failed;
     drawFrame(ctx, d, (i / VIDEO_FPS) * X.speed, vb, width, color, bg, height);
-    const frame = new VideoFrame(c, { timestamp: Math.round(i * us), duration: Math.round(us) });
+    const frame = new VideoFrame(c, {
+      timestamp: Math.round(i * us),
+      duration: Math.round(us),
+    });
     encoder.encode(frame, { keyFrame: i % (VIDEO_FPS * 2) === 0 });
     frame.close();
     // keep the encoder queue short so memory stays flat on long 4K exports
@@ -182,11 +189,7 @@ async function recordRealtime(d, kind) {
   c.width = size;
   c.height = hgt;
   const ctx = c.getContext("2d", { alpha: false });
-  const vb = frameBox(
-    shapes(d).box,
-    Math.max(+X.pad, 0.1),
-    size / hgt,
-  );
+  const vb = frameBox(shapes(d).box, Math.max(+X.pad, 0.1), size / hgt);
   const bg = exportBg(),
     color = X.fg;
   drawFrame(ctx, d, 0, vb, size, color, bg, hgt);
@@ -206,16 +209,7 @@ async function recordRealtime(d, kind) {
   await new Promise((res) => {
     const step = () => {
       const t = (performance.now() - t0) / 1000;
-      drawFrame(
-        ctx,
-        d,
-        Math.min(t, secs) * X.speed,
-        vb,
-        size,
-        color,
-        bg,
-        hgt,
-      );
+      drawFrame(ctx, d, Math.min(t, secs) * X.speed, vb, size, color, bg, hgt);
       if (t >= secs) return res();
       requestAnimationFrame(step);
     };

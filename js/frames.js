@@ -1,8 +1,6 @@
 /* ---------- frame effects: whole frame parts animate with the eyes ---------- */
 const OUTER_RECTS = LOGO.slice(0, 5),
-  INNER_RECTS = LOGO.filter((r) =>
-    INNER.has([r.x, r.y, r.w, r.h].join()),
-  );
+  INNER_RECTS = LOGO.filter((r) => INNER.has([r.x, r.y, r.w, r.h].join()));
 const MISC = LOGO.filter(
   (r) => !OUTER_RECTS.includes(r) && !INNER_RECTS.includes(r),
 );
@@ -30,9 +28,7 @@ function grow(paths, arrow, dt = 0.06, D = 2.8) {
     p.forEach(([x, y], k) => out.push(mk(x, y, 20, 20, k, 0.2))),
   );
   const start = Math.max(...paths.map((p) => p.length));
-  arrow.forEach(([x, y, w, hh], k) =>
-    out.push(mk(x, y, w, hh, start + k, 0)),
-  );
+  arrow.forEach(([x, y, w, hh], k) => out.push(mk(x, y, w, hh, start + k, 0)));
   return out;
 }
 const UP_L = [
@@ -79,11 +75,7 @@ const FRAMES = {
     ),
   ],
   working: [...MISC, ...INNER_RECTS, ...chase(OUT_PATH, 1.6, 0.25)],
-  success: [
-    ...tint(MISC, "pop"),
-    ...INNER_RECTS,
-    ...tint(OUTER_RECTS, "pop"),
-  ],
+  success: [...tint(MISC, "pop"), ...INNER_RECTS, ...tint(OUTER_RECTS, "pop")],
   warning: [
     ...tint(MISC, "pulseop"),
     ...INNER_RECTS,
@@ -102,9 +94,7 @@ const FRAMES = {
     MISC[2],
     { ...MISC[1], o: 0.2 },
     ...cellsOf(range(20, 260).map((x) => [x, 0])),
-    ...cellsOf(
-      [...range(20, 140), ...range(180, 260)].map((x) => [x, 280]),
-    ),
+    ...cellsOf([...range(20, 140), ...range(180, 260)].map((x) => [x, 280])),
     ...chase(
       range(280, 0, -20).map((y) => [0, y]),
       1.6,

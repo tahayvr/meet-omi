@@ -36,14 +36,28 @@ const root = path.join(__dirname, ".."),
 
 const PLAYERS = {
   python: { cwd: "player/python", run: ["python3", "tests/morphs.py"] },
-  rust: { cwd: "player/rust", run: ["cargo", "run", "--release", "--quiet", "--locked", "--example", "morphs", "--"] },
+  rust: {
+    cwd: "player/rust",
+    run: [
+      "cargo",
+      "run",
+      "--release",
+      "--quiet",
+      "--locked",
+      "--example",
+      "morphs",
+      "--",
+    ],
+  },
 };
 const args = process.argv.slice(2),
   keep = args.includes("--keep"),
   asked = args.filter((a) => a !== "--keep"),
   unknown = asked.filter((a) => !PLAYERS[a]);
 if (unknown.length) {
-  console.error(`no player "${unknown[0]}": ${Object.keys(PLAYERS).join(", ")}`);
+  console.error(
+    `no player "${unknown[0]}": ${Object.keys(PLAYERS).join(", ")}`,
+  );
   process.exit(2);
 }
 
@@ -55,12 +69,14 @@ for (const how of ["rest", "loop", "morph"])
   for (let i = 0; i < ids.length; i++)
     for (const to of ids) {
       const from = ids[i],
-        before = how === "morph" ? ids[(i + ids.length - 1) % ids.length] : null;
+        before =
+          how === "morph" ? ids[(i + ids.length - 1) % ids.length] : null;
       if (from === to) continue;
       const omi = new Omi(null, pack, { color: "#000" });
       let ms = 1000;
       const run = (seconds) => {
-        for (const stop = ms + seconds * 1000; ms < stop - 1e-6; ) omi.frame((ms += 10));
+        for (const stop = ms + seconds * 1000; ms < stop - 1e-6;)
+          omi.frame((ms += 10));
       };
       if (how === "morph") {
         omi.set(before, { instant: true });
@@ -85,21 +101,32 @@ for (const how of ["rest", "loop", "morph"])
 const dir = fs.mkdtempSync(path.join(os.tmpdir(), "omi-morphs-")),
   file = path.join(dir, "morphs.jsonl");
 fs.writeFileSync(file, lines.join("\n") + "\n");
-console.log(`the reference player: ${lines.length} morphs (${ids.length} modes, every pair, from rest, mid-loop and mid-morph)`);
+console.log(
+  `the reference player: ${lines.length} morphs (${ids.length} modes, every pair, from rest, mid-loop and mid-morph)`,
+);
 
 // --- each player against them
 let failed = 0;
 for (const name of asked.length ? asked : Object.keys(PLAYERS)) {
   const p = PLAYERS[name],
-    out = spawnSync(p.run[0], [...p.run.slice(1), file], { cwd: path.join(root, p.cwd), encoding: "utf8", maxBuffer: 1 << 26 });
+    out = spawnSync(p.run[0], [...p.run.slice(1), file], {
+      cwd: path.join(root, p.cwd),
+      encoding: "utf8",
+      maxBuffer: 1 << 26,
+    });
   if (out.error) {
-    console.log(`FAIL ${name}: could not run ${p.run[0]} (${out.error.code || out.error.message})`);
+    console.log(
+      `FAIL ${name}: could not run ${p.run[0]} (${out.error.code || out.error.message})`,
+    );
     failed++;
     continue;
   }
   process.stdout.write(out.stdout);
   if (out.status !== 0) {
-    if (out.stderr) process.stdout.write(out.stderr.trim().split("\n").slice(-12).join("\n") + "\n");
+    if (out.stderr)
+      process.stdout.write(
+        out.stderr.trim().split("\n").slice(-12).join("\n") + "\n",
+      );
     failed++;
   }
 }

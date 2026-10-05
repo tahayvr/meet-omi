@@ -34,8 +34,13 @@ let failed = false;
 const report = (name, { checks, fails }) => {
   if (fails.length) {
     failed = true;
-    console.log(`FAIL ${name}: ${fails.length} of ${checks}:\n  ${fails.join("\n  ")}`);
-  } else console.log(`ok: ${name}: ${checks} checks (${pack.modes.length} modes, ${conf.morphs.length} morphs)`);
+    console.log(
+      `FAIL ${name}: ${fails.length} of ${checks}:\n  ${fails.join("\n  ")}`,
+    );
+  } else
+    console.log(
+      `ok: ${name}: ${checks} checks (${pack.modes.length} modes, ${conf.morphs.length} morphs)`,
+    );
 };
 
 // 1. As written, in Node.
@@ -46,19 +51,28 @@ report("node", checkConformance(require("../player/omi.js"), pack, conf));
 const ctx = vm.createContext({});
 vm.runInContext(QT_LACKS.map((p) => `delete ${p};`).join("\n"), ctx);
 vm.runInContext(source, ctx, { filename: "player/omi.js" });
-vm.runInContext(fs.readFileSync(path.join(__dirname, "conformance.js"), "utf8"), ctx, {
-  filename: "tools/conformance.js",
-});
+vm.runInContext(
+  fs.readFileSync(path.join(__dirname, "conformance.js"), "utf8"),
+  ctx,
+  {
+    filename: "tools/conformance.js",
+  },
+);
 ctx.packJson = JSON.stringify(pack);
 ctx.confJson = JSON.stringify(conf);
 try {
   report(
     "Qt's built-ins only",
-    vm.runInContext("checkConformance(Omi, JSON.parse(packJson), JSON.parse(confJson))", ctx),
+    vm.runInContext(
+      "checkConformance(Omi, JSON.parse(packJson), JSON.parse(confJson))",
+      ctx,
+    ),
   );
 } catch (e) {
   failed = true;
-  console.log(`FAIL Qt's built-ins only: ${e.message} (one of ${QT_LACKS.join(", ")}?)`);
+  console.log(
+    `FAIL Qt's built-ins only: ${e.message} (one of ${QT_LACKS.join(", ")}?)`,
+  );
 }
 
 // 3. Object spread: Qt's parser rejects { ...o } and { a, ...o }. Comments
@@ -70,10 +84,13 @@ const code = source
   .replace(/(["'`])(?:\\.|(?!\1).)*\1/g, '""');
 const spread = /\{\s*\.\.\.|[\w$\])]\s*,\s*\.\.\.[\w$.]+\s*\}/g;
 const lines = [];
-for (let m; (m = spread.exec(code)); ) lines.push(code.slice(0, m.index).split("\n").length);
+for (let m; (m = spread.exec(code));)
+  lines.push(code.slice(0, m.index).split("\n").length);
 if (lines.length) {
   failed = true;
-  console.log(`FAIL object spread at player/omi.js line ${lines.join(", ")}: use Object.assign`);
+  console.log(
+    `FAIL object spread at player/omi.js line ${lines.join(", ")}: use Object.assign`,
+  );
 } else console.log("ok: no object spread");
 
 if (failed) process.exit(1);

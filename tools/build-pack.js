@@ -46,7 +46,9 @@ files["omi.js"] = fs.readFileSync(path.join(root, "player/omi.js"), "utf8");
 if (process.argv.includes("--check")) {
   const stale = Object.keys(files).filter((name) => {
     const file = path.join(out, name);
-    return !fs.existsSync(file) || fs.readFileSync(file, "utf8") !== files[name];
+    return (
+      !fs.existsSync(file) || fs.readFileSync(file, "utf8") !== files[name]
+    );
   });
   for (const name of stale) console.log(`FAIL pack/${name} is out of date`);
   if (stale.length) {

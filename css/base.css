@@ -52,8 +52,7 @@ body {
   background: var(--chrome);
   color: var(--text);
   font-family:
-    "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Consolas,
-    monospace;
+    "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
   font-size: 14px;
 }
 button,

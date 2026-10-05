@@ -32,7 +32,10 @@
         padding: 0 16px 48px;
         background: var(--bg);
         color: var(--fg);
-        font: 15px/1.5 ui-monospace, "JetBrains Mono", monospace;
+        font:
+          15px/1.5 ui-monospace,
+          "JetBrains Mono",
+          monospace;
       }
       main {
         max-width: 760px;
@@ -168,10 +171,13 @@
       const react = (id) => {
         clearTimeout(reacting);
         omi.set(id, { instant: still });
-        reacting = setTimeout(() => {
-          reacting = null;
-          omi.set(mode, { instant: still });
-        }, (omi.hold(id) + pack.morph.duration + pack.morph.stagger) * 1000);
+        reacting = setTimeout(
+          () => {
+            reacting = null;
+            omi.set(mode, { instant: still });
+          },
+          (omi.hold(id) + pack.morph.duration + pack.morph.stagger) * 1000,
+        );
       };
 
       // --- the eyes follow the pointer, and look ahead again when it rests
@@ -182,7 +188,10 @@
           dx = e.clientX - (r.left + r.width / 2),
           dy = e.clientY - (r.top + r.height / 2),
           reach = r.width * 1.5; // full tilt this far from Omi's center
-        omi.look(Math.max(-1, Math.min(1, dx / reach)), Math.max(-1, Math.min(1, dy / reach)));
+        omi.look(
+          Math.max(-1, Math.min(1, dx / reach)),
+          Math.max(-1, Math.min(1, dy / reach)),
+        );
         clearTimeout(rest);
         rest = setTimeout(() => omi.look(0, 0), 2500);
       });
@@ -196,7 +205,8 @@
           i = ids.indexOf(mode);
         if (e.key === " ") react("happy");
         else if (e.key === "ArrowRight") setMode(ids[(i + 1) % ids.length]);
-        else if (e.key === "ArrowLeft") setMode(ids[(i - 1 + ids.length) % ids.length]);
+        else if (e.key === "ArrowLeft")
+          setMode(ids[(i - 1 + ids.length) % ids.length]);
         else return;
         e.preventDefault();
       });
@@ -205,7 +215,10 @@
       const accents = document.getElementById("accents"),
         swatches = ["", "#9ece6a", "#f7768e", "#e0af68", "#bb9af7"]; // "": the page's accent
       accents.innerHTML = swatches
-        .map((c) => `<button style="background:${c || "var(--accent)"}" data-color="${c}" aria-label="${c || "Page accent"}"></button>`)
+        .map(
+          (c) =>
+            `<button style="background:${c || "var(--accent)"}" data-color="${c}" aria-label="${c || "Page accent"}"></button>`,
+        )
         .join("");
       accents.addEventListener("click", (e) => {
         const b = e.target.closest("button");
@@ -217,21 +230,35 @@
       // With reduced motion nothing redraws by itself: draw the faded-in color.
       canvas.addEventListener("transitionend", () => omi.draw());
       const showAccent = () =>
-        accents.querySelectorAll("button").forEach((b) =>
-          b.setAttribute("aria-pressed", String(b.dataset.color === canvas.style.color || (!b.dataset.color && !canvas.style.color))),
-        );
+        accents
+          .querySelectorAll("button")
+          .forEach((b) =>
+            b.setAttribute(
+              "aria-pressed",
+              String(
+                b.dataset.color === canvas.style.color ||
+                  (!b.dataset.color && !canvas.style.color),
+              ),
+            ),
+          );
 
       // --- every mode, one button each
       const nav = document.getElementById("modes"),
         name = document.getElementById("name");
-      nav.innerHTML = pack.modes.map((m) => `<button data-mode="${m.id}">${m.name}</button>`).join("");
+      nav.innerHTML = pack.modes
+        .map((m) => `<button data-mode="${m.id}">${m.name}</button>`)
+        .join("");
       nav.addEventListener("click", (e) => {
         const b = e.target.closest("button");
         if (b) setMode(b.dataset.mode);
       });
       function show() {
         name.textContent = pack.modes.find((m) => m.id === mode).name;
-        nav.querySelectorAll("button").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.mode === mode)));
+        nav
+          .querySelectorAll("button")
+          .forEach((b) =>
+            b.setAttribute("aria-pressed", String(b.dataset.mode === mode)),
+          );
       }
 
       showAccent();

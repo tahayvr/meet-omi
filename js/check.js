@@ -39,9 +39,16 @@ function checkSite() {
   try {
     const built = packFiles();
     for (const name of Object.keys(built))
-      say(read("pack/" + name) === built[name], `pack/${name} is the one this page builds`);
-    say(read("pack/omi.js") === read("player/omi.js"), "pack/omi.js is the player this page runs");
-    if (failed) lines.push("      run node tools/build-pack.js and commit pack/");
+      say(
+        read("pack/" + name) === built[name],
+        `pack/${name} is the one this page builds`,
+      );
+    say(
+      read("pack/omi.js") === read("player/omi.js"),
+      "pack/omi.js is the player this page runs",
+    );
+    if (failed)
+      lines.push("      run node tools/build-pack.js and commit pack/");
   } catch (err) {
     say(false, `the pack could not be read (${err.message})`);
   }
@@ -56,7 +63,13 @@ function checkSite() {
   let rectsSeen = 0,
     wrong = 0;
   for (const d of DESIGNS) {
-    host.innerHTML = svgFor(d, { color: "#000", animated: true, force: true, vb, size: vb.w });
+    host.innerHTML = svgFor(d, {
+      color: "#000",
+      animated: true,
+      force: true,
+      vb,
+      size: vb.w,
+    });
     const svg = host.firstElementChild,
       body = svg.querySelector("g"),
       anims = svg.getAnimations({ subtree: true }),
@@ -69,39 +82,72 @@ function checkSite() {
       const toView = svg.getScreenCTM().inverse(),
         placed = (el, r) => {
           const m = toView.multiply(el.getScreenCTM());
-          return { x: m.a * r.x + m.e, y: m.d * r.y + m.f, w: m.a * r.w, h: m.d * r.h };
+          return {
+            x: m.a * r.x + m.e,
+            y: m.d * r.y + m.f,
+            w: m.a * r.w,
+            h: m.d * r.h,
+          };
         };
       // the window stays put while its layer moves; only the body moves it
       const win = d.clip ? placed(body, d.clip) : null;
       const css = [];
       for (const el of rects) {
-        const o = parseFloat(getComputedStyle(el).opacity) * (el.hasAttribute("fill-opacity") ? +el.getAttribute("fill-opacity") : 1);
+        const o =
+          parseFloat(getComputedStyle(el).opacity) *
+          (el.hasAttribute("fill-opacity")
+            ? +el.getAttribute("fill-opacity")
+            : 1);
         if (!(o > 0.001)) continue;
-        let r = placed(el, { x: +el.getAttribute("x"), y: +el.getAttribute("y"), w: +el.getAttribute("width"), h: +el.getAttribute("height") });
-        if (el.ownerSVGElement !== svg) r = clipTo(r, { x: win.x, y: win.y, w: win.w, h: win.h });
+        let r = placed(el, {
+          x: +el.getAttribute("x"),
+          y: +el.getAttribute("y"),
+          w: +el.getAttribute("width"),
+          h: +el.getAttribute("height"),
+        });
+        if (el.ownerSVGElement !== svg)
+          r = clipTo(r, { x: win.x, y: win.y, w: win.w, h: win.h });
         if (r) css.push({ ...r, o });
       }
       const player = playerRects(d, t);
       rectsSeen += player.length;
       if (css.length !== player.length) {
-        off.push(`at ${t} s the CSS shows ${css.length} rects, the player ${player.length}`);
+        off.push(
+          `at ${t} s the CSS shows ${css.length} rects, the player ${player.length}`,
+        );
         continue;
       }
       css.forEach((r, i) => {
         for (const k of ["x", "y", "w", "h", "o"])
-          if (Math.abs(r[k] - player[i][k]) > (k === "o" ? NEAR.opacity : NEAR.position))
-            off.push(`at ${t} s rect ${i} has ${k} ${+r[k].toFixed(4)} as CSS, ${+player[i][k].toFixed(4)} in the player`);
+          if (
+            Math.abs(r[k] - player[i][k]) >
+            (k === "o" ? NEAR.opacity : NEAR.position)
+          )
+            off.push(
+              `at ${t} s rect ${i} has ${k} ${+r[k].toFixed(4)} as CSS, ${+player[i][k].toFixed(4)} in the player`,
+            );
       });
     }
     if (off.length) {
       wrong++;
-      say(false, `${d.id}: ${off.slice(0, 3).join("; ")}${off.length > 3 ? `; and ${off.length - 3} more` : ""}`);
+      say(
+        false,
+        `${d.id}: ${off.slice(0, 3).join("; ")}${off.length > 3 ? `; and ${off.length - 3} more` : ""}`,
+      );
     }
   }
   host.remove();
-  if (!wrong) say(true, `as CSS, every mode is what the player draws (${DESIGNS.length} modes at ${TIMES.length} times, ${rectsSeen} rects)`);
+  if (!wrong)
+    say(
+      true,
+      `as CSS, every mode is what the player draws (${DESIGNS.length} modes at ${TIMES.length} times, ${rectsSeen} rects)`,
+    );
 
-  lines.push(failed ? `FAIL: ${failed} of the checks above` : "ok: this page shows what the pack and the player say");
+  lines.push(
+    failed
+      ? `FAIL: ${failed} of the checks above`
+      : "ok: this page shows what the pack and the player say",
+  );
   // for a person, and for tools/check-site.js
   const out = document.createElement("pre");
   out.id = "sitecheck";

@@ -321,6 +321,17 @@ and mid-morph: 7056 morphs, rect for rect.
 """
 
 [[step]]
+id = 24
+title = "oxlint and oxfmt"
+status = "done"
+detail = """
+The project's first dev dependencies, installed with pnpm: pnpm fmt (oxfmt,
+80 columns, as the hand-written files already were) and pnpm lint (oxlint,
+tuned in .oxlintrc.json to plain scripts that share a scope). Both run on
+every push. Everything else still needs nothing installed.
+"""
+
+[[step]]
 id = 8
 title = "Publishing"
 status = "todo"

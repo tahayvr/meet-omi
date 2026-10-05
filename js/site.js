@@ -32,7 +32,11 @@ function renderSite() {
   // hero: starts as the plain logo and morphs into each featured mode
   const hd = byIdD(heroId) || DESIGNS[0];
   if (!heroOmi)
-    heroOmi = mountOmi($("heroCanvas"), { margin: 36, bleed: 124, mode: "mark" });
+    heroOmi = mountOmi($("heroCanvas"), {
+      margin: 36,
+      bleed: 124,
+      mode: "mark",
+    });
   else syncOmi(heroOmi);
   const fg = eff(hd.id).fg;
   heroOmi.color = fg === S.fg ? null : fg; // null: the page's accent color

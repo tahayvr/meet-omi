@@ -11,11 +11,11 @@ license = "MIT"
 requires-python = ">=3.9"
 dependencies = []
 classifiers = [
-    # Not on PyPI yet: this keeps an upload from going through by accident.
-    "Private :: Do Not Upload",
-    "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3 :: Only",
-    "Topic :: Multimedia :: Graphics",
+  # Not on PyPI yet: this keeps an upload from going through by accident.
+  "Private :: Do Not Upload",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3 :: Only",
+  "Topic :: Multimedia :: Graphics",
 ]
 
 [tool.setuptools]

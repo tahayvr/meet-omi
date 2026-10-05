@@ -23,7 +23,8 @@ const fs = require("fs"),
 
 const root = path.join(__dirname, ".."),
   out = path.resolve(process.argv[2] || path.join(root, "_site")),
-  git = (...args) => execFileSync("git", args, { cwd: root, encoding: "utf8" }).trim(),
+  git = (...args) =>
+    execFileSync("git", args, { cwd: root, encoding: "utf8" }).trim(),
   build = (process.env.GITHUB_SHA || git("rev-parse", "HEAD")).slice(0, 7);
 
 if (out === root || root.startsWith(out + path.sep)) {
@@ -36,7 +37,13 @@ fs.rmSync(out, { recursive: true, force: true });
 // what git tracks, and what it would if it were added: not what it ignores
 const files = git("ls-files", "--cached", "--others", "--exclude-standard")
   .split("\n")
-  .filter((f) => f && f.split("/")[0] !== inside && !f.startsWith(".github/") && fs.existsSync(path.join(root, f)));
+  .filter(
+    (f) =>
+      f &&
+      f.split("/")[0] !== inside &&
+      !f.startsWith(".github/") &&
+      fs.existsSync(path.join(root, f)),
+  );
 for (const f of files) {
   fs.mkdirSync(path.dirname(path.join(out, f)), { recursive: true });
   fs.copyFileSync(path.join(root, f), path.join(out, f));
@@ -46,15 +53,23 @@ for (const f of files) {
 const page = path.join(out, "index.html");
 let html = fs.readFileSync(page, "utf8"),
   stamped = 0;
-html = html.replace(/(<(?:script|link)\b[^>]*?\b(?:src|href)=")([^":?#]+\.(?:js|css))(")/g, (all, before, file, after) => {
-  stamped++;
-  return `${before}${file}?v=${build}${after}`;
-});
+html = html.replace(
+  /(<(?:script|link)\b[^>]*?\b(?:src|href)=")([^":?#]+\.(?:js|css))(")/g,
+  (all, before, file, after) => {
+    stamped++;
+    return `${before}${file}?v=${build}${after}`;
+  },
+);
 if (!/<meta charset[^>]*>/i.test(html) || !stamped) {
   console.error("index.html isn't laid out as expected: nothing was stamped");
   process.exit(1);
 }
-html = html.replace(/(<meta charset[^>]*>)/i, `$1\n    <meta name="omi-build" content="${build}" />`);
+html = html.replace(
+  /(<meta charset[^>]*>)/i,
+  `$1\n    <meta name="omi-build" content="${build}" />`,
+);
 fs.writeFileSync(page, html);
 
-console.log(`${path.relative(process.cwd(), out) || "."}/: ${files.length} files, build ${build} (on ${stamped} addresses in index.html)`);
+console.log(
+  `${path.relative(process.cwd(), out) || "."}/: ${files.length} files, build ${build} (on ${stamped} addresses in index.html)`,
+);

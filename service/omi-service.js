@@ -18,7 +18,9 @@ const args = process.argv.slice(2),
   socket = opt("socket") || socketPath(),
   packPath = opt("pack"),
   modes = packPath
-    ? new Set(JSON.parse(fs.readFileSync(packPath, "utf8")).modes.map((m) => m.id))
+    ? new Set(
+        JSON.parse(fs.readFileSync(packPath, "utf8")).modes.map((m) => m.id),
+      )
     : null;
 
 let state = { mode: "mark", from: null, since: Date.now(), instant: true },
@@ -60,7 +62,8 @@ function onSet(app, msg) {
       timer = null;
       if (change(msg.then, false)) log(`${msg.then} (after ${msg.mode})`);
     }, msg.for * 1000);
-  if (changed) log(`${msg.mode}${msg.instant ? " (instant)" : ""} from ${app.name}`);
+  if (changed)
+    log(`${msg.mode}${msg.instant ? " (instant)" : ""} from ${app.name}`);
   // the app that sent it gets an answer either way
   else send(app, stateMsg());
 }
@@ -70,7 +73,8 @@ const server = net.createServer((app) => {
   apps.add(app);
   send(app, stateMsg());
   lines(app, (msg) => {
-    if (msg.type === "hello" && typeof msg.name === "string") app.name = msg.name;
+    if (msg.type === "hello" && typeof msg.name === "string")
+      app.name = msg.name;
     else if (msg.type === "set") onSet(app, msg);
     else if (msg.type === "get") send(app, stateMsg());
   });

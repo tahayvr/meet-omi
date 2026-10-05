@@ -42,11 +42,7 @@ const CONF = Array.from({ length: 22 }, (_, i) => {
 const EGG = {
   party: {
     face: [...F.success, ...as("extra", CONF)],
-    logo: [
-      ...tint(MISC, "pop"),
-      ...INNER_RECTS,
-      ...tint(OUTER_RECTS, "pop"),
-    ],
+    logo: [...tint(MISC, "pop"), ...INNER_RECTS, ...tint(OUTER_RECTS, "pop")],
     mood: "m-happy",
   },
   love: {
@@ -54,8 +50,8 @@ const EGG = {
     mood: "",
   },
   glitch: {
-    face: [R(100, 110, 20, 40, "gl"), R(180, 110, 20, 40, "gl")].map(
-      (r, i) => withD(r, 2.4, 1.1 + i * 0.05),
+    face: [R(100, 110, 20, 40, "gl"), R(180, 110, 20, 40, "gl")].map((r, i) =>
+      withD(r, 2.4, 1.1 + i * 0.05),
     ),
     logo: LOGO.map((r, i) =>
       withD({ ...r, c: "gl" }, 2.4, [0, 0.9, 1.6][i % 3]),
@@ -93,12 +89,8 @@ const EGG = {
   tiling: {
     face: as("extra", [
       ...outline(72, 72, 70, 156, 6, "tile").map((r) => withD(r, 3, 0)),
-      ...outline(152, 72, 76, 73, 6, "tile").map((r) =>
-        withD(r, 3, 0.35),
-      ),
-      ...outline(152, 155, 76, 73, 6, "tile").map((r) =>
-        withD(r, 3, 0.7),
-      ),
+      ...outline(152, 72, 76, 73, 6, "tile").map((r) => withD(r, 3, 0.35)),
+      ...outline(152, 155, 76, 73, 6, "tile").map((r) => withD(r, 3, 0.7)),
     ]),
   },
   mindblown: {
@@ -159,11 +151,21 @@ const MORE = {
     mood: "",
   },
   recording: {
-    face: [R(100, 110, 20, 40, "eye"), R(180, 110, 20, 40, "eye"), { ...R(80, 80, 20, 20, "rec"), role: "extra" }],
+    face: [
+      R(100, 110, 20, 40, "eye"),
+      R(180, 110, 20, 40, "eye"),
+      { ...R(80, 80, 20, 20, "rec"), role: "extra" },
+    ],
     mood: "",
   },
-  nod: { face: [R(100, 110, 20, 40, "nod"), R(180, 110, 20, 40, "nod")], mood: "" },
-  shake: { face: [R(100, 110, 20, 40, "shake"), R(180, 110, 20, 40, "shake")], mood: "" },
+  nod: {
+    face: [R(100, 110, 20, 40, "nod"), R(180, 110, 20, 40, "nod")],
+    mood: "",
+  },
+  shake: {
+    face: [R(100, 110, 20, 40, "shake"), R(180, 110, 20, 40, "shake")],
+    mood: "",
+  },
 };
 const DESIGNS_OLD = [
   { id: "logo", name: "Logo", face: [], mood: "" },
@@ -341,4 +343,3 @@ DESIGNS.forEach((d) => {
   d.logo = withRole(d.logo, (r) => (inLogo(r) ? "frame" : "extra"));
   d.face = withRole(d.face, () => "eye");
 });
-

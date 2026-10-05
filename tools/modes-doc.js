@@ -19,7 +19,10 @@ const root = path.join(__dirname, ".."),
 
 // the reference player, without a browser
 const ctx = vm.createContext({});
-vm.runInContext(fs.readFileSync(path.join(root, "pack/omi.js"), "utf8") + ";this.Omi = Omi;", ctx);
+vm.runInContext(
+  fs.readFileSync(path.join(root, "pack/omi.js"), "utf8") + ";this.Omi = Omi;",
+  ctx,
+);
 const omi = new ctx.Omi(null, pack, { color: "#000" });
 
 // What each mode is for, in an app. Reactions say "then back".
@@ -31,7 +34,8 @@ const USE = {
   "thinking-sideeye": "A variation of thinking, with a glance aside",
   "thinking-hmm": "A variation of thinking: weighing something",
   "thinking-stack": "A variation of thinking: something building up",
-  "thinking-snake": "A variation of thinking that fits a terminal (an easter egg of sorts)",
+  "thinking-snake":
+    "A variation of thinking that fits a terminal (an easter egg of sorts)",
   updating: "Downloading or installing",
   uploading: "Sending something away",
   working: "Busy doing it for the user",
@@ -46,7 +50,8 @@ const USE = {
   listening: "Waiting for the user to press a key",
   happy: "Pleased, then back",
   laughing: "A joke landed, then back",
-  excited: "Something good is about to happen (a theme picker, a download that's nearly done)",
+  excited:
+    "Something good is about to happen (a theme picker, a download that's nearly done)",
   love: "A favourite, a thank-you, then back",
   wink: "A small aside, then back",
   shy: "A compliment received, then back",
@@ -67,9 +72,12 @@ const USE = {
   tiling: "Windows being arranged (the Omarchy tiling tutorial)",
   "mind-blown": "Something impressive just happened, then back",
   hello: "A greeting: first boot, a first open, then back",
-  goodbye: "Logout, shutdown, reboot: a tilt and the eyes close, then the host shows the plain logo",
-  asking: "Waiting for the user to decide: an agent wants approval, a dialog needs an answer",
-  attention: "A ping: a notification arrived, a background job finished, then back",
+  goodbye:
+    "Logout, shutdown, reboot: a tilt and the eyes close, then the host shows the plain logo",
+  asking:
+    "Waiting for the user to decide: an agent wants approval, a dialog needs an answer",
+  attention:
+    "A ping: a notification arrived, a background job finished, then back",
   recording: "The screen is being shared or recorded, as long as it lasts",
   nod: "Yes: a small agreement, lighter than success, then back",
   shake: "No: the gentle no that error is too strong for, then back",
@@ -86,7 +94,9 @@ function inView(r) {
     y = Math.max(r.y, vy),
     x2 = Math.min(r.x + r.w, vx + vw),
     y2 = Math.min(r.y + r.h, vy + vh);
-  return x2 - x > 0.01 && y2 - y > 0.01 ? Object.assign({}, r, { x, y, w: x2 - x, h: y2 - y }) : null;
+  return x2 - x > 0.01 && y2 - y > 0.01
+    ? Object.assign({}, r, { x, y, w: x2 - x, h: y2 - y })
+    : null;
 }
 function rectsSvg(mode, ox = 0, oy = 0) {
   return omi
@@ -141,13 +151,22 @@ files["docs/modes/sheet.svg"] = sheet();
 // --- the gallery
 const secs = (s) => (s % 1 ? s.toFixed(1) : String(s)) + " s";
 const rows = pack.modes.map((m) => {
-  const what = m.kind === "reaction" ? `reaction, ${secs(omi.hold(m.id))}` : "state";
-  const tags = [m.family ? `family: ${m.family}` : "", m.easter ? "easter egg" : ""].filter(Boolean).join(", ");
+  const what =
+    m.kind === "reaction" ? `reaction, ${secs(omi.hold(m.id))}` : "state";
+  const tags = [
+    m.family ? `family: ${m.family}` : "",
+    m.easter ? "easter egg" : "",
+  ]
+    .filter(Boolean)
+    .join(", ");
   const loop = omi.loopSeconds(m.id);
   return `| ![${m.name}](modes/${m.id}.svg) | \`${m.id}\` | ${m.name} | ${what} | ${loop ? secs(loop) : "still"} | ${USE[m.id] || ""}${tags ? ` (${tags})` : ""} |`;
 });
-const unknown = Object.keys(USE).filter((id) => !pack.modes.some((m) => m.id === id));
-if (unknown.length) throw new Error("USE names modes not in the pack: " + unknown.join(", "));
+const unknown = Object.keys(USE).filter(
+  (id) => !pack.modes.some((m) => m.id === id),
+);
+if (unknown.length)
+  throw new Error("USE names modes not in the pack: " + unknown.join(", "));
 
 const md = `# Every Omi mode
 
@@ -180,25 +199,35 @@ files["docs/modes.md"] = md;
 
 // stills of modes the pack no longer has
 const gone = fs.existsSync(outDir)
-  ? fs.readdirSync(outDir).filter((f) => f.endsWith(".svg") && !files[`docs/modes/${f}`])
+  ? fs
+      .readdirSync(outDir)
+      .filter((f) => f.endsWith(".svg") && !files[`docs/modes/${f}`])
   : [];
 
 if (process.argv.includes("--check")) {
   const stale = Object.keys(files).filter((name) => {
     const file = path.join(root, name);
-    return !fs.existsSync(file) || fs.readFileSync(file, "utf8") !== files[name];
+    return (
+      !fs.existsSync(file) || fs.readFileSync(file, "utf8") !== files[name]
+    );
   });
   for (const name of stale) console.log(`FAIL ${name} is out of date`);
-  for (const f of gone) console.log(`FAIL docs/modes/${f} is for a mode the pack doesn't have`);
+  for (const f of gone)
+    console.log(`FAIL docs/modes/${f} is for a mode the pack doesn't have`);
   if (stale.length || gone.length) {
     console.log("run node tools/modes-doc.js and commit docs/");
     process.exit(1);
   }
-  console.log(`ok: docs/modes.md and ${pack.modes.length} stills are up to date`);
+  console.log(
+    `ok: docs/modes.md and ${pack.modes.length} stills are up to date`,
+  );
   process.exit(0);
 }
 
 fs.mkdirSync(outDir, { recursive: true });
 for (const f of gone) fs.unlinkSync(path.join(outDir, f));
-for (const [name, text] of Object.entries(files)) fs.writeFileSync(path.join(root, name), text);
-console.log(`docs/modes.md: ${pack.modes.length} modes; docs/modes/: ${pack.modes.length} stills and sheet.svg`);
+for (const [name, text] of Object.entries(files))
+  fs.writeFileSync(path.join(root, name), text);
+console.log(
+  `docs/modes.md: ${pack.modes.length} modes; docs/modes/: ${pack.modes.length} stills and sheet.svg`,
+);

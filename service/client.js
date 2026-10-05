@@ -51,7 +51,13 @@ function lines(stream, onMessage) {
 /* Connect to the service. onState(state) runs for every state it sends:
    on connect, after every change, and in answer to get and set. set() and
    get() resolve with the answer (or reject with the service's error). */
-function connect({ socket = socketPath(), name, onState, onError, onClose } = {}) {
+function connect({
+  socket = socketPath(),
+  name,
+  onState,
+  onError,
+  onClose,
+} = {}) {
   const conn = net.createConnection(socket),
     waiting = [];
   let closed = false,

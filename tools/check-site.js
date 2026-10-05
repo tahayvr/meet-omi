@@ -21,7 +21,8 @@ const fs = require("fs"),
   { spawn, spawnSync } = require("child_process");
 
 const args = process.argv.slice(2),
-  named = (flag) => (args.includes(flag) ? args.splice(args.indexOf(flag), 2)[1] : null),
+  named = (flag) =>
+    args.includes(flag) ? args.splice(args.indexOf(flag), 2)[1] : null,
   dir = named("--dir"),
   wanted = named("--build"),
   remote = args[0];
@@ -33,7 +34,12 @@ function findChrome() {
     "/Applications/Chromium.app/Contents/MacOS/Chromium",
   ].filter((p) => fs.existsSync(p));
   if (apps.length) return apps[0];
-  for (const name of ["chromium", "google-chrome", "google-chrome-stable", "chromium-browser"]) {
+  for (const name of [
+    "chromium",
+    "google-chrome",
+    "google-chrome-stable",
+    "chromium-browser",
+  ]) {
     const found = spawnSync("which", [name], { encoding: "utf8" });
     if (found.status === 0 && found.stdout.trim()) return found.stdout.trim();
   }
@@ -52,9 +58,15 @@ const freePort = () =>
 // the repo, served by tools/dev.js; resolves once it answers
 function serve(port) {
   return new Promise((resolve, reject) => {
-    const server = spawn(process.execPath, [path.join(__dirname, "dev.js"), String(port), ...(dir ? [dir] : [])], { stdio: ["ignore", "pipe", "inherit"] });
+    const server = spawn(
+      process.execPath,
+      [path.join(__dirname, "dev.js"), String(port), ...(dir ? [dir] : [])],
+      { stdio: ["ignore", "pipe", "inherit"] },
+    );
     server.on("error", reject);
-    server.on("exit", (code) => reject(new Error(`the server stopped (${code})`)));
+    server.on("exit", (code) =>
+      reject(new Error(`the server stopped (${code})`)),
+    );
     server.stdout.once("data", () => resolve(server));
   });
 }
@@ -114,7 +126,12 @@ async function load(chrome, url) {
     // Chrome's helpers may still be letting go of it: try a few times, and
     // a folder left in the temporary directory is no reason to fail
     try {
-      fs.rmSync(profile, { recursive: true, force: true, maxRetries: 10, retryDelay: 200 });
+      fs.rmSync(profile, {
+        recursive: true,
+        force: true,
+        maxRetries: 10,
+        retryDelay: 200,
+      });
     } catch (e) {}
     if (page.dom.includes("</html>") || page.late || tries === 1) return page;
     await new Promise((later) => setTimeout(later, 1000));
@@ -124,7 +141,9 @@ async function load(chrome, url) {
 (async () => {
   const chrome = findChrome();
   if (!chrome) {
-    console.log("FAIL no Chrome or Chromium found: install one, or set CHROME to its path");
+    console.log(
+      "FAIL no Chrome or Chromium found: install one, or set CHROME to its path",
+    );
     process.exit(1);
   }
   let server = null,
@@ -138,25 +157,43 @@ async function load(chrome, url) {
   let page, built;
   for (let tries = wanted && remote ? 18 : 1; tries > 0; tries--) {
     page = await load(chrome, url + (url.includes("?") ? "&" : "?") + "check");
-    built = (/<meta name="omi-build" content="([^"]*)"/.exec(page.dom) || [])[1];
+    built = (/<meta name="omi-build" content="([^"]*)"/.exec(page.dom) ||
+      [])[1];
     if (!wanted || built === wanted || tries === 1) break;
-    console.log(`      ${url} is ${built ? `build ${built}` : "an unstamped build"}, waiting for ${wanted}`);
+    console.log(
+      `      ${url} is ${built ? `build ${built}` : "an unstamped build"}, waiting for ${wanted}`,
+    );
     await new Promise((later) => setTimeout(later, 10000));
   }
-  if (server) server.removeAllListeners("exit"), server.kill();
+  if (server) {
+    server.removeAllListeners("exit");
+    server.kill();
+  }
 
   const dom = page.dom,
     report = /<pre id="sitecheck"[^>]*>([\s\S]*?)<\/pre>/.exec(dom),
     result = /<html[^>]*\sdata-check="(\w+)"/.exec(dom);
   if (!dom.includes("</html>")) {
-    console.log(`FAIL Chrome printed no page for ${url}` + (page.late ? " in two minutes" : ""));
+    console.log(
+      `FAIL Chrome printed no page for ${url}` +
+        (page.late ? " in two minutes" : ""),
+    );
     // what the page logged, and what Chrome said last, less its own chatter
-    const said = page.said.split("\n").filter((l) => l.trim() && !/updater|VERBOSE|dbus|gcm/.test(l));
-    console.log([...said.filter((l) => /CONSOLE/.test(l)).slice(-12), ...said.filter((l) => !/CONSOLE/.test(l)).slice(-8)].join("\n"));
+    const said = page.said
+      .split("\n")
+      .filter((l) => l.trim() && !/updater|VERBOSE|dbus|gcm/.test(l));
+    console.log(
+      [
+        ...said.filter((l) => /CONSOLE/.test(l)).slice(-12),
+        ...said.filter((l) => !/CONSOLE/.test(l)).slice(-8),
+      ].join("\n"),
+    );
     process.exit(1);
   }
   if (wanted && built !== wanted) {
-    console.log(`FAIL the page at ${url} is ${built ? `build ${built}` : "an unstamped build"}, not ${wanted}`);
+    console.log(
+      `FAIL the page at ${url} is ${built ? `build ${built}` : "an unstamped build"}, not ${wanted}`,
+    );
     process.exit(1);
   }
   if (!report || !result) {
@@ -167,7 +204,13 @@ async function load(chrome, url) {
     );
     process.exit(1);
   }
-  console.log(report[1].replace(/&lt;/g, "<").replace(/&gt;/g, ">").replace(/&quot;/g, '"').replace(/&amp;/g, "&"));
+  console.log(
+    report[1]
+      .replace(/&lt;/g, "<")
+      .replace(/&gt;/g, ">")
+      .replace(/&quot;/g, '"')
+      .replace(/&amp;/g, "&"),
+  );
   process.exit(result[1] === "ok" ? 0 : 1);
 })().catch((err) => {
   console.log(`FAIL ${err.message}`);

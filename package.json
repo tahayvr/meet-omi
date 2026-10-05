@@ -13,6 +13,13 @@
     "check:rust": "cd player/rust && cargo test",
     "check:qt": "QML_XHR_ALLOW_FILE_READ=1 /usr/lib/qt6/bin/qmltestrunner -input tools/qml",
     "check:quickshell": "node tools/check-quickshell.js",
-    "dev": "node tools/dev.js"
+    "dev": "node tools/dev.js",
+    "fmt": "oxfmt",
+    "fmt:check": "oxfmt --check",
+    "lint": "oxlint --deny-warnings"
+  },
+  "devDependencies": {
+    "oxfmt": "^0.71.0",
+    "oxlint": "^1.86.0"
   }
 }

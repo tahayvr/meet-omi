@@ -84,9 +84,7 @@ function lum(hex) {
   const n = parseInt(hex.slice(1), 16),
     c = [(n >> 16) & 255, (n >> 8) & 255, n & 255].map((v) => {
       v /= 255;
-      return v <= 0.03928
-        ? v / 12.92
-        : Math.pow((v + 0.055) / 1.055, 2.4);
+      return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4);
     });
   return 0.2126 * c[0] + 0.7152 * c[1] + 0.0722 * c[2];
 }
@@ -128,7 +126,7 @@ const RESET_ICON =
 const hasOver = (id) =>
   !!(S.over || {})[id] && Object.keys(S.over[id]).length > 0;
 function clearOver(id) {
-  const o = { ...(S.over || {}) };
+  const o = { ...S.over };
   delete o[id];
   S = { ...S, over: o };
   persist();
@@ -200,9 +198,7 @@ function syncControls() {
   $("fgPick").value = S.fg;
   $("fgHex").value = S.fg;
   const ti = THEMES.findIndex(
-    (t) =>
-      t.bg === (S.bg || "").toLowerCase() &&
-      t.fg === S.fg.toLowerCase(),
+    (t) => t.bg === (S.bg || "").toLowerCase() && t.fg === S.fg.toLowerCase(),
   );
   $("themeSel").value = ti < 0 ? "custom" : String(ti);
   $("anim").checked = S.anim;
@@ -231,8 +227,7 @@ function syncControls() {
       b.setAttribute(
         "aria-pressed",
         String(
-          (b.dataset.c || null) ===
-            (S.bg ? S.bg.toLowerCase() : null) ||
+          (b.dataset.c || null) === (S.bg ? S.bg.toLowerCase() : null) ||
             (!b.dataset.c && !S.bg),
         ),
       ),
@@ -253,7 +248,7 @@ function applySpeed() {
       if (
         window.CSSAnimation &&
         a instanceof CSSAnimation &&
-        /^omi-/.test(a.animationName)
+        a.animationName.startsWith("omi-")
       ) {
         const t = a.effect && a.effect.target,
           host = t && t.closest && t.closest("[data-sid]");
@@ -282,7 +277,7 @@ const fmtRules = (fmt) => ({
   noRatio: ["txt"].includes(fmt),
   noPad: ["json"].includes(fmt),
 });
-const eff = (id) => ({ ...S, ...((S.over || {})[id] || {}) });
+const eff = (id) => ({ ...S, ...(S.over || {})[id] });
 const inView = () => typeof view !== "undefined" && view.open;
 const ctx = () => (inView() ? eff(DESIGNS[vi].id) : S);
 let X = S; // settings for the export in progress
@@ -296,9 +291,9 @@ function set(patch) {
       ...S,
       ...g,
       over: {
-        ...(S.over || {}),
+        ...S.over,
         ...(Object.keys(o).length
-          ? { [id]: { ...((S.over || {})[id] || {}), ...o } }
+          ? { [id]: { ...(S.over || {})[id], ...o } }
           : {}),
       },
     };
@@ -345,12 +340,8 @@ $("themeSel").addEventListener("change", (e) => {
   if (t) set({ bg: t.bg, fg: t.fg });
 });
 const hexOk = (v) => /^#[0-9a-f]{6}$/i.test(v);
-$("bgPick").addEventListener("input", (e) =>
-  set({ bg: e.target.value }),
-);
-$("fgPick").addEventListener("input", (e) =>
-  set({ fg: e.target.value }),
-);
+$("bgPick").addEventListener("input", (e) => set({ bg: e.target.value }));
+$("fgPick").addEventListener("input", (e) => set({ fg: e.target.value }));
 $("bgHex").addEventListener("change", (e) => {
   let v = e.target.value.trim();
   if (v && v[0] !== "#") v = "#" + v;
@@ -365,16 +356,10 @@ $("fgHex").addEventListener("change", (e) => {
   else syncControls();
 });
 ["anim", "names", "clear"].forEach((k) =>
-  $(k).addEventListener("change", (e) =>
-    set({ [k]: e.target.checked }),
-  ),
+  $(k).addEventListener("change", (e) => set({ [k]: e.target.checked })),
 );
-$("tile").addEventListener("input", (e) =>
-  set({ tile: +e.target.value }),
-);
-$("speed").addEventListener("input", (e) =>
-  set({ speed: +e.target.value }),
-);
+$("tile").addEventListener("input", (e) => set({ tile: +e.target.value }));
+$("speed").addEventListener("input", (e) => set({ speed: +e.target.value }));
 ["fmt", "size", "pad", "vlen", "ratio"].forEach((k) =>
   $(k).addEventListener("change", (e) => set({ [k]: e.target.value })),
 );

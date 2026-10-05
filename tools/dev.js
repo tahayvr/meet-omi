@@ -34,12 +34,16 @@ const TYPES = {
 };
 
 function send(res, status, text, headers) {
-  res.writeHead(status, Object.assign({ "Content-Type": "text/plain; charset=utf-8" }, headers));
+  res.writeHead(
+    status,
+    Object.assign({ "Content-Type": "text/plain; charset=utf-8" }, headers),
+  );
   res.end(text);
 }
 
 function answer(req, res) {
-  if (req.method !== "GET" && req.method !== "HEAD") return send(res, 405, "GET only\n");
+  if (req.method !== "GET" && req.method !== "HEAD")
+    return send(res, 405, "GET only\n");
   let url, file;
   try {
     url = new URL(req.url, "http://localhost");
@@ -47,12 +51,16 @@ function answer(req, res) {
   } catch (e) {
     return send(res, 400, "Bad request\n");
   }
-  if (file !== root && !file.startsWith(root + path.sep)) return send(res, 403, "Outside the repo\n");
+  if (file !== root && !file.startsWith(root + path.sep))
+    return send(res, 403, "Outside the repo\n");
 
   fs.stat(file, (err, stat) => {
     if (!err && stat.isDirectory()) {
       // a folder's page loads its files by relative paths, which need the slash
-      if (!url.pathname.endsWith("/")) return send(res, 301, "", { Location: url.pathname + "/" + url.search });
+      if (!url.pathname.endsWith("/"))
+        return send(res, 301, "", {
+          Location: url.pathname + "/" + url.search,
+        });
       file = path.join(file, "index.html");
       return fs.stat(file, (e, s) => serve(e, s));
     }
@@ -60,9 +68,11 @@ function answer(req, res) {
   });
 
   function serve(err, stat) {
-    if (err || !stat.isFile()) return send(res, 404, `Nothing at ${url.pathname}\n`);
+    if (err || !stat.isFile())
+      return send(res, 404, `Nothing at ${url.pathname}\n`);
     res.writeHead(200, {
-      "Content-Type": TYPES[path.extname(file).toLowerCase()] || "application/octet-stream",
+      "Content-Type":
+        TYPES[path.extname(file).toLowerCase()] || "application/octet-stream",
       "Content-Length": stat.size,
       "Cache-Control": "no-store",
     });
@@ -94,8 +104,11 @@ function listen(port, done) {
       console.log(`The web example:   http://localhost:${port}/examples/web/`);
       return;
     }
-    if (err.code === "EADDRINUSE" && !asked && port < FIRST + TRIES) return start(port + 1);
-    console.error(err.code === "EADDRINUSE" ? `Port ${port} is in use` : err.message);
+    if (err.code === "EADDRINUSE" && !asked && port < FIRST + TRIES)
+      return start(port + 1);
+    console.error(
+      err.code === "EADDRINUSE" ? `Port ${port} is in use` : err.message,
+    );
     process.exit(1);
   });
 })(asked || FIRST);

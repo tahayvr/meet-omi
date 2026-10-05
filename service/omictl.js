@@ -36,7 +36,9 @@ if (cmd === "watch") {
         ? omi.get()
         : omi.set(mode, {
             ...(rest.includes("--instant") ? { instant: true } : {}),
-            ...(opt("for") != null ? { for: +opt("for"), then: opt("then") } : {}),
+            ...(opt("for") != null
+              ? { for: +opt("for"), then: opt("then") }
+              : {}),
           });
   req.then(show, fail).finally(() => omi.close());
 } else {

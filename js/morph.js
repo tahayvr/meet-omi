@@ -36,7 +36,12 @@ function mountOmi(canvas, { margin = 70, bleed = 90, mode } = {}) {
   const side = 300 + 2 * margin;
   canvas.style.setProperty("--bleed", `${(bleed / side) * 100}%`);
   return new Omi(canvas, pagePack(), {
-    view: [-margin - bleed, -margin - bleed, side + 2 * bleed, side + 2 * bleed],
+    view: [
+      -margin - bleed,
+      -margin - bleed,
+      side + 2 * bleed,
+      side + 2 * bleed,
+    ],
     bodyMotion: false,
     mode,
     ...pagePlayerOpts(),
@@ -82,7 +87,9 @@ function syncMorphUI() {
   const id = omi ? omi.mode : MORPH_MARK.id;
   document
     .querySelectorAll("#mpick .mbtn")
-    .forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.id === id)));
+    .forEach((b) =>
+      b.setAttribute("aria-pressed", String(b.dataset.id === id)),
+    );
   const d = morphDesign(id);
   $("mname").textContent = d ? d.name : "";
   const t = $("mtour");
@@ -102,7 +109,11 @@ function renderMorph() {
       groups
         .map(
           (g) =>
-            `<div class="mgroup"><h3>${g}</h3><div class="mbtns">${DESIGNS.filter((d) => d.group === g).map(btn).join("")}</div></div>`,
+            `<div class="mgroup"><h3>${g}</h3><div class="mbtns">${DESIGNS.filter(
+              (d) => d.group === g,
+            )
+              .map(btn)
+              .join("")}</div></div>`,
         )
         .join("");
     pick.addEventListener("click", (e) => {

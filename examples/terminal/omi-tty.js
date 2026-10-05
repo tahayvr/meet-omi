@@ -28,7 +28,9 @@ const fs = require("fs"),
   path = require("path"),
   Omi = require("../../pack/omi.js");
 
-const pack = JSON.parse(fs.readFileSync(path.join(__dirname, "../../pack/omi.json"), "utf8"));
+const pack = JSON.parse(
+  fs.readFileSync(path.join(__dirname, "../../pack/omi.json"), "utf8"),
+);
 
 // ---------------------------------------------------------------- options
 const args = process.argv.slice(2),
@@ -39,14 +41,18 @@ const args = process.argv.slice(2),
     args.splice(i, 2);
     return v;
   },
-  flag = (name) => args.includes(name) && args.splice(args.indexOf(name), 1).length > 0;
+  flag = (name) =>
+    args.includes(name) && args.splice(args.indexOf(name), 1).length > 0;
 const once = flag("--once"),
   following = flag("--follow"),
   bounce = flag("--bounce"),
   askedSize = opt("size", null),
   every = +opt("every", 2.5),
   look = String(opt("look", "0,0")).split(",").map(Number),
-  rgb = (hex) => (/^#[0-9a-f]{6}$/i.test(hex || "") ? [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16)) : null),
+  rgb = (hex) =>
+    /^#[0-9a-f]{6}$/i.test(hex || "")
+      ? [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16))
+      : null,
   theme = omarchyTheme(),
   fg = rgb(opt("fg", null)) || theme.accent, // null: the terminal's foreground
   bg = rgb(opt("bg", null)) || theme.background, // null: no blending
@@ -66,7 +72,9 @@ function omarchyTheme() {
       "utf8",
     );
     const get = (key) => {
-      const m = toml.match(new RegExp("^\\s*" + key + '\\s*=\\s*"(#[0-9a-fA-F]{6})"', "m"));
+      const m = toml.match(
+        new RegExp("^\\s*" + key + '\\s*=\\s*"(#[0-9a-fA-F]{6})"', "m"),
+      );
       return m ? rgb(m[1]) : null;
     };
     return { accent: get("accent"), background: get("background") };
@@ -102,7 +110,8 @@ function pixels(rects) {
       y1 = Math.min(size, Math.round((r.y + r.h - vy) * s)),
       o = Math.min(1, r.o);
     for (let y = y0; y < y1; y++)
-      for (let x = x0; x < x1; x++) on[y * size + x] = Math.max(on[y * size + x], o);
+      for (let x = x0; x < x1; x++)
+        on[y * size + x] = Math.max(on[y * size + x], o);
   }
   return on;
 }
@@ -115,7 +124,17 @@ function color(a) {
   return fg.map((c, k) => Math.round(bg[k] + (c - bg[k]) * a));
 }
 const sgr = (c, layer) =>
-  c === null ? (layer === 38 ? "39" : "49") : c === "fg" ? (fg ? `${layer};2;${fg.join(";")}` : layer === 38 ? "39" : "7") : `${layer};2;${c.join(";")}`;
+  c === null
+    ? layer === 38
+      ? "39"
+      : "49"
+    : c === "fg"
+      ? fg
+        ? `${layer};2;${fg.join(";")}`
+        : layer === 38
+          ? "39"
+          : "7"
+      : `${layer};2;${c.join(";")}`;
 
 /* One row of characters: ▀ with the top pixel's color as foreground and the
    bottom's as background. Escape codes only when a color changes. */
@@ -126,12 +145,13 @@ function row(on, y) {
     const top = color(on[y * size + x]),
       bottom = color(on[(y + 1) * size + x]);
     let ch, code;
-    if (top === null && bottom === null) (ch = " "), (code = "\x1b[39;49m");
-    else if (bottom === null) (ch = "▀"), (code = `\x1b[${sgr(top, 38)};49m`);
-    else if (top === null) (ch = "▄"), (code = `\x1b[${sgr(bottom, 38)};49m`);
-    else if (top === "fg" && bottom === "fg") (ch = "█"), (code = `\x1b[${sgr("fg", 38)};49m`);
-    else (ch = "▀"), (code = `\x1b[${sgr(top, 38)};${sgr(bottom, 48)}m`);
-    if (code !== last) (out += code), (last = code);
+    if (top === null && bottom === null) ((ch = " "), (code = "\x1b[39;49m"));
+    else if (bottom === null) ((ch = "▀"), (code = `\x1b[${sgr(top, 38)};49m`));
+    else if (top === null) ((ch = "▄"), (code = `\x1b[${sgr(bottom, 38)};49m`));
+    else if (top === "fg" && bottom === "fg")
+      ((ch = "█"), (code = `\x1b[${sgr("fg", 38)};49m`));
+    else ((ch = "▀"), (code = `\x1b[${sgr(top, 38)};${sgr(bottom, 48)}m`));
+    if (code !== last) ((out += code), (last = code));
     out += ch;
   }
   return out + "\x1b[0m";
@@ -194,7 +214,9 @@ const tick = () => {
   const on = pixels(omi.rects()),
     lines = [];
   for (let y = 0; y < size; y += 2) lines.push(row(on, y));
-  lines.push(`\x1b[2K  ${pack.modes.find((m) => m.id === omi.mode).name}  (Ctrl+C to quit)`);
+  lines.push(
+    `\x1b[2K  ${pack.modes.find((m) => m.id === omi.mode).name}  (Ctrl+C to quit)`,
+  );
   let out = "";
   lines.forEach((l, i) => {
     if (shown[i] !== l) out += `\x1b[${i + 1};1H${l}`;

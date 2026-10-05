@@ -17,6 +17,23 @@ jobs:
           node-version: 22
       - run: npm run check
 
+  # the code reads the way the project writes it (oxfmt), and has none of
+  # the mistakes oxlint knows
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 12
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm lint
+      - run: pnpm fmt:check
+
   # the Rust player, against the same conformance data
   rust:
     runs-on: ubuntu-latest

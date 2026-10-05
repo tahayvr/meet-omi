@@ -1,0 +1,30 @@
+{
+  "$schema": "./node_modules/oxlint/configuration_schema.json",
+  // built from other files here, or someone else's
+  "ignorePatterns": ["pack/", "js/vendor/"],
+  "rules": {
+    // `ready && go()` and `a ? b() : c()` as statements are how this code is written
+    "no-unused-expressions": [
+      "warn",
+      { "allowShortCircuit": true, "allowTernary": true }
+    ],
+    // an error caught to be ignored needs no name
+    "no-unused-vars": ["warn", { "caughtErrors": "none" }],
+    // "then" is a field of the Omi state protocol ({ for, then }) and of JSON Schema (if, then)
+    "unicorn/no-thenable": "off"
+  },
+  "overrides": [
+    {
+      // The jig's scripts are plain scripts sharing one scope: what one
+      // declares at the top, another uses, and a linter that reads one file
+      // at a time can't tell that from a name nobody uses.
+      "files": ["js/**/*.js"],
+      "rules": { "no-unused-vars": "off" }
+    },
+    {
+      // `if (x) (a = 1), (b = 2);` is how these two set a few things at once
+      "files": ["player/omi.js", "examples/terminal/omi-tty.js"],
+      "rules": { "no-unused-expressions": "off" }
+    }
+  ]
+}

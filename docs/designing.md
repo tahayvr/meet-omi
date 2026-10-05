@@ -41,15 +41,15 @@ it: apps never read the jig's code. Ideas waiting to be designed are in
 
 ## Where things are
 
-| What | Where |
-| --- | --- |
-| The modes: faces, props, which loop each piece plays | `js/designs.js` (`DESIGNS`, grouped; faces in `F`, props and eggs beside it) |
-| The pieces' building blocks and the logo | `js/geometry.js` (`R`, `LOGO`, `F`, `ARROW`, `QMARK`…) |
-| Frame effects: bars that flow, grow or tile | `js/frames.js` |
-| Every animation, as keyframes | `js/motion.js` (`ANIM`) |
-| What a mode is for: kind, hold, family, easter | `js/pack.js` (`REACTIONS`, `FAMILIES`, `EASTER`) |
-| The pack and its spec | `js/pack.js` (`buildPack`, `PACK_README`), written to `pack/` by `tools/build-pack.js` |
-| The gallery | `docs/modes.md` and `docs/modes/`, written by `tools/modes-doc.js` |
+| What                                                 | Where                                                                                  |
+| ---------------------------------------------------- | -------------------------------------------------------------------------------------- |
+| The modes: faces, props, which loop each piece plays | `js/designs.js` (`DESIGNS`, grouped; faces in `F`, props and eggs beside it)           |
+| The pieces' building blocks and the logo             | `js/geometry.js` (`R`, `LOGO`, `F`, `ARROW`, `QMARK`…)                                 |
+| Frame effects: bars that flow, grow or tile          | `js/frames.js`                                                                         |
+| Every animation, as keyframes                        | `js/motion.js` (`ANIM`)                                                                |
+| What a mode is for: kind, hold, family, easter       | `js/pack.js` (`REACTIONS`, `FAMILIES`, `EASTER`)                                       |
+| The pack and its spec                                | `js/pack.js` (`buildPack`, `PACK_README`), written to `pack/` by `tools/build-pack.js` |
+| The gallery                                          | `docs/modes.md` and `docs/modes/`, written by `tools/modes-doc.js`                     |
 
 ## Making one
 
@@ -96,7 +96,8 @@ it: apps never read the jig's code. Ideas waiting to be designed are in
    the pack does.
 8. **Commit `pack/` and `docs/` with the source.** Apps copy the pack, so
    a mode that isn't in `pack/` doesn't exist to them. Mark the idea as
-   "in pack" in `ideas.md`.
+   "in pack" in `ideas.md`. `pnpm fmt` first, so the code reads the way
+   the rest does, and `pnpm lint` (both need `pnpm install` once).
 
 ## What the jig shows is what apps get
 

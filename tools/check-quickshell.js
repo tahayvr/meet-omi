@@ -63,17 +63,28 @@ const run = spawnSync("quickshell", ["-p", path.join(dir, "shell.qml")], {
   timeout: 60000,
 });
 fs.rmSync(dir, { recursive: true, force: true });
+// the log without its colors (the escape character is the point of this one)
+// oxlint-disable-next-line no-control-regex
 const log = `${run.stdout}${run.stderr}`.replace(/\x1b\[[0-9;]*m/g, ""),
   line = log.split("\n").find((l) => l.includes("OMI-CHECK "));
 
 if (!line) {
   // The player didn't load: show why (a syntax error names the line).
-  console.log(`FAIL quickshell: the check didn't run\n${log.split("\n").filter((l) => /ERROR|WARN/.test(l)).join("\n")}`);
+  console.log(
+    `FAIL quickshell: the check didn't run\n${log
+      .split("\n")
+      .filter((l) => /ERROR|WARN/.test(l))
+      .join("\n")}`,
+  );
   process.exit(1);
 }
-const { checks, fails } = JSON.parse(line.slice(line.indexOf("OMI-CHECK ") + 10));
+const { checks, fails } = JSON.parse(
+  line.slice(line.indexOf("OMI-CHECK ") + 10),
+);
 if (fails.length) {
-  console.log(`FAIL quickshell: ${fails.length} of ${checks}:\n  ${fails.join("\n  ")}`);
+  console.log(
+    `FAIL quickshell: ${fails.length} of ${checks}:\n  ${fails.join("\n  ")}`,
+  );
   process.exit(1);
 }
 console.log(`ok: quickshell: ${checks} checks`);

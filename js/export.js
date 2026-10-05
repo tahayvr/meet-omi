@@ -68,8 +68,7 @@ function rasterize(svg, w, h) {
     };
     img.onerror = () => rej(new Error("Could not render the SVG."));
     img.src =
-      "data:image/svg+xml;base64," +
-      btoa(unescape(encodeURIComponent(svg)));
+      "data:image/svg+xml;base64," + btoa(unescape(encodeURIComponent(svg)));
   });
 }
 async function ascii(d) {

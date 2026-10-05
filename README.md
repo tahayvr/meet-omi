@@ -77,3 +77,7 @@ and the Python player, on the conformance data), `npm run check:morphs`
 Quickshell one run on every push
 ([.github/workflows/check.yml](.github/workflows/check.yml)); those two need
 a browser and a Wayland session, so they are run by hand.
+
+None of that needs anything installed. `pnpm install` brings in the two
+tools the code is kept tidy with: `pnpm fmt` formats it (oxfmt) and
+`pnpm lint` looks for mistakes (oxlint); both run on every push too.

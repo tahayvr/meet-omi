@@ -122,10 +122,7 @@ const ARROW = [
   R(179, 44, 22, 8, "arrow"),
   R(187, 52, 6, 6, "arrow"),
 ];
-const BANG = [
-  R(185, 22, 10, 22, "pulseop"),
-  R(185, 48, 10, 10, "pulseop"),
-];
+const BANG = [R(185, 22, 10, 22, "pulseop"), R(185, 48, 10, 10, "pulseop")];
 const QMARK = [
   R(178, 22, 26, 7, "pulseop"),
   R(197, 22, 7, 18, "pulseop"),
@@ -164,10 +161,7 @@ Object.assign(F, {
     R(195, 115, 5, 30),
   ],
   lowbat: [R(100, 200, 20, 20), R(180, 200, 20, 20)],
-  listening: [
-    R(100, 110, 20, 40, "pulse"),
-    R(180, 110, 20, 40, "pulse"),
-  ],
+  listening: [R(100, 110, 20, 40, "pulse"), R(180, 110, 20, 40, "pulse")],
   // a question mark where the eyes were
   confused: as("extra", [
     ...chase(
@@ -205,18 +199,13 @@ const INNER = new Set([
   "240,60,20,180",
   "40,240,220,20",
 ]);
-const LOGO_OUT = LOGO.filter(
-  (r) => !INNER.has([r.x, r.y, r.w, r.h].join()),
-);
+const LOGO_OUT = LOGO.filter((r) => !INNER.has([r.x, r.y, r.w, r.h].join()));
 const SNAKE_PATH = [
   [220, 40],
   [240, 40],
   ...[60, 80, 100, 120, 140, 160, 180, 200, 220].map((y) => [240, y]),
   [240, 240],
-  ...[220, 200, 180, 160, 140, 120, 100, 80, 60, 40].map((x) => [
-    x,
-    240,
-  ]),
+  ...[220, 200, 180, 160, 140, 120, 100, 80, 60, 40].map((x) => [x, 240]),
   ...[220, 200, 180, 160, 140, 120, 100, 80, 60].map((y) => [40, y]),
   ...[40, 60, 80, 100, 120, 140].map((x) => [x, 40]),
 ];

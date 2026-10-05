@@ -625,7 +625,10 @@ if (typeof $ === "function" && $("savePack"))
       const running = document.querySelector('script[src*="player/omi.js"]'),
         res = await fetch(running ? running.src : "player/omi.js");
       if (res.ok)
-        files.push({ name: "omi-pack/omi.js", data: enc.encode(await res.text()) });
+        files.push({
+          name: "omi-pack/omi.js",
+          data: enc.encode(await res.text()),
+        });
     } catch (e) {}
     if (files.length < 4) toast("Couldn\u2019t include the player (omi.js).");
     await save("omi-pack.zip", zip(files));
