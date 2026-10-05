@@ -97,6 +97,9 @@ When a `state` arrives, hand it to the player as a change that happened at
   `since`. Its first frames can differ slightly from apps that were already
   watching; from the landing on, they are the same.
 
+Work that out from the clock on every frame, not once and then by counting
+frames: an app that stalls for a moment is back in step on its next frame.
+
 All apps share the pack's morph timing, so all land at the same moment and
 their loops stay together. For the same reason, apps that want to stay in
 sync play at speed 1.

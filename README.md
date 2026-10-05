@@ -6,7 +6,8 @@
 Omi is the Omarchy mascot: the Omarchy logo with a face. It has 49 modes,
 from idle and thinking to updating, success and party, morphs from any one
 to any other, and is drawn as plain rectangles in one color, so any app can
-show it: a shell plugin, a web page, a Qt app, a terminal, a Rust program.
+show it: a shell plugin, a web page, a Qt app, a terminal, a Rust or a
+Python program.
 
 ![Every Omi mode](docs/modes/sheet.svg)
 
@@ -46,8 +47,10 @@ The rules it's drawn by, in short (the long form is in
   and the page checks that itself.
 - **[pack/](pack/):** what apps use: `omi.json` (every mode), `omi.js` (the
   player) and the spec.
-- **[player/rust/](player/rust/):** a second player, a Rust crate written
-  from the spec alone and checked against the same conformance data.
+- **[player/rust/](player/rust/) and [player/python/](player/python/):**
+  two more players, a Rust crate and a Python package, written from the
+  spec and checked against the same conformance data. They draw every morph
+  as the reference player does, rect for rect.
 - **[examples/](examples/):** Omi in an Omarchy shell plugin, a web page, a Qt
   Quick app and a terminal.
 - **[docs/omarchy.md](docs/omarchy.md):** building Omi into Omarchy, and which
@@ -65,7 +68,10 @@ docs/modes are built from what's committed (`tools/build-pack.js --check`,
 `tools/modes-doc.js --check`), the reference player (`tools/check-player.js`)
 and the service (`tools/check-service.js`). Then `npm run check:site` (the
 site, in Chrome: it shows the pack in pack/, and its CSS draws what the
-player draws), `npm run check:rust` (the Rust player), `npm run check:qt`
-(the Qt Quick item) and, in a Wayland session, `npm run check:quickshell`.
+player draws), `npm run check:rust` and `npm run check:python` (the Rust
+and the Python player, on the conformance data), `npm run check:morphs`
+(both of them against the reference player on every morph there is),
+`npm run check:qt` (the Qt Quick item) and, in a Wayland session,
+`npm run check:quickshell`.
 `npm run build` rebuilds pack/ and docs/modes. All but the Quickshell one
 run on every push ([.github/workflows/check.yml](.github/workflows/check.yml)).

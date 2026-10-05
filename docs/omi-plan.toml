@@ -300,6 +300,27 @@ what the stamp already gives.
 """
 
 [[step]]
+id = 22
+title = "A third player, and morphs that are exact"
+status = "done"
+detail = """
+player/python: a Python package (standard library only), first written from
+pack/README.md alone. It passed conformance and still drew about one morph
+in ten differently from the reference player, so the README's pairing steps
+were made exact: what "the same" means, how halves round, the zero offset
+and its thresholds, the assignment written out with its ties, which cells a
+leftover cell may use, the drawing order, the landing frame. Two rules are
+new, so that players agree to the last rect: an ease is solved one way (24
+halvings), and rects are rounded to 1/1024 before pairing, which makes every
+cost exact and every tie a tie in any language. The reference player changed
+in four small ways (that rounding, no sliver cells, the first same cell
+instead of the last, faded rects of a running morph are no source), and the
+Rust player was brought along. tools/check-morphs.js holds the Python and
+the Rust player to the reference on every pair of modes, from rest, mid-loop
+and mid-morph: 7056 morphs, rect for rect.
+"""
+
+[[step]]
 id = 8
 title = "Publishing"
 status = "todo"

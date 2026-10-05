@@ -1,0 +1,22 @@
+[build-system]
+requires = ["setuptools>=77"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "omi-player"
+version = "0.1.0"
+description = "Plays Omi, the Omarchy mascot, from an Omi pack: modes, loops, morphs and gaze, as a list of rects to fill"
+readme = "README.md"
+license = "MIT"
+requires-python = ">=3.9"
+dependencies = []
+classifiers = [
+    # Not on PyPI yet: this keeps an upload from going through by accident.
+    "Private :: Do Not Upload",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3 :: Only",
+    "Topic :: Multimedia :: Graphics",
+]
+
+[tool.setuptools]
+packages = ["omi"]

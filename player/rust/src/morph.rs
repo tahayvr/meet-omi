@@ -4,7 +4,7 @@
 
 use crate::pack::Pack;
 use crate::Rect;
-use std::collections::HashMap;
+use std::collections::{HashMap, VecDeque};
 
 /// Pairs of different roles that never move into each other.
 const FACE: [&str; 4] = ["eye", "brow", "mouth", "tear"];
@@ -33,12 +33,31 @@ pub struct Step {
     pub now: Rect,
 }
 
+/// To the nearest whole number, halves going up (2.5 to 3, -2.5 to -2).
+fn round(v: f64) -> f64 {
+    (v + 0.5).floor()
+}
+
+/// A rect with x, y, w and h to the nearest 1/1024. The pairing only adds,
+/// subtracts and multiplies these, which is exact, so it comes out the same
+/// as in any other player: none of it turns on an ease's last digits.
+fn fine(r: &Rect) -> Rect {
+    let q = |v: f64| round(v * 1024.0) / 1024.0;
+    Rect {
+        x: q(r.x),
+        y: q(r.y),
+        w: q(r.w),
+        h: q(r.h),
+        ..r.clone()
+    }
+}
+
 /// Plans a morph from `from` (what is on screen) to `to` (the new mode at
-/// rest). Both are cut into grid cells first.
+/// rest). Both are rounded to 1/1024 and cut into grid cells first.
 pub fn plan(pack: &Pack, from: &[Rect], to: &[Rect]) -> Vec<Step> {
     let planner = Planner::new(pack);
-    let src: Vec<Rect> = from.iter().flat_map(|r| planner.cells(r)).collect();
-    let dst: Vec<Rect> = to.iter().flat_map(|r| planner.cells(r)).collect();
+    let src: Vec<Rect> = from.iter().flat_map(|r| planner.cells(&fine(r))).collect();
+    let dst: Vec<Rect> = to.iter().flat_map(|r| planner.cells(&fine(r))).collect();
     let (stagger, [cx, cy]) = (pack.morph.stagger, pack.morph.center);
     planner
         .pair(&src, &dst)
@@ -157,9 +176,13 @@ impl Planner {
         }
         let cuts = |a: f64, b: f64| {
             let mut out = vec![a];
+            // every grid line more than 1e-6 inside: an edge a hair off a
+            // line doesn't leave a sliver of a cell
             let mut v = (a / g).floor() * g + g;
             while v < b - 1e-6 {
-                out.push(v);
+                if v > a + 1e-6 {
+                    out.push(v);
+                }
                 v += g;
             }
             out.push(b);
@@ -185,7 +208,7 @@ impl Planner {
     /// A key that is equal for two rects in the same place, of the same size
     /// and role, after moving the rect by (dx, dy).
     fn key<'r>(&self, r: &'r Rect, dx: f64, dy: f64) -> PlaceKey<'r> {
-        let q = |v: f64| (v * 2.0).round() as i64;
+        let q = |v: f64| round(v * 2.0) as i64;
         (q(r.x + dx), q(r.y + dy), q(r.w), q(r.h), &r.role)
     }
 
@@ -249,7 +272,7 @@ impl Planner {
                         continue;
                     }
                     let (ex, ey) = (b.x - a.x, b.y - a.y);
-                    let k = (ex.round() as i64, ey.round() as i64);
+                    let k = (round(ex) as i64, round(ey) as i64);
                     let i = *index.entry(k).or_insert_with(|| {
                         votes.push(Vote {
                             n: 0,
@@ -291,36 +314,41 @@ impl Planner {
                 votes[g].x / votes[g].n as f64,
                 votes[g].y / votes[g].n as f64,
             );
-            // New pieces by place, in the order their places first appear.
-            let mut left: Vec<(PlaceKey, Vec<Rect>)> = Vec::new();
-            let mut at: HashMap<PlaceKey, usize> = HashMap::new();
-            for r in &d {
-                let k = self.key(r, 0.0, 0.0);
-                match at.get(&k) {
-                    Some(&i) => left[i].1.push(r.clone()),
-                    None => {
-                        at.insert(k, left.len());
-                        left.push((k, vec![r.clone()]));
-                    }
-                }
+            // New pieces by place, each place's in order. An old piece that
+            // fits takes the first one left in its place; the new pieces
+            // nobody took keep their order.
+            let place = |r: &Rect, dx: f64, dy: f64| {
+                let (x, y, w, h, role) = self.key(r, dx, dy);
+                (x, y, w, h, role.to_string())
+            };
+            let mut left: HashMap<_, VecDeque<usize>> = HashMap::new();
+            for (i, r) in d.iter().enumerate() {
+                left.entry(place(r, 0.0, 0.0)).or_default().push_back(i);
             }
+            let mut taken = vec![false; d.len()];
             let mut rest = Vec::new();
             for a in s.drain(..) {
-                let k = self.key(&a, dx, dy);
-                let taken = at.get(&k).and_then(|&i| left[i].1.pop());
-                match taken {
-                    Some(b) => pairs.push(Pair {
-                        role: b.role.clone(),
-                        from: a,
-                        to: b,
-                        pop: false,
-                        rigid: shared,
-                    }),
+                match left.get_mut(&place(&a, dx, dy)).and_then(|l| l.pop_front()) {
+                    Some(i) => {
+                        taken[i] = true;
+                        pairs.push(Pair {
+                            role: d[i].role.clone(),
+                            from: a,
+                            to: d[i].clone(),
+                            pop: false,
+                            rigid: shared,
+                        });
+                    }
                     None => rest.push(a),
                 }
             }
             s = rest;
-            d = left.into_iter().flat_map(|(_, l)| l).collect();
+            d = d
+                .into_iter()
+                .zip(taken)
+                .filter(|(_, gone)| !gone)
+                .map(|(r, _)| r)
+                .collect();
             if !shared {
                 break;
             }

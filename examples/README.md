@@ -71,6 +71,10 @@ A player is small: work out a mode's rects at time t, plan and play morphs,
 fill rects. [`../pack/README.md`](../pack/README.md) describes every rule, and
 [`../pack/conformance.json`](../pack/conformance.json) lists what a correct
 player draws; [`../tools/check-player.js`](../tools/check-player.js) shows how
-to check yours against it. [`../player/rust`](../player/rust) is one written
-that way, in Rust: a crate to use from a Rust app, and proof that the README
-is enough.
+to check yours against it. [`../player/rust`](../player/rust) and
+[`../player/python`](../player/python) are two written that way: a crate
+and a package to use from a Rust or a Python app, and proof that the README
+is enough. [`../tools/check-morphs.js`](../tools/check-morphs.js) holds both
+to the reference player on every morph there is, and can do the same for
+yours: it writes the reference player's frames to a file for your player to
+replay.

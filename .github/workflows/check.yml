@@ -36,6 +36,28 @@ jobs:
       - run: cargo test --locked
         working-directory: player/rust
 
+  # the Python player, against the same conformance data
+  python:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.9"
+      - run: python3 -m unittest discover -s tests
+        working-directory: player/python
+
+  # every morph there is, in every player: the Python and the Rust player
+  # draw what the reference player draws, rect for rect
+  morphs:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm run check:morphs
+
   # the Qt Quick item, in a real Qt Quick window with no display
   qt:
     runs-on: ubuntu-24.04

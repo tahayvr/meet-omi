@@ -44,7 +44,10 @@ pub fn ease(e: &Ease, p: f64) -> f64 {
 }
 
 /// CSS cubic-bezier(x1, y1, x2, y2): find the curve parameter whose x is p by
-/// bisection (x is monotonic for x1, x2 in 0..1), and return its y.
+/// bisection (x is monotonic for x1, x2 in 0..1), and return its y. Halved
+/// 24 times, as the pack README has it: every player solves the curve the
+/// same way, so their numbers agree to the last digits and a morph pairs the
+/// same in all of them.
 pub fn bezier(c: &[f64; 4], p: f64) -> f64 {
     if p <= 0.0 || p >= 1.0 {
         return p;
@@ -55,7 +58,7 @@ pub fn bezier(c: &[f64; 4], p: f64) -> f64 {
     };
     let (mut lo, mut hi) = (0.0, 1.0);
     let mut t = p;
-    for _ in 0..32 {
+    for _ in 0..24 {
         t = (lo + hi) / 2.0;
         if at(x1, x2, t) < p {
             lo = t;

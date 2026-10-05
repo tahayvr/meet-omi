@@ -86,7 +86,9 @@ it: apps never read the jig's code. Ideas waiting to be designed are in
 7. **Run every check.** `npm run check`: that the pack and the gallery
    are built from what's committed, the reference player and the service.
    `npm run check:site`: the jig itself, in Chrome (see below).
-   `npm run check:rust`: the Rust player. `npm run check:qt`: the Qt item.
+   `npm run check:rust` and `npm run check:python`: the other two
+   players. `npm run check:morphs`: both of them against the reference
+   player on every morph. `npm run check:qt`: the Qt item.
    In an Omarchy session, `npm run check:quickshell`: the player inside
    the shell itself. A new mode is only data,
    so all of them should pass unchanged; if a player fails, the mode uses
@@ -128,6 +130,6 @@ what is live at any time.
 
 A change to the format itself (a new field a player must understand, a
 rule that changes what a correct player draws) is a different thing from
-a new mode: it needs the spec in `PACK_README` updated first, both players
-brought along, conformance rebuilt, and a `PACK_VERSION` bump when an
+a new mode: it needs the spec in `PACK_README` updated first, all three
+players brought along, conformance rebuilt, and a `PACK_VERSION` bump when an
 older player would misread the new pack.

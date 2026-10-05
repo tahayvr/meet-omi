@@ -34,8 +34,13 @@ for how to snap the rects to device pixels.
 ## Checking it
 
     cargo test                          # conformance against ../../pack
+    node ../../tools/check-morphs.js rust   # every morph, against the reference player
     cargo run --example print -- idle   # prints a few frames of rects
 
 The test prints the counts, like `tools/check-player.js` does for the
 reference player, and how many of the reference player's in-between morph
 frames it matches (those are not required by the pack).
+`tools/check-morphs.js` goes further: it has this player (`examples/morphs.rs`)
+draw every pair of modes, from rest, from the middle of a loop and from the
+middle of another morph, and holds each frame to the reference player's,
+rect for rect.

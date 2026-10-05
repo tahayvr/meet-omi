@@ -29,10 +29,12 @@ for players in other languages:
       omi.set("thinking"); // morphs from wherever Omi is
     </script>
 
-Options: color (null follows the canvas's CSS color), speed, animate,
-bodyMotion (false leaves out whole-body bobs), mode (where to start), view
-(an [x, y, w, h] to show instead of the pack's view). omi.on("settled", fn)
-runs fn when a morph lands. omi.loopSeconds(mode) is how long a mode takes
+Options: color (null follows the canvas's CSS color), speed, animate (false
+shows every mode at rest; morphs and the gaze still play), bodyMotion (false
+leaves out whole-body bobs), mode (where to start), view (an [x, y, w, h]
+to show instead of the pack's view). omi.set(mode, { instant: true }) jumps
+instead of morphing. omi.on("settled", fn) runs fn when a morph lands, and
+after a jump. omi.loopSeconds(mode) is how long a mode takes
 to play every piece's loop once: show it at least that long in a tour.
 omi.hold(mode) is how long to show a reaction after its morph lands, and
 omi.kind(mode) whether the pack calls it one.
@@ -123,15 +125,25 @@ To find a piece's look at time t (seconds):
 4. Find the two keys around p, k0 at p0 and k1 at p1, and blend:
    value = v0 + (v1 - v0) × ease((p - p0) / (p1 - p0)).
 5. A value can be [name, factor]: the piece's own number `name` times
-   `factor` (confetti flies to its own mx, my).
+   `factor` (confetti flies to its own mx, my). An animation lists the
+   numbers it reads in `vars`; a piece without one has 0 for it.
 
 `ease` is a cubic-bezier [x1, y1, x2, y2], exactly like CSS
 cubic-bezier(), applied to every segment between two keys. "steps" holds v0
 until the next key.
 
+To put a progress p through a cubic-bezier: at 0 or less, or 1 or more, it
+stays as it is. Otherwise, with B(a, b, t) = 3·a·t·(1 − t)² + 3·b·t²·(1 − t)
++ t³, start from lo = 0 and hi = 1 and do this 24 times: t = (lo + hi) / 2,
+then lo = t if B(x1, x2, t) < p, else hi = t. The result is B(y1, y2, t)
+with the last t. Any way of solving the curve lands within the tolerance,
+but a morph's pairing is only the same in every player when their numbers
+agree far closer than that, so solve it this way.
+
 To draw: scale the piece about its center by sx, sy, move it by tx, ty, then
 fill it with opacity × op. With a body `anim` (`body: true`), move and scale
-the whole of Omi about the center of the mode's `bounds`.
+the whole of Omi about the center of the mode's `bounds`: its tx, ty, sx
+and sy only, never its op.
 
 A mode at rest is time 0. Start a mode's animations at t = 0 when you show
 it, and a still and its animation always match. Note that a piece with a
@@ -147,65 +159,125 @@ where duration is the piece's own if it sets one. 0 for a still mode.
 A player keeps one clock for a mode's loops and one for a morph. On every
 display frame it is given the time in milliseconds and advances both by
 dt = (now − last) / 1000, kept between 0 and 0.1 s (a host's clock may
-restart, or pause), times `speed`; the first frame advances nothing. A
-mode change made between two frames starts its morph at 0 and moves from
-the next frame on. Only rects with opacity above 0.001 are on screen: drop
+restart, or pause), times `speed` (never less than 0.05); the first frame
+advances nothing. Only rects with opacity above 0.001 are on screen: drop
 the rest before drawing, and before taking them as a morph's source.
-Changing to the mode Omi is already in, with no morph running, does
-nothing.
+
+Changing mode:
+
+- A change made between two frames starts its morph at 0 and moves from
+  the next frame on.
+- Changing to the mode Omi is already in, with no morph running, does
+  nothing. In the middle of a morph it is a change like any other, even
+  to the mode that morph is heading for.
+- A change can be instant: Omi jumps to the new mode at rest, its loops at
+  0. A change made when nothing is on screen is a jump too: there is
+  nothing to morph from.
+- With loops off (the reference player's `animate: false`) a mode is
+  shown at rest, time 0; morphs and the gaze still play. Turning loops on
+  or off puts the loop clock back to 0.
 
 ## Morphing from one mode to another
 
 Every step here is exact: two players that follow them draw the same
-morph. (The conformance data only requires the start and the landing, so a
-player may pair differently, but then its morphs look different.)
+morph, between any two modes and from any moment. (The conformance data
+only requires the start and the landing, so a player that pairs differently
+still passes, but its morphs look different.) Lists keep their order, which
+starts as drawing order, and "in order" means that order. Rounding is to
+the nearest, halves going up (2.5 to 3, −2.5 to −2).
 
 1. Take the rects on screen now, before the gaze is applied (in the middle
-   of an animation, or in the middle of a morph: whatever is drawn), with
-   opacity above 0.001, and the new mode's rects at rest (t = 0).
+   of an animation, or in the middle of a morph: whatever is drawn), and
+   the new mode's rects at rest (t = 0). Of both, only those with opacity
+   above 0.001. Round the x, y, w and h of each to the nearest 1/1024.
+   Everything below only adds, subtracts and multiplies those, which is
+   exact in any language, so no pairing turns on a player's last digits.
 2. Cut rects into grid cells, along the grid lines, so a cell that is in
    both modes can stay where it is: a rect whose four edges all sit on
    multiples of `grid` (within 1e-6), or that overlaps any piece of
-   `mark` (the logo), is cut at every grid line it crosses; the end cells
-   keep their partial size. Other rects stay whole.
+   `mark` (the logo; sharing an edge is not overlapping), is cut at every
+   grid line that is more than 1e-6 inside it; the end cells keep their
+   partial size. Its cells take its place in the list, column by column
+   from the left, each column from the top. Other rects stay whole.
 3. Pair the old cells (S) with the new ones (D):
    - *Rigid groups.* Cells that moved together as a whole, or didn't move
-     at all, pair first. Two cells are "the same" when x, y, w, h match to
-     half a unit and the role is equal. Each pair of an old and a new cell
-     with the same role and size (w and h within 0.5) votes for the offset
-     (new − old), rounded to whole units, averaging the exact offsets of its
-     voters. The zero offset is always a candidate. An offset fits as many
-     old cells as find a distinct new cell that is the same once shifted by
-     it. It needs at least max(12, 0.3 × min(|S|, |D|)) fits; a non-zero
-     offset is chosen over the zero one only if it fits more than 1.2× as
-     many. The chosen offset pairs every old cell that fits (each new cell
-     once). If it was non-zero the pairs are *rigid* and the search runs
-     again on what is left, up to 4 times; the zero offset, or no fit, ends
-     it.
+     at all, pair first, in up to 4 rounds, each on the cells not paired
+     yet, for as long as both sides have some. A round:
+     - Two cells are "the same" when the role is equal and so are x, y, w
+       and h, each rounded to half a unit (round 2x, 2y, 2w and 2h).
+     - Every pair of an old and a new cell with the same role and size (w
+       and h each within 0.5) votes for the offset (new − old), rounded
+       to whole units: take the old cells in order and, for each, the new
+       ones in order. An offset stands for the average of the exact
+       offsets of its voters, and offsets are tried in the order they were
+       first voted for.
+     - An offset fits as many old cells as, taken in order and shifted by
+       it, find a new cell that is the same and that none before took.
+     - The offset that rounds to (0, 0) is the one to beat, with the fits
+       it has (none, if nothing voted for it). Another offset takes its
+       place when it has at least max(12, 0.3 × min(|S|, |D|)) votes, fits
+       at least that many cells, and fits more than 1.2× as many as the
+       best so far.
+     - If the best fits no cell, the rounds are over and it pairs nothing.
+       Otherwise every old cell that fits it, in order, pairs with the
+       first new cell left that is the same once shifted. If the best was
+       the offset that rounds to (0, 0), the rounds are over; if not, its
+       pairs are *rigid* and the next round runs on what is left.
    - *The rest* pair by a minimum-cost one-to-one assignment (the smaller
      side is matched in full), cost = squared distance between centers +
      0.5 × ((Δw)² + (Δh)²) + `rolePenalty`² when the roles differ. A frame
-     cell and a face cell (eye, brow, mouth, tear) never pair: their cost
-     is infinite, and an assignment that lands on one is dropped.
-   - *New cells with no partner* split off their nearest old cell (paired
-     ones too, but never a banned role), nearest by squared distance +
-     `rolePenalty`² for a different role: they start as a copy of it, with
-     the new cell's role, when its plain squared distance is under
-     `splitReach`². Otherwise they grow from their own center: from size 0
-     with the "back" ease on size (1 + 2.70158 (p − 1)³ + 1.70158 (p − 1)²),
-     and opacity = target × min(1, 3p), p being the raw progress.
-   - *Old cells with no partner* slide into their nearest new cell (found
-     the same way) with opacity going to 0, taking its role, when it is
-     within `splitReach`; otherwise they shrink to a zero-size rect at
-     their own center with opacity 0.
+     cell and a face cell (eye, brow, mouth, tear) never pair: 1e9 is
+     added to their cost instead, and an assignment that lands on one is
+     dropped. Several assignments can cost the same, so the method counts.
+     With the smaller side's cells as rows 1..n (the old cells, when both
+     sides have as many) and the other side's as columns 1..m, in order,
+     and u, v, p all 0 to start with:
+
+         for i = 1..n:
+           p[0] = i;  j0 = 0;  minv[1..m] = ∞;  used[0..m] = no
+           repeat:
+             used[j0] = yes;  i0 = p[j0];  delta = ∞
+             for j = 1..m, not used:
+               cur = cost[i0][j] − u[i0] − v[j]
+               if cur < minv[j]:    minv[j] = cur;  way[j] = j0
+               if minv[j] < delta:  delta = minv[j];  j1 = j
+             for j = 0..m:
+               if used[j]:  u[p[j]] += delta;  v[j] −= delta
+               else:        minv[j] −= delta
+             j0 = j1
+           until p[j0] = 0
+           repeat:  j1 = way[j0];  p[j0] = p[j1];  j0 = j1  until j0 = 0
+         row p[j] pairs with column j, for every j from 1 with p[j] ≠ 0
+
+     The pairs are made in the order of the rows.
+   - *New cells with no partner*, in order, split off their nearest old
+     cell: of the old cells the rigid groups left over (whether the
+     assignment paired them or not, but never one of a banned role), the
+     nearest by squared distance between centers + `rolePenalty`² for a
+     different role, and of two as near the first. The new cell starts as
+     a copy of it, with its own role, when the plain squared distance
+     between them is under `splitReach`². Otherwise, or with no old cell
+     to split off, it grows from its own center: from size 0 with the
+     "back" ease on size (1 + 2.70158 (p − 1)³ + 1.70158 (p − 1)²), and
+     opacity = target × min(1, 3p), p being the raw progress in both, not
+     put through `ease`.
+   - *Old cells with no partner*, in order, slide into their nearest new
+     cell (found the same way, among the new cells the rigid groups left
+     over) with opacity going to 0, taking its role, when it is within
+     `splitReach`; otherwise they shrink to a zero-size rect at their own
+     center with opacity 0, keeping their role.
 4. Each pair starts late by its delay: the distance from the center of its
    new rect (its old one if the new has no size) to `center`, divided by
    260 and capped at 1, times `stagger`; a rigid pair's delay is
    stagger / 4. Its progress is (t − delay) / `duration`, kept in 0..1 and
    put through `ease`, blending x, y, w, h and opacity from old to new.
-   The whole morph lands at t = duration + stagger. While it runs, a pair's
-   rect has the role of its new cell.
-5. When it lands, start the new mode's animations at t = 0.
+   While it runs, a pair's rect has the role of its new cell. The pairs
+   are drawn in the order they were made: the rigid groups round by round,
+   the assignment's, the new cells with no partner, then the old ones.
+5. The morph lands on the first frame that takes its clock to duration +
+   stagger or past it. That frame shows the new mode at rest: its
+   animations start at t = 0 there, and what the frame overshot by is
+   dropped.
 
 ## Drawing Omi crisp
 
@@ -272,10 +344,12 @@ listed, in drawing order.
 - `modes`: for every mode, the rects at a few times (in seconds), with body
   motion on. Yours must match within `tolerance`.
 - `morphs`: a few morphs. `start` is the old mode at rest, `end` is what
-  the morph lands on (`morph_seconds` in): yours must match both, in any
-  order. `frames` (0.2 s and 0.4 s in) are the reference player's frames in
-  between; a player that pairs pieces exactly as described above matches
-  them too, but other pairings are allowed.
+  the morph lands on (`morph_seconds` in; give it frames of 0.1 s or
+  less until it has landed): yours must match both, in any order.
+  `frames` are the reference player's frames in between, in drawing
+  order, 0.2 s and 0.4 s after the frame the change was made on, at 100
+  frames a second; a player that pairs pieces exactly as described above
+  matches them too, but other pairings are allowed.
 - `gazes`: a mode at rest with no loops (animate off), looking ahead, then
   turned to `look`: `half` is `half.at` seconds in, `end` is
   once it has landed. Yours must match both, in drawing order.

@@ -209,7 +209,10 @@ var Omi = (function () {
       if (!aligned && !touches) return [r];
       const cuts = (a, b) => {
         const o = [a];
-        for (let v = Math.floor(a / 20) * 20 + 20; v < b - 1e-6; v += 20) o.push(v);
+        // every grid line more than 1e-6 inside: an edge a hair off a
+        // line doesn't leave a sliver of a cell
+        for (let v = Math.floor(a / 20) * 20 + 20; v < b - 1e-6; v += 20)
+          if (v > a + 1e-6) o.push(v);
         o.push(b);
         return o;
       };
@@ -308,10 +311,11 @@ var Omi = (function () {
         S = S.filter((s) => {
           const l = left.get(this.key(s, dx, dy));
           if (!l || !l.length) return true;
-          steps.push({ a: s, b: l.pop(), rigid: shared });
+          steps.push({ a: s, b: l.shift(), rigid: shared });
           return false;
         });
-        D = concat([...left.values()]);
+        const kept = new Set(concat([...left.values()]));
+        D = D.filter((d) => kept.has(d));
         if (!shared) break;
       }
       // 2. The rest travel to their cheapest partner, by distance, size and
@@ -470,7 +474,9 @@ var Omi = (function () {
           this.t = instant ? late : Math.max(0, late - total);
         return;
       }
-      const from = this.rawRects(),
+      // what is on screen: a morph in progress carries rects that have
+      // faded out, and those are no more a source than a hidden piece is
+      const from = this.rawRects().filter((r) => r.o > 0.001),
         to = this.restRects(mode);
       this.mode = id;
       this.t = 0;
@@ -481,8 +487,14 @@ var Omi = (function () {
         this.emit("settled");
         return;
       }
+      /* Every x, y, w and h goes to the nearest 1/1024 first. From there on
+         the pairing only adds, subtracts and multiplies such numbers, which
+         is exact, so a player in any language makes the same pairs: none of
+         it can turn on the last digits of an ease. */
       const P = this.planner,
-        cut = (list) => concat(list.map((r) => P.cells(r))),
+        fine = (v) => Math.round(v * 1024) / 1024,
+        snap = (r) => Object.assign({}, r, { x: fine(r.x), y: fine(r.y), w: fine(r.w), h: fine(r.h) }),
+        cut = (list) => concat(list.map((r) => P.cells(snap(r)))),
         steps = P.plan(cut(from), cut(to)),
         { stagger, center: [cx, cy] } = this.pack.morph;
       for (const s of steps) {
