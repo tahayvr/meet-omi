@@ -15,8 +15,8 @@
      addresses, a page never runs some files of one build with some of
      another.
 
-   .github/workflows/publish.yml runs this, checks the folder in Chrome
-   (tools/check-site.js --dir) and publishes it. */
+   .github/workflows/publish.yml runs this and publishes the folder.
+   tools/check-site.js --dir checks one in Chrome, by hand. */
 const fs = require("fs"),
   path = require("path"),
   { execFileSync } = require("child_process");

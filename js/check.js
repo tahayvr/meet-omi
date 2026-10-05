@@ -11,8 +11,8 @@
    Stills, video frames, the hero and the Morph section are the player's own
    rects (playerRects, morph.js), so they have nothing to drift from.
 
-   tools/check-site.js opens this in Chrome without a window, and anyone can
-   open it by hand, here or on the live site.
+   tools/check-site.js opens this in Chrome without a window (npm run
+   check:site), and anyone can open it by hand, here or on the live site.
 
    It runs in one go as the page loads, reading the pack's files with requests
    that wait for their answer, so the report is in the page by the time the
@@ -26,7 +26,6 @@ function checkSite() {
     lines.push((ok ? "ok    " : "FAIL  ") + text);
     if (!ok) failed++;
   };
-  console.log("check: started");
 
   // 1. the same build as pack/
   const read = (url) => {
@@ -46,8 +45,6 @@ function checkSite() {
   } catch (err) {
     say(false, `the pack could not be read (${err.message})`);
   }
-
-  console.log("check: the pack is read");
 
   // 2. the CSS against the player
   const TIMES = [0, 0.9, 3.3, 7.77],

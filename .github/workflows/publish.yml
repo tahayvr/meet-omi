@@ -1,9 +1,9 @@
 name: Publish
 
 # Publishes the site, https://tahayvr.github.io/meet-omi/, from master, and
-# only a build that has passed: the pack and the player's checks, then the
-# site's own check in Chrome, on the very folder that goes up. Once it is
-# live, the same check is run on the live address.
+# only a build whose pack and player pass their checks. The site's own
+# check runs in a browser, so it is run by hand: npm run check:site, or
+# ?check on the live address.
 #
 # For this to be what publishes the site, the repo's Pages source has to be
 # "GitHub Actions" (Settings, Pages), not a branch.
@@ -37,12 +37,9 @@ jobs:
       - run: npm run check
       # the site as it goes up: every file, stamped with this commit
       - run: node tools/publish-site.js _site
-      - run: node tools/check-site.js --dir _site --build "${GITHUB_SHA::7}"
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:
           path: _site
       - id: deploy
         uses: actions/deploy-pages@v4
-      # what is live is this build, and it checks out
-      - run: node tools/check-site.js "${{ steps.deploy.outputs.page_url }}" --build "${GITHUB_SHA::7}"

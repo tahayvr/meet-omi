@@ -121,12 +121,12 @@ the same report on the page.
 
 The site, https://tahayvr.github.io/meet-omi/, is this page, published on
 every push to `master` by `.github/workflows/publish.yml`, and only when
-it passes: `npm run check`, then the same check in Chrome on the folder
-that goes up (`tools/publish-site.js` puts it together, with the commit on
-the address of every script and stylesheet, so a browser never runs files
-of two builds together), then once more on the live address.
-`node tools/check-site.js https://tahayvr.github.io/meet-omi/` asks it of
-what is live at any time.
+`npm run check` passes. `tools/publish-site.js` puts it together, with the
+commit on the address of every script and stylesheet, so a browser never
+runs files of two builds together. The site check needs a browser, so it
+isn't part of that: run `npm run check:site` before pushing a change to the
+jig, and `node tools/check-site.js https://tahayvr.github.io/meet-omi/`
+(or `?check` on the address) asks the same of what is live.
 
 A change to the format itself (a new field a player must understand, a
 rule that changes what a correct player draws) is a different thing from
