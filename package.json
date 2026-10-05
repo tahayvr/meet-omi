@@ -1,0 +1,14 @@
+{
+  "name": "meet-omi",
+  "private": true,
+  "description": "Omi, the Omarchy mascot: the design jig, the Omi pack, its players and the checks that hold them together",
+  "license": "MIT",
+  "scripts": {
+    "build": "node tools/build-pack.js && node tools/modes-doc.js",
+    "check": "node tools/build-pack.js --check && node tools/modes-doc.js --check && node tools/check-player.js && node tools/check-service.js",
+    "check:rust": "cd player/rust && cargo test",
+    "check:qt": "QML_XHR_ALLOW_FILE_READ=1 /usr/lib/qt6/bin/qmltestrunner -input tools/qml",
+    "check:quickshell": "node tools/check-quickshell.js",
+    "serve": "python3 -m http.server"
+  }
+}

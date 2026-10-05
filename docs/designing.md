@@ -81,13 +81,13 @@ it: apps never read the jig's code. Ideas waiting to be designed are in
 6. **Build the pack.** `node tools/build-pack.js` writes `pack/omi.json`,
    `pack/README.md`, `pack/conformance.json` and `pack/omi.js` (a copy of
    `player/omi.js`, so the pack ships with its player: edit the source,
-   never the copy). Then
-   `node tools/modes-doc.js` for the gallery.
-7. **Run every check.** That the pack is built from what's committed:
-   `node tools/build-pack.js --check`. The reference player: `node tools/check-player.js`
-   and, in an Omarchy session, `node tools/check-quickshell.js`. The Qt
-   item: `QML_XHR_ALLOW_FILE_READ=1 /usr/lib/qt6/bin/qmltestrunner -input tools/qml`.
-   The Rust player: `cargo test` in `player/rust`. A new mode is only data,
+   never the copy). Then `node tools/modes-doc.js` for the gallery.
+   `npm run build` does both.
+7. **Run every check.** `npm run check`: that the pack and the gallery
+   are built from what's committed, the reference player and the service.
+   `npm run check:rust`: the Rust player. `npm run check:qt`: the Qt item.
+   In an Omarchy session, `npm run check:quickshell`: the player inside
+   the shell itself. A new mode is only data,
    so all of them should pass unchanged; if a player fails, the mode uses
    something the spec doesn't cover, and the spec needs the rule before
    the pack does.

@@ -1,0 +1,40 @@
+name: Check
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+
+jobs:
+  # pack/ and docs/ are built from what's committed, and the reference
+  # player and the service do what the spec and the protocol say
+  pack:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm run check
+
+  # the Rust player, against the same conformance data
+  rust:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: cargo test --locked
+        working-directory: player/rust
+
+  # the Qt Quick item, in a real Qt Quick window with no display
+  qt:
+    runs-on: ubuntu-24.04
+    env:
+      QT_QPA_PLATFORM: offscreen
+    steps:
+      - uses: actions/checkout@v4
+      - run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            qt6-declarative-dev-tools qml6-module-qtquick qml6-module-qtquick-window \
+            qml6-module-qttest
+      - run: npm run check:qt

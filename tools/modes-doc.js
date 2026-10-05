@@ -3,7 +3,8 @@
    of each one as an SVG in docs/modes/ (plus docs/modes/sheet.svg, all of
    them on one sheet), from pack/omi.json through the reference player.
 
-     node tools/modes-doc.js
+     node tools/modes-doc.js           write them
+     node tools/modes-doc.js --check   fail if they aren't what it would write
 
    Run it after tools/build-pack.js whenever a mode changes, and commit
    docs/ with it. The "Use it for" column is written here, by hand: it is
@@ -132,9 +133,10 @@ function sheet() {
   );
 }
 
-fs.mkdirSync(outDir, { recursive: true });
-for (const m of pack.modes) fs.writeFileSync(path.join(outDir, `${m.id}.svg`), still(m));
-fs.writeFileSync(path.join(outDir, "sheet.svg"), sheet());
+// every file this writes, by its path from the repo's root
+const files = {};
+for (const m of pack.modes) files[`docs/modes/${m.id}.svg`] = still(m);
+files["docs/modes/sheet.svg"] = sheet();
 
 // --- the gallery
 const secs = (s) => (s % 1 ? s.toFixed(1) : String(s)) + " s";
@@ -174,5 +176,29 @@ drawn by the reference player.
 | --- | --- | --- | --- | --- | --- |
 ${rows.join("\n")}
 `;
-fs.writeFileSync(path.join(root, "docs/modes.md"), md);
+files["docs/modes.md"] = md;
+
+// stills of modes the pack no longer has
+const gone = fs.existsSync(outDir)
+  ? fs.readdirSync(outDir).filter((f) => f.endsWith(".svg") && !files[`docs/modes/${f}`])
+  : [];
+
+if (process.argv.includes("--check")) {
+  const stale = Object.keys(files).filter((name) => {
+    const file = path.join(root, name);
+    return !fs.existsSync(file) || fs.readFileSync(file, "utf8") !== files[name];
+  });
+  for (const name of stale) console.log(`FAIL ${name} is out of date`);
+  for (const f of gone) console.log(`FAIL docs/modes/${f} is for a mode the pack doesn't have`);
+  if (stale.length || gone.length) {
+    console.log("run node tools/modes-doc.js and commit docs/");
+    process.exit(1);
+  }
+  console.log(`ok: docs/modes.md and ${pack.modes.length} stills are up to date`);
+  process.exit(0);
+}
+
+fs.mkdirSync(outDir, { recursive: true });
+for (const f of gone) fs.unlinkSync(path.join(outDir, f));
+for (const [name, text] of Object.entries(files)) fs.writeFileSync(path.join(root, name), text);
 console.log(`docs/modes.md: ${pack.modes.length} modes; docs/modes/: ${pack.modes.length} stills and sheet.svg`);

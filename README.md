@@ -3,7 +3,7 @@
 > [!IMPORTANT]  
 > **Concept!** Not final designs.
 
-Omi is the Omarchy mascot: the Omarchy logo with a face. It has 42 modes,
+Omi is the Omarchy mascot: the Omarchy logo with a face. It has 49 modes,
 from idle and thinking to updating, success and party, morphs from any one
 to any other, and is drawn as plain rectangles in one color, so any app can
 show it: a shell plugin, a web page, a Qt app, a terminal, a Rust program.
@@ -54,9 +54,11 @@ The rules it's drawn by, in short (the long form is in
 - **[docs/ideas.md](docs/ideas.md):** modes and reactions still to make, each
   with a sketch.
 
-Checks: `node tools/build-pack.js --check` (pack/ is up to date, including
-its copy of the player), `node tools/check-player.js`,
-`node tools/check-quickshell.js` (in a
-Wayland session), `node tools/check-service.js`, the Qt Quick item:
-`QML_XHR_ALLOW_FILE_READ=1 /usr/lib/qt6/bin/qmltestrunner -input tools/qml`,
-and the Rust player: `cargo test` in `player/rust`.
+Checks: `npm run check` runs the ones that only need Node: that pack/ and
+docs/modes are built from what's committed (`tools/build-pack.js --check`,
+`tools/modes-doc.js --check`), the reference player (`tools/check-player.js`)
+and the service (`tools/check-service.js`). Then `npm run check:rust` (the
+Rust player), `npm run check:qt` (the Qt Quick item) and, in a Wayland
+session, `npm run check:quickshell`. `npm run build` rebuilds pack/ and
+docs/modes. All but the Quickshell one run on every push
+([.github/workflows/check.yml](.github/workflows/check.yml)).
