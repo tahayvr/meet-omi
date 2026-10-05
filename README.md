@@ -37,7 +37,7 @@ The rules it's drawn by, in short (the long form is in
 [docs/modes.md](docs/modes.md) shows every mode with what it's for.
 
 - **[index.html](index.html):** the design jig, where Omi's modes and
-  animations are made. Serve the repo (`python3 -m http.server`) and open it.
+  animations are made. `npm run dev` serves it at http://localhost:8000.
 - **[pack/](pack/):** what apps use: `omi.json` (every mode), `omi.js` (the
   player) and the spec.
 - **[player/rust/](player/rust/):** a second player, a Rust crate written

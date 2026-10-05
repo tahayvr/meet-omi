@@ -73,8 +73,8 @@ it: apps never read the jig's code. Ideas waiting to be designed are in
 4. **Say what it's for.** In `js/pack.js`, add a reaction's hold to
    `REACTIONS`, or leave it a state; put it in a family in `FAMILIES` if it
    means the same thing as another mode; mark a joke in `EASTER`.
-5. **Look at it in the jig.** Serve the repo (`python3 -m http.server`) and
-   open `index.html`: the Modes section shows every design looping, Morph
+5. **Look at it in the jig.** `npm run dev` and open
+   http://localhost:8000: the Modes section shows every design looping, Morph
    plays any pair, and the Terminal section shows it at half-block size.
    Check it at the small end too: 44 device pixels across is where props
    must still read.

@@ -47,8 +47,8 @@ state instead of calling `set` yourself: see the
   `… react success` drives it from a script. `install.sh --remove` takes it
   out. [docs/omarchy.md](../docs/omarchy.md) covers building Omi into your
   own plugin.
-- **Web:** serve the repo (for example `python3 -m http.server`) and open
-  `/examples/web/`.
+- **Web:** `npm run dev` in the repo and open
+  http://localhost:8000/examples/web/.
 - **QML:** `QML_XHR_ALLOW_FILE_READ=1 qml examples/qml/main.qml`. The
   environment variable lets QML read the pack from disk; in an app, ship the
   pack in your resources instead. Inside the Omarchy shell, use the Omarchy
