@@ -77,6 +77,11 @@ function dump(chrome, profile, url) {
         `--user-data-dir=${profile}`,
         // a CI runner has no sandbox to offer, and little shared memory
         ...(process.env.CI ? ["--no-sandbox", "--disable-dev-shm-usage"] : []),
+        // only the site itself is asked for anything: the page must not wait
+        // on a font from somewhere else to count as loaded
+        `--host-resolver-rules=MAP * ~NOTFOUND, EXCLUDE ${new URL(url).hostname}`,
+        // what the page logs goes to Chrome's own log, for when this fails
+        "--enable-logging=stderr",
         "--dump-dom",
         url,
       ],
@@ -86,7 +91,7 @@ function dump(chrome, profile, url) {
       said = "",
       late = false;
     browser.stderr.setEncoding("utf8");
-    browser.stderr.on("data", (text) => (said = (said + text).slice(-4000)));
+    browser.stderr.on("data", (text) => (said = (said + text).slice(-20000)));
     const stop = () => browser.kill("SIGKILL"),
       timer = setTimeout(() => ((late = true), stop()), 120000);
     browser.stdout.setEncoding("utf8");
@@ -145,9 +150,9 @@ async function load(chrome, url) {
     result = /<html[^>]*\sdata-check="(\w+)"/.exec(dom);
   if (!dom.includes("</html>")) {
     console.log(`FAIL Chrome printed no page for ${url}` + (page.late ? " in two minutes" : ""));
-    // what Chrome said last, less its own chatter
-    const said = page.said.split("\n").filter((l) => l.trim() && !/updater|VERBOSE/.test(l));
-    if (said.length) console.log(said.slice(-8).join("\n"));
+    // what the page logged, and what Chrome said last, less its own chatter
+    const said = page.said.split("\n").filter((l) => l.trim() && !/updater|VERBOSE|dbus|gcm/.test(l));
+    console.log([...said.filter((l) => /CONSOLE/.test(l)).slice(-12), ...said.filter((l) => !/CONSOLE/.test(l)).slice(-8)].join("\n"));
     process.exit(1);
   }
   if (wanted && built !== wanted) {

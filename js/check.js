@@ -26,6 +26,7 @@ function checkSite() {
     lines.push((ok ? "ok    " : "FAIL  ") + text);
     if (!ok) failed++;
   };
+  console.log("check: started");
 
   // 1. the same build as pack/
   const read = (url) => {
@@ -45,6 +46,8 @@ function checkSite() {
   } catch (err) {
     say(false, `the pack could not be read (${err.message})`);
   }
+
+  console.log("check: the pack is read");
 
   // 2. the CSS against the player
   const TIMES = [0, 0.9, 3.3, 7.77],
