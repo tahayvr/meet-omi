@@ -8,14 +8,6 @@ const MP4 =
       MediaRecorder.isTypeSupported(t),
     )
   );
-const WEBM =
-  HAS_ENCODER ||
-  !!(
-    window.MediaRecorder &&
-    ["video/webm;codecs=vp9", "video/webm"].some((t) =>
-      MediaRecorder.isTypeSupported(t),
-    )
-  );
 function drawFrame(ctx, d, t, vb, size, color, bg, hgt) {
   ctx.setTransform(1, 0, 0, 1, 0, 0);
   ctx.fillStyle = bg;

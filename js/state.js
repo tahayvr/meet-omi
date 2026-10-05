@@ -44,7 +44,6 @@ const FG_SW = [
   "#ffffff",
   "#1a1b26",
 ];
-const DEF0 = 0;
 const DEF = {
   bg: "#1a1b26",
   fg: "#9ece6a",
@@ -108,19 +107,6 @@ function uniformBox() {
   return { x: cx - hw, y: cy - hh, w: hw * 2, h: hh * 2 };
 }
 
-const VI = {
-  accept:
-    '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12l5 5 9-10"></path></svg>',
-  deny: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"></path></svg>',
-  edit: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h4L19 9l-4-4L4 16z"></path></svg>',
-};
-const VLABEL = {
-  accept: "Accepted",
-  deny: "Denied",
-  edit: "Needs edits",
-};
-const reviews = {},
-  rdb = null;
 const RESET_ICON =
   '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"></path><path d="M3 3v5h5"></path></svg>';
 const hasOver = (id) =>

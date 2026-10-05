@@ -34,10 +34,8 @@ function showView() {
   $("vside").setAttribute("aria-expanded", String(S.side));
   syncControls();
   rmSync();
-  syncReviewUI();
   applySpeed();
 }
-function resetNote() {}
 const sideEl = $("side"),
   mainEl = document.querySelector(".main");
 function openView(id) {
@@ -47,7 +45,6 @@ function openView(id) {
     sideEl.classList.add("in-view");
     view.showModal();
   }
-  resetNote();
   showView();
 }
 view.addEventListener("close", () => {
@@ -76,7 +73,6 @@ $("resetOver").addEventListener("click", () => {
 });
 const step = (n) => {
   vi = (vi + n + DESIGNS.length) % DESIGNS.length;
-  resetNote();
   showView();
 };
 $("vprev").addEventListener("click", () => step(-1));
@@ -93,4 +89,3 @@ const esc = (s) =>
     /[&<>"]/g,
     (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c],
   );
-function syncReviewUI() {}
