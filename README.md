@@ -45,8 +45,9 @@ The rules it's drawn by, in short (the long form is in
   ([.github/workflows/publish.yml](.github/workflows/publish.yml)). What it
   shows is the pack, played by the player: add `?check` to either address
   and the page checks that itself.
-- **[pack/](pack/):** what apps use: `omi.json` (every mode), `omi.js` (the
-  player) and the spec.
+- **[pack/](pack/):** what apps use: `omi.json` (every mode, with what a
+  screen reader says for each), `omi.js` (the player), the spec and a JSON
+  Schema.
 - **[player/rust/](player/rust/) and [player/python/](player/python/):**
   two more players, a Rust crate and a Python package, written from the
   spec and checked against the same conformance data. They draw every morph
@@ -65,8 +66,9 @@ The rules it's drawn by, in short (the long form is in
 
 Checks: `npm run check` runs the ones that only need Node: that pack/ and
 docs/modes are built from what's committed (`tools/build-pack.js --check`,
-`tools/modes-doc.js --check`), the reference player (`tools/check-player.js`)
-and the service (`tools/check-service.js`). Then `npm run check:site` (the
+`tools/modes-doc.js --check`), that the pack has its shape and keeps the
+rules Omi is drawn by (`tools/check-pack.js`), the reference player
+(`tools/check-player.js`) and the service (`tools/check-service.js`). Then `npm run check:site` (the
 site, in Chrome: it shows the pack in pack/, and its CSS draws what the
 player draws), `npm run check:rust` and `npm run check:python` (the Rust
 and the Python player, on the conformance data), `npm run check:morphs`

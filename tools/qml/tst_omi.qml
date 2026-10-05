@@ -1,5 +1,6 @@
 // Checks examples/qml/Omi.qml, the Omi item Qt Quick apps copy, in a real
-// Qt Quick window: loading, morphing, reactions, gaze, even drawing.
+// Qt Quick window: loading, morphing, reactions and their labels, gaze,
+// even drawing.
 //
 //     QML_XHR_ALLOW_FILE_READ=1 /usr/lib/qt6/bin/qmltestrunner -input tools/qml
 import QtQuick
@@ -49,10 +50,13 @@ TestCase {
     function test_3_reacts() {
         omi.mode = "idle";
         settled.wait(3000);
+        compare(omi.label, "Omi", "a screen reader hears the mode's label");
         omi.react("happy", 0.6);
         compare(omi.showing, "happy", "the reaction plays over the mode");
+        compare(omi.label, "Omi is happy", "and the reaction's while it plays");
         compare(omi.mode, "idle", "the mode stays");
         tryCompare(omi, "showing", "idle", 3000, "then goes back");
+        compare(omi.label, "Omi");
     }
 
     function test_4_looks() {

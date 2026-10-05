@@ -321,6 +321,25 @@ and mid-morph: 7056 morphs, rect for rect.
 """
 
 [[step]]
+id = 23
+title = "The pack checks itself, and says what a screen reader says"
+status = "done"
+detail = """
+pack/omi.schema.json: omi.json's shape as a JSON Schema (PACK_SCHEMA in
+js/pack.js, built with the pack). tools/check-pack.js holds the pack to it
+(with tools/schema.js, a validator for the part of JSON Schema it uses),
+checks that it hangs together (every animation, role and number a piece
+names is there) and that it keeps the rules of docs/designing.md a program
+can check: whole units, the frame on the cells, no mouths, the frame and
+face inside the view, the eyes inside the inner square at rest. A mode that
+breaks one on purpose is argued for in the tool (scared, peek).
+Every mode has a `label`, what a screen reader says for it ("Omi is
+thinking"; LABELS in js/pack.js): label() in all three players, the
+reference player keeps a canvas's aria-label on it, the QML items are
+pictures by that name, and the gallery shows it.
+"""
+
+[[step]]
 id = 24
 title = "oxlint and oxfmt"
 status = "done"

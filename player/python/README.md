@@ -41,8 +41,9 @@ later and only the standard library.
 on_settled=None)` takes its options by name; `on_settled(mode)` is called
 when a morph lands, and after a jump. Also there: `set(mode, instant=True)` to jump,
 `mode_rects(mode, seconds)` for stills, `look(dx, dy)`, `gaze()`, `gazing`,
-`loop_seconds(mode)`, `hold(mode)`, `kind(mode)`, `mode`, `morphing` and
-`settled`. A mode the pack doesn't have raises `omi.UnknownMode`, a
+`loop_seconds(mode)`, `hold(mode)`, `kind(mode)`, `label(mode)` (what a
+screen reader says for a mode: your toolkit's accessible name), `mode`,
+`morphing` and `settled`. A mode the pack doesn't have raises `omi.UnknownMode`, a
 `KeyError`; a file that isn't a version 1 pack raises `omi.PackError`, a
 `ValueError`. See "Drawing Omi crisp" in the pack README for how to snap
 the rects to device pixels.

@@ -98,6 +98,17 @@ class WhatAModeIsFor(unittest.TestCase):
         self.assertEqual(player.hold("typing"), min(max(player.loop_seconds("typing"), 1.2), 2.5))
 
 
+class Labels(unittest.TestCase):
+    def test_what_a_screen_reader_says(self):
+        player = Player(pack)
+        self.assertEqual(player.label("thinking"), "Omi is thinking")
+        # Variations of one mode say the same thing.
+        self.assertEqual(player.label("thinking-snake"), player.label("thinking"))
+        for mode in pack.modes:
+            self.assertTrue(player.label(mode))
+        self.assertRaises(UnknownMode, player.label, "thinkng")
+
+
 class Time(unittest.TestCase):
     def test_first_frame_advances_nothing(self):
         player = Player(pack, mode="idle")

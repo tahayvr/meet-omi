@@ -47,6 +47,12 @@ Item {
     readonly property var modes: player ? player.pack.modes : []
     // The mode on screen: `mode`, or a reaction playing over it.
     readonly property string showing: reaction !== "" ? reaction : mode
+    // What a screen reader says for it, from the pack ("Omi is thinking").
+    // The item is a picture by that name; bind Accessible.name to something
+    // else if your app has better words for the moment.
+    readonly property string label: player ? player.label(showing) : ""
+    Accessible.role: Accessible.Graphic
+    Accessible.name: label
 
     signal settled()
 

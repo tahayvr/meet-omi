@@ -1,0 +1,445 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://tahayvr.github.io/meet-omi/pack/omi.schema.json",
+  "title": "Omi pack",
+  "description": "omi.json, format version 1: every mode, every animation, and the morph and gaze settings. The pack's README.md says what each part means.",
+  "type": "object",
+  "required": [
+    "format",
+    "version",
+    "grid",
+    "view",
+    "roles",
+    "morph",
+    "animations",
+    "modes"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "format": {
+      "const": "omi-pack"
+    },
+    "version": {
+      "const": 1
+    },
+    "grid": {
+      "description": "The size of one logo cell, in grid units.",
+      "type": "number",
+      "exclusiveMinimum": 0
+    },
+    "view": {
+      "description": "A square around the logo with room for the props: use it as the viewBox.",
+      "$ref": "#/$defs/box"
+    },
+    "roles": {
+      "description": "What a piece can be.",
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "minItems": 1,
+      "uniqueItems": true
+    },
+    "morph": {
+      "description": "How one mode turns into another.",
+      "type": "object",
+      "required": [
+        "duration",
+        "stagger",
+        "ease",
+        "center",
+        "splitReach",
+        "rolePenalty"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "duration": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "stagger": {
+          "type": "number",
+          "minimum": 0
+        },
+        "ease": {
+          "$ref": "#/$defs/bezier"
+        },
+        "center": {
+          "$ref": "#/$defs/point"
+        },
+        "splitReach": {
+          "type": "number",
+          "minimum": 0
+        },
+        "rolePenalty": {
+          "type": "number",
+          "minimum": 0
+        }
+      }
+    },
+    "gaze": {
+      "description": "Where the eyes can look, on top of any mode. A player without it ignores looks.",
+      "type": "object",
+      "required": [
+        "reach",
+        "duration",
+        "ease",
+        "roles"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "reach": {
+          "$ref": "#/$defs/point"
+        },
+        "duration": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "ease": {
+          "$ref": "#/$defs/bezier"
+        },
+        "roles": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "uniqueItems": true
+        },
+        "inside": {
+          "description": "The box the gazing rects stay in.",
+          "$ref": "#/$defs/box"
+        }
+      }
+    },
+    "animations": {
+      "description": "Every animation, by name.",
+      "type": "object",
+      "additionalProperties": {
+        "$ref": "#/$defs/animation"
+      }
+    },
+    "modes": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/$defs/mode"
+      }
+    }
+  },
+  "$defs": {
+    "point": {
+      "description": "[x, y]",
+      "type": "array",
+      "items": {
+        "type": "number"
+      },
+      "minItems": 2,
+      "maxItems": 2
+    },
+    "box": {
+      "description": "[x, y, w, h]",
+      "type": "array",
+      "items": {
+        "type": "number"
+      },
+      "minItems": 4,
+      "maxItems": 4
+    },
+    "bezier": {
+      "description": "A cubic-bezier [x1, y1, x2, y2], as in CSS.",
+      "type": "array",
+      "items": {
+        "type": "number"
+      },
+      "minItems": 4,
+      "maxItems": 4
+    },
+    "value": {
+      "description": "A number, or [name, factor]: the piece's own number of that name, times factor.",
+      "anyOf": [
+        {
+          "type": "number"
+        },
+        {
+          "type": "array",
+          "prefixItems": [
+            {
+              "type": "string",
+              "minLength": 1
+            },
+            {
+              "type": "number"
+            }
+          ],
+          "items": false,
+          "minItems": 2,
+          "maxItems": 2
+        }
+      ]
+    },
+    "animation": {
+      "description": "A loop: keys of [progress 0..1, values], blended with the ease between every two.",
+      "type": "object",
+      "required": [
+        "duration",
+        "ease",
+        "keys"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "duration": {
+          "description": "Seconds a loop takes.",
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "ease": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/bezier"
+            },
+            {
+              "description": "Hold each key until the next.",
+              "const": "steps"
+            }
+          ]
+        },
+        "body": {
+          "description": "Moves the whole of Omi, as a mode's anim.",
+          "const": true
+        },
+        "vars": {
+          "description": "The numbers of a piece this animation reads.",
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "uniqueItems": true
+        },
+        "keys": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "array",
+            "prefixItems": [
+              {
+                "description": "Progress.",
+                "type": "number",
+                "minimum": 0,
+                "maximum": 1
+              },
+              {
+                "description": "Move (tx, ty), scale (sx, sy) and opacity (op), on top of the piece at rest.",
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "tx": {
+                    "$ref": "#/$defs/value"
+                  },
+                  "ty": {
+                    "$ref": "#/$defs/value"
+                  },
+                  "sx": {
+                    "$ref": "#/$defs/value"
+                  },
+                  "sy": {
+                    "$ref": "#/$defs/value"
+                  },
+                  "op": {
+                    "$ref": "#/$defs/value"
+                  }
+                }
+              }
+            ],
+            "items": false,
+            "minItems": 2,
+            "maxItems": 2
+          }
+        }
+      }
+    },
+    "piece": {
+      "description": "A filled rectangle. Any other number on it is one an animation reads by name.",
+      "type": "object",
+      "required": [
+        "x",
+        "y",
+        "w",
+        "h",
+        "role"
+      ],
+      "properties": {
+        "x": {
+          "type": "number"
+        },
+        "y": {
+          "type": "number"
+        },
+        "w": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "h": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "role": {
+          "type": "string",
+          "minLength": 1
+        },
+        "opacity": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "anim": {
+          "description": "The animation it plays.",
+          "type": "string",
+          "minLength": 1
+        },
+        "delay": {
+          "description": "Seconds it lags behind its animation.",
+          "type": "number",
+          "minimum": 0
+        },
+        "duration": {
+          "description": "Its own loop time, instead of the animation's.",
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "clip": {
+          "description": "Only seen through the mode's window.",
+          "const": true
+        }
+      },
+      "additionalProperties": {
+        "type": "number"
+      }
+    },
+    "mode": {
+      "type": "object",
+      "required": [
+        "id",
+        "name",
+        "label",
+        "kind",
+        "bounds",
+        "pieces"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9]*(-[a-z0-9]+)*$"
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "label": {
+          "description": "What a screen reader says for the mode.",
+          "type": "string",
+          "minLength": 1
+        },
+        "group": {
+          "description": "Where the jig files it. For people, not for apps.",
+          "type": "string",
+          "minLength": 1
+        },
+        "kind": {
+          "description": "A state stays as long as what it stands for; a reaction is shown, then Omi goes back.",
+          "enum": [
+            "state",
+            "reaction"
+          ]
+        },
+        "hold": {
+          "description": "On a reaction: seconds to show it after its morph lands.",
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "family": {
+          "description": "Modes that mean the same thing share one.",
+          "type": "string",
+          "minLength": 1
+        },
+        "easter": {
+          "description": "A joke: leave it out of a generic picker.",
+          "const": true
+        },
+        "bounds": {
+          "description": "The tightest box around the mode.",
+          "$ref": "#/$defs/box"
+        },
+        "anim": {
+          "description": "An animation that moves the whole of Omi.",
+          "type": "string",
+          "minLength": 1
+        },
+        "clip": {
+          "description": "A window: pieces with clip: true are only seen through it.",
+          "type": "object",
+          "required": [
+            "x",
+            "y",
+            "w",
+            "h"
+          ],
+          "additionalProperties": false,
+          "properties": {
+            "x": {
+              "type": "number"
+            },
+            "y": {
+              "type": "number"
+            },
+            "w": {
+              "type": "number",
+              "exclusiveMinimum": 0
+            },
+            "h": {
+              "type": "number",
+              "exclusiveMinimum": 0
+            },
+            "anim": {
+              "type": "string",
+              "minLength": 1
+            }
+          }
+        },
+        "pieces": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/piece"
+          }
+        }
+      },
+      "if": {
+        "required": [
+          "kind"
+        ],
+        "properties": {
+          "kind": {
+            "const": "reaction"
+          }
+        }
+      },
+      "then": {
+        "required": [
+          "hold"
+        ],
+        "properties": {
+          "hold": true
+        }
+      },
+      "else": {
+        "properties": {
+          "hold": false
+        }
+      }
+    }
+  }
+}

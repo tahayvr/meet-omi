@@ -228,6 +228,8 @@ fn options_and_lookups() {
     assert_eq!(omi.mode(), "idle");
     assert_eq!(omi.kind("success"), omi::Kind::Reaction);
     assert_eq!(omi.kind("idle"), omi::Kind::State);
+    assert_eq!(omi.label("thinking"), "Omi is thinking");
+    assert_eq!(omi.label("no such mode"), "");
     assert!((omi.hold("success") - 1.2).abs() < 1e-9);
     let h = omi.hold("idle");
     assert!((1.2..=2.5).contains(&h));

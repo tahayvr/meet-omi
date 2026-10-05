@@ -336,6 +336,14 @@ class Player:
             return scene.mode.hold
         return min(max(scene.loop_seconds, 1.2), 2.5)
 
+    def label(self, mode):
+        """What a screen reader says for a mode ("Omi is thinking").
+
+        Give it to your toolkit as the picture's accessible name, so Omi
+        is announced the same way in every app.
+        """
+        return self.pack.mode(mode).label
+
     def kind(self, mode):
         """What the pack calls a mode: "state" or "reaction"."""
         return self.pack.mode(mode).kind

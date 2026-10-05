@@ -42,8 +42,7 @@ function renderSite() {
   heroOmi.color = fg === S.fg ? null : fg; // null: the page's accent color
   if (heroOmi.mode !== hd.id)
     heroOmi.set(hd.id, { instant: pagePlayerOpts().instant });
-  $("heroName").textContent = hd.name;
-  $("heroCanvas").setAttribute("aria-label", "Omi, " + hd.name);
+  $("heroName").textContent = hd.name; // the canvas's own label is the player's
   // anatomy
   const logo = { id: "logo", name: "Logo", face: [], mood: "" };
   const anat =

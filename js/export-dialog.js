@@ -29,7 +29,7 @@ function openExport(d) {
     bg: null,
     animated: false,
     vb: squareBox(shapes(d).box, 0.1),
-    label: "Omi, " + d.name,
+    label: labelOf(d),
   });
   xsync();
   xdlg.returnValue = "";

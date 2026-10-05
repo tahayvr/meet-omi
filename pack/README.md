@@ -10,6 +10,8 @@ modes. Made by the Meet Omi design jig. This file describes format version
 - omi.js: the reference player, for web pages and anything with a
   JavaScript engine (Electron, QML, GJS).
 - conformance.json: what a correct player draws, to test your own.
+- omi.schema.json: omi.json's shape as a JSON Schema, for an editor or a
+  validator.
 
 Nothing here is tied to one language or toolkit. omi.json is plain JSON and
 this file describes every rule, so any app can read it and draw Omi itself:
@@ -32,8 +34,10 @@ for players in other languages:
 Options: color (null follows the canvas's CSS color), speed, animate (false
 shows every mode at rest; morphs and the gaze still play), bodyMotion (false
 leaves out whole-body bobs), mode (where to start), view (an [x, y, w, h]
-to show instead of the pack's view). omi.set(mode, { instant: true }) jumps
-instead of morphing. omi.on("settled", fn) runs fn when a morph lands, and
+to show instead of the pack's view), label (false leaves the canvas's
+accessible name alone: otherwise the player keeps its aria-label on the
+mode's `label`, and gives it role="img" if it has no role).
+omi.set(mode, { instant: true }) jumps instead of morphing. omi.on("settled", fn) runs fn when a morph lands, and
 after a jump. omi.loopSeconds(mode) is how long a mode takes
 to play every piece's loop once: show it at least that long in a tour.
 omi.hold(mode) is how long to show a reaction after its morph lands, and
@@ -97,6 +101,12 @@ What a mode is for:
   before going back. For a mode without one, hold it for its loop time
   (`loopSeconds` in the reference player), kept between 1.2 and 2.5 s. The
   reference player's `omi.hold(mode)` gives either.
+- `label`: what a screen reader says for the mode, in English ("Omi is
+  thinking"). Give it to your toolkit as the picture's accessible name
+  (aria-label on the web, Accessible.name in Qt), so Omi is announced the
+  same way in every app. Variations of one mode say the same thing (every
+  thinking is "Omi is thinking"). The reference player's
+  `omi.label(mode)` gives it.
 - `family`: modes that mean the same thing ("thinking", "offline",
   "transfer"). Pick one per family for a situation; the rest are variations.
 - `easter`: true on the jokes (vim, glitch, code-rain). Leave them out of a

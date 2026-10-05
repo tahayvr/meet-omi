@@ -99,6 +99,7 @@ class Mode(NamedTuple):
 
     id: str
     name: str
+    label: str
     kind: str
     hold: Optional[float]
     family: Optional[str]
@@ -249,6 +250,9 @@ def _mode(data, animations):
     return Mode(
         id=mode_id,
         name=str(data.get("name", mode_id)),
+        # What a screen reader says: the label, or the name in a pack
+        # without labels.
+        label=str(data.get("label") or data.get("name", mode_id)),
         kind=str(data.get("kind", "state")),
         hold=None if hold is None else _number(hold, what + " hold"),
         family=data.get("family"),

@@ -112,10 +112,12 @@ function rectsSvg(mode, ox = 0, oy = 0) {
     )
     .join("");
 }
+const xml = (s) =>
+  s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/"/g, "&quot;");
 function still(mode) {
   return (
     `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${vw} ${vh}" width="${STILL}" height="${STILL}" ` +
-    `fill="${COLOR}" shape-rendering="crispEdges" role="img" aria-label="Omi: ${mode.name}">` +
+    `fill="${COLOR}" shape-rendering="crispEdges" role="img" aria-label="${xml(mode.label)}">` +
     rectsSvg(mode) +
     "</svg>\n"
   );
@@ -160,7 +162,7 @@ const rows = pack.modes.map((m) => {
     .filter(Boolean)
     .join(", ");
   const loop = omi.loopSeconds(m.id);
-  return `| ![${m.name}](modes/${m.id}.svg) | \`${m.id}\` | ${m.name} | ${what} | ${loop ? secs(loop) : "still"} | ${USE[m.id] || ""}${tags ? ` (${tags})` : ""} |`;
+  return `| ![${m.label}](modes/${m.id}.svg) | \`${m.id}\` | ${m.name} | ${what} | ${loop ? secs(loop) : "still"} | ${m.label} | ${USE[m.id] || ""}${tags ? ` (${tags})` : ""} |`;
 });
 const unknown = Object.keys(USE).filter(
   (id) => !pack.modes.some((m) => m.id === id),
@@ -187,12 +189,15 @@ drawn by the reference player.
 - A **family** groups modes that mean the same thing: pick one per
   situation and treat the rest as variations. **Easter eggs** are jokes;
   leave them out of anything generic.
+- **A screen reader says** is the mode's \`label\` in the pack: the
+  accessible name every app gives the picture, so Omi is announced the same
+  way everywhere. It is each still's own name on this page.
 - "Use it for" is advice for app authors; [docs/omarchy.md](omarchy.md)
   has the rules of thumb behind it (react to what the user did, never
   guilt the user, keep reactions short while they concentrate).
 
-| | id | Name | Kind | Loop | Use it for |
-| --- | --- | --- | --- | --- | --- |
+| | id | Name | Kind | Loop | A screen reader says | Use it for |
+| --- | --- | --- | --- | --- | --- | --- |
 ${rows.join("\n")}
 `;
 files["docs/modes.md"] = md;

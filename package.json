@@ -6,7 +6,7 @@
   "scripts": {
     "build": "node tools/build-pack.js && node tools/modes-doc.js",
     "build:site": "node tools/publish-site.js _site",
-    "check": "node tools/build-pack.js --check && node tools/modes-doc.js --check && node tools/check-player.js && node tools/check-service.js",
+    "check": "node tools/build-pack.js --check && node tools/check-pack.js && node tools/modes-doc.js --check && node tools/check-player.js && node tools/check-service.js",
     "check:site": "node tools/check-site.js",
     "check:morphs": "node tools/check-morphs.js",
     "check:python": "cd player/python && python3 -m unittest discover -s tests",

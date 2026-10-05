@@ -16,6 +16,8 @@
      omi.hold("success");                 // 1.2: how long to show a reaction
                                           // after its morph lands
      omi.kind("success");                 // "reaction" (or "state")
+     omi.label("thinking");               // "Omi is thinking": what a screen
+                                          // reader says for the mode
 
    Options (also settable later as properties):
      color        fill color; null follows the canvas's CSS `color`
@@ -27,6 +29,10 @@
                   be a little smaller than the canvas. Drawing only.
      mode         the mode to start in (default "mark", the plain logo)
      view         [x, y, w, h] to show, instead of the pack's view
+     label        true (default) keeps the canvas's aria-label on the mode's
+                  label, and gives it role="img" if it has no role, so a
+                  screen reader says what Omi is doing; false leaves the
+                  canvas's name to the page. Set when the player is made.
 
    Everything Omi shows is a list of axis-aligned rects with an opacity, so
    each frame is: work out the rects, fill them. In a browser, draw() fills
@@ -425,7 +431,9 @@ var Omi = (function () {
       this._animate = opts.animate ?? true;
       this._bodyMotion = opts.bodyMotion ?? true;
       this.even = opts.even ?? true;
+      this._label = opts.label ?? true;
       this.mode = this.modes[opts.mode] ? opts.mode : "mark";
+      this.name();
       this.t = 0; // seconds into the current mode's loops
       this.morph = null;
       this._sync = null; // set by a shared change: { since, after }
@@ -511,6 +519,7 @@ var Omi = (function () {
         to = this.restRects(mode);
       this.mode = id;
       this.t = 0;
+      this.name();
       if (instant || !from.length) {
         this.morph = null;
         if (this._animate) this.t = late;
@@ -630,6 +639,21 @@ var Omi = (function () {
           ? Object.assign({}, r, { x: r.x + dx, y: r.y + dy })
           : r,
       );
+    }
+
+    /* What a screen reader says for a mode, from the pack ("Omi is
+       thinking"): its label, or its name in a pack without labels. Give it
+       to your toolkit as the picture's accessible name. */
+    label(id) {
+      const mode = this.modes[id];
+      return mode ? mode.label || mode.name || id : "";
+    }
+    // On a page, the canvas says what Omi is doing (unless `label` is off).
+    name() {
+      const cv = this.canvas;
+      if (!this._label || !cv || !cv.setAttribute) return;
+      if (!cv.hasAttribute("role")) cv.setAttribute("role", "img");
+      cv.setAttribute("aria-label", this.label(this.mode));
     }
 
     /* A mode's kind, "state" or "reaction", from the pack. */

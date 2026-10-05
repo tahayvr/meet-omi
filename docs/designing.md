@@ -18,14 +18,16 @@ it: apps never read the jig's code. Ideas waiting to be designed are in
 - **The grid.** The logo is a 300 × 300 square of 20-unit cells. Eyes are
   one cell wide and two tall at rest, at (100, 110) and (180, 110). Keep
   pieces on the grid where you can: cells that sit on the grid are what
-  the morph pairs between modes, so a mode drawn on it morphs cleanly.
+  the morph pairs between modes, so a mode drawn on it morphs cleanly. The
+  frame always sits on the cells, and every piece on whole units.
 - **No mouths.** Omi reads through its eyes, brows and props. The one
   mouth that existed (sudo's) was removed; happy and laughing shape the
   frame instead. A new mode with a mouth is a design decision to argue
   for, not a default.
 - **Stays inside the view.** The pack's `view` is the logo with 70 units of
-  room on every side; props live there. The eyes stay inside the inner
-  square when they look around (`gaze.inside`).
+  room on every side; props live there, and may drift off its edge (z's,
+  confetti). The frame and the face never leave it. The eyes start inside
+  the inner square, and stay there when they look around (`gaze.inside`).
 - **Never guilt the user.** Modes exist for what the system is doing and
   for what just happened, not for scolding. Sad and crying are for things
   that were lost, never for a cancel, a skip or a wrong key.
@@ -39,6 +41,15 @@ it: apps never read the jig's code. Ideas waiting to be designed are in
   start isn't a good still is rotated to one that is (`START` in
   `js/motion.js`).
 
+`node tools/check-pack.js` (part of `npm run check`) holds the pack to the
+ones a program can check: the grid, no mouths, the view and the inner
+square, along with the pack's own shape (`pack/omi.schema.json`: every mode
+has a kind and a label, every reaction a hold) and that it hangs together
+(no animation or role named that isn't there). A mode that breaks a rule on
+purpose is argued for in that file, in `ARGUED`, with the reason in a line:
+`scared`'s frame makes a mouth between the middles of its eyes, off the
+cells, and `peek`'s eyes are below the logo.
+
 ## Where things are
 
 | What                                                 | Where                                                                                  |
@@ -48,6 +59,8 @@ it: apps never read the jig's code. Ideas waiting to be designed are in
 | Frame effects: bars that flow, grow or tile          | `js/frames.js`                                                                         |
 | Every animation, as keyframes                        | `js/motion.js` (`ANIM`)                                                                |
 | What a mode is for: kind, hold, family, easter       | `js/pack.js` (`REACTIONS`, `FAMILIES`, `EASTER`)                                       |
+| What a screen reader says for each mode              | `js/pack.js` (`LABELS`)                                                                |
+| The pack's shape, as a JSON Schema                   | `js/pack.js` (`PACK_SCHEMA`), written to `pack/omi.schema.json`                        |
 | The pack and its spec                                | `js/pack.js` (`buildPack`, `PACK_README`), written to `pack/` by `tools/build-pack.js` |
 | The gallery                                          | `docs/modes.md` and `docs/modes/`, written by `tools/modes-doc.js`                     |
 
@@ -72,7 +85,10 @@ it: apps never read the jig's code. Ideas waiting to be designed are in
    add the loop to `START` with how far in to begin.
 4. **Say what it's for.** In `js/pack.js`, add a reaction's hold to
    `REACTIONS`, or leave it a state; put it in a family in `FAMILIES` if it
-   means the same thing as another mode; mark a joke in `EASTER`.
+   means the same thing as another mode; mark a joke in `EASTER`. Give it
+   a label in `LABELS`: what a screen reader says for it ("Omi is
+   thinking"), the same words as any mode it is a variation of. The pack
+   won't build without one.
 5. **Look at it in the jig.** `npm run dev` and open
    http://localhost:8000: the Modes section shows every design looping, Morph
    plays any pair, and the Terminal section shows it at half-block size.
@@ -84,7 +100,8 @@ it: apps never read the jig's code. Ideas waiting to be designed are in
    never the copy). Then `node tools/modes-doc.js` for the gallery.
    `npm run build` does both.
 7. **Run every check.** `npm run check`: that the pack and the gallery
-   are built from what's committed, the reference player and the service.
+   are built from what's committed, that the pack keeps the rules above
+   (`tools/check-pack.js`), the reference player and the service.
    `npm run check:site`: the jig itself, in Chrome (see below).
    `npm run check:rust` and `npm run check:python`: the other two
    players. `npm run check:morphs`: both of them against the reference

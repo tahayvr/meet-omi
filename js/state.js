@@ -159,7 +159,7 @@ function render() {
   const E = (d) => eff(d.id);
   const tile = (d) => `
     <figure class="tile" role="listitem">
-      <button class="open" data-id="${d.id}" aria-label="Open ${d.name}"><div class="art${E(d).bg !== S.bg ? " own" : ""}" data-sid="${d.id}"${E(d).bg !== S.bg ? ` style="background:${E(d).bg || "transparent"}"` : ""}>${svgFor(d, { color: E(d).fg, animated: E(d).anim, force: S.force, vb, label: "Omi, " + d.name })}</div></button>
+      <button class="open" data-id="${d.id}" aria-label="Open ${d.name}"><div class="art${E(d).bg !== S.bg ? " own" : ""}" data-sid="${d.id}"${E(d).bg !== S.bg ? ` style="background:${E(d).bg || "transparent"}"` : ""}>${svgFor(d, { color: E(d).fg, animated: E(d).anim, force: S.force, vb, label: labelOf(d) })}</div></button>
       <figcaption class="meta">
 ${S.names ? `<span class="name">${d.name}</span>` : ""}${hasOver(d.id) ? `<button class="reset" data-id="${d.id}" aria-label="Reset ${d.name} to global settings" title="Has its own settings. Reset to global">${RESET_ICON}</button>` : ""}
 <button class="save" data-id="${d.id}" aria-label="Export ${d.name}" title="Export ${d.name}">${DL_ICON}</button>

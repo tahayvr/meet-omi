@@ -13,6 +13,9 @@ let pagePackCache = null,
 // round-trip through JSON: the players get exactly what omi.json holds
 const pagePack = () =>
   pagePackCache || (pagePackCache = JSON.parse(JSON.stringify(buildPack())));
+// What a screen reader says for a design: the pack's label for it.
+const labelOf = (d) =>
+  (pagePack().modes.find((m) => m.id === d.id) || {}).label || "Omi, " + d.name;
 /* What the player draws of a design, t seconds into its loops (0: at rest),
    body motion and all. A design the pack doesn't have (the anatomy's bare
    logo) is packed on the spot. */

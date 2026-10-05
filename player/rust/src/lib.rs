@@ -518,6 +518,16 @@ impl Player {
         }
     }
 
+    /// What a screen reader says for a mode ("Omi is thinking"): its label,
+    /// or its name in a pack without labels. Give it to your toolkit as the
+    /// picture's accessible name. Empty for a mode the pack doesn't have.
+    pub fn label(&self, id: &str) -> &str {
+        match self.pack.mode(id) {
+            Some(m) => m.label.as_deref().or(m.name.as_deref()).unwrap_or(&m.id),
+            None => "",
+        }
+    }
+
     /// A mode's kind; "state" unless the pack says "reaction".
     pub fn kind(&self, id: &str) -> Kind {
         match self.pack.mode(id).and_then(|m| m.kind.as_deref()) {

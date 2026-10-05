@@ -28,6 +28,7 @@ fills the rects itself, in its accent colour. Dependencies: `serde` and
 `Player::with_options` takes `speed`, `animate`, `body_motion` and the start
 `mode`. Also there: `set_instant`, `mode_rects(mode, seconds)` for stills,
 `look(dx, dy)`, `gaze()`, `gazing()`, `loop_seconds`, `hold`, `kind`,
+`label` (what a screen reader says for a mode: your toolkit's accessible name),
 `settled()` and `is_morphing()`. See "Drawing Omi crisp" in the pack README
 for how to snap the rects to device pixels.
 

@@ -163,6 +163,9 @@ pub struct Mode {
     pub id: String,
     #[serde(default)]
     pub name: Option<String>,
+    /// What a screen reader says for the mode ("Omi is thinking").
+    #[serde(default)]
+    pub label: Option<String>,
     /// "state" or "reaction"; missing means "state".
     #[serde(default)]
     pub kind: Option<String>,

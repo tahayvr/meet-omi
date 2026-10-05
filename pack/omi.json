@@ -2511,6 +2511,7 @@
     {
       "id": "mark",
       "name": "The mark",
+      "label": "The Omarchy logo",
       "kind": "state",
       "bounds": [
         0,
@@ -2615,6 +2616,7 @@
     {
       "id": "idle",
       "name": "Idle",
+      "label": "Omi",
       "group": "Core",
       "kind": "state",
       "bounds": [
@@ -2737,6 +2739,7 @@
     {
       "id": "thinking",
       "name": "Thinking",
+      "label": "Omi is thinking",
       "group": "Thinking",
       "kind": "state",
       "family": "thinking",
@@ -2886,6 +2889,7 @@
     {
       "id": "thinking-drift",
       "name": "Thinking, drift",
+      "label": "Omi is thinking",
       "group": "Thinking",
       "kind": "state",
       "family": "thinking",
@@ -3017,6 +3021,7 @@
     {
       "id": "thinking-sideeye",
       "name": "Thinking, side-eye",
+      "label": "Omi is thinking",
       "group": "Thinking",
       "kind": "state",
       "family": "thinking",
@@ -3140,6 +3145,7 @@
     {
       "id": "thinking-hmm",
       "name": "Thinking, hmm",
+      "label": "Omi is thinking",
       "group": "Thinking",
       "kind": "state",
       "family": "thinking",
@@ -3630,6 +3636,7 @@
     {
       "id": "thinking-stack",
       "name": "Thinking, rising",
+      "label": "Omi is thinking",
       "group": "Thinking",
       "kind": "state",
       "family": "thinking",
@@ -4422,6 +4429,7 @@
     {
       "id": "thinking-snake",
       "name": "Thinking, snake",
+      "label": "Omi is thinking",
       "group": "Thinking",
       "kind": "state",
       "family": "thinking",
@@ -4841,6 +4849,7 @@
     {
       "id": "updating",
       "name": "Updating / downloading",
+      "label": "Omi is updating",
       "group": "System states",
       "kind": "state",
       "family": "transfer",
@@ -5519,6 +5528,7 @@
     {
       "id": "uploading",
       "name": "Uploading",
+      "label": "Omi is uploading",
       "group": "System states",
       "kind": "state",
       "family": "transfer",
@@ -6197,6 +6207,7 @@
     {
       "id": "working",
       "name": "Working",
+      "label": "Omi is working",
       "group": "System states",
       "kind": "state",
       "bounds": [
@@ -6777,6 +6788,7 @@
     {
       "id": "success",
       "name": "Success",
+      "label": "Omi succeeded",
       "group": "System states",
       "kind": "reaction",
       "hold": 1.2,
@@ -6934,6 +6946,7 @@
     {
       "id": "warning",
       "name": "Warning",
+      "label": "Omi has a warning",
       "group": "System states",
       "kind": "state",
       "bounds": [
@@ -7076,6 +7089,7 @@
     {
       "id": "error",
       "name": "Error",
+      "label": "Omi hit an error",
       "group": "System states",
       "kind": "state",
       "bounds": [
@@ -7252,6 +7266,7 @@
     {
       "id": "offline-standby",
       "name": "Offline, standby",
+      "label": "Omi is offline",
       "group": "System states",
       "kind": "state",
       "family": "offline",
@@ -7366,6 +7381,7 @@
     {
       "id": "offline-searching",
       "name": "Offline, searching",
+      "label": "Omi is offline, looking for a network",
       "group": "System states",
       "kind": "state",
       "family": "offline",
@@ -7945,6 +7961,7 @@
     {
       "id": "low-battery",
       "name": "Low battery",
+      "label": "Omi is low on battery",
       "group": "System states",
       "kind": "state",
       "bounds": [
@@ -8458,6 +8475,7 @@
     {
       "id": "sleeping",
       "name": "Sleeping",
+      "label": "Omi is asleep",
       "group": "System states",
       "kind": "state",
       "bounds": [
@@ -8697,6 +8715,7 @@
     {
       "id": "asking",
       "name": "Asking",
+      "label": "Omi has a question",
       "group": "System states",
       "kind": "state",
       "bounds": [
@@ -8874,6 +8893,7 @@
     {
       "id": "attention",
       "name": "Attention",
+      "label": "Omi wants your attention",
       "group": "System states",
       "kind": "reaction",
       "hold": 1.2,
@@ -9044,6 +9064,7 @@
     {
       "id": "recording",
       "name": "Recording",
+      "label": "Omi is recording the screen",
       "group": "System states",
       "kind": "state",
       "bounds": [
@@ -9173,6 +9194,7 @@
     {
       "id": "typing",
       "name": "Typing",
+      "label": "Omi is typing",
       "group": "Omi reactions",
       "kind": "state",
       "bounds": [
@@ -9685,6 +9707,7 @@
     {
       "id": "listening",
       "name": "Listening",
+      "label": "Omi is listening",
       "group": "Omi reactions",
       "kind": "state",
       "bounds": [
@@ -9814,6 +9837,7 @@
     {
       "id": "hello",
       "name": "Hello",
+      "label": "Omi says hello",
       "group": "Omi reactions",
       "kind": "reaction",
       "hold": 1.6,
@@ -9938,6 +9962,7 @@
     {
       "id": "goodbye",
       "name": "Goodbye",
+      "label": "Omi says goodbye",
       "group": "Omi reactions",
       "kind": "reaction",
       "hold": 1.4,
@@ -10062,6 +10087,7 @@
     {
       "id": "nod",
       "name": "Nod",
+      "label": "Omi nods: yes",
       "group": "Omi reactions",
       "kind": "reaction",
       "hold": 0.9,
@@ -10184,6 +10210,7 @@
     {
       "id": "shake",
       "name": "Shake",
+      "label": "Omi shakes its head: no",
       "group": "Omi reactions",
       "kind": "reaction",
       "hold": 0.9,
@@ -10306,6 +10333,7 @@
     {
       "id": "happy",
       "name": "Happy",
+      "label": "Omi is happy",
       "group": "Emotions",
       "kind": "reaction",
       "hold": 1.8,
@@ -10458,6 +10486,7 @@
     {
       "id": "laughing",
       "name": "Laughing",
+      "label": "Omi is laughing",
       "group": "Emotions",
       "kind": "reaction",
       "hold": 1.6,
@@ -10652,6 +10681,7 @@
     {
       "id": "excited",
       "name": "Excited",
+      "label": "Omi is excited",
       "group": "Emotions",
       "kind": "reaction",
       "hold": 1.8,
@@ -10790,6 +10820,7 @@
     {
       "id": "love",
       "name": "Love",
+      "label": "Omi loves it",
       "group": "Emotions",
       "kind": "reaction",
       "hold": 2,
@@ -10996,6 +11027,7 @@
     {
       "id": "wink",
       "name": "Wink",
+      "label": "Omi winks",
       "group": "Emotions",
       "kind": "reaction",
       "hold": 1.2,
@@ -11132,6 +11164,7 @@
     {
       "id": "shy",
       "name": "Shy",
+      "label": "Omi is shy",
       "group": "Emotions",
       "kind": "reaction",
       "hold": 2,
@@ -11272,6 +11305,7 @@
     {
       "id": "surprised",
       "name": "Surprised",
+      "label": "Omi is surprised",
       "group": "Emotions",
       "kind": "reaction",
       "hold": 1.4,
@@ -11401,6 +11435,7 @@
     {
       "id": "confused",
       "name": "Confused",
+      "label": "Omi is confused",
       "group": "Emotions",
       "kind": "state",
       "bounds": [
@@ -11604,6 +11639,7 @@
     {
       "id": "skeptical",
       "name": "Skeptical",
+      "label": "Omi is skeptical",
       "group": "Emotions",
       "kind": "state",
       "bounds": [
@@ -11766,6 +11802,7 @@
     {
       "id": "bored",
       "name": "Bored",
+      "label": "Omi is bored",
       "group": "Emotions",
       "kind": "state",
       "bounds": [
@@ -11933,6 +11970,7 @@
     {
       "id": "sad",
       "name": "Sad",
+      "label": "Omi is sad",
       "group": "Emotions",
       "kind": "state",
       "bounds": [
@@ -12090,6 +12128,7 @@
     {
       "id": "crying",
       "name": "Crying",
+      "label": "Omi is crying",
       "group": "Emotions",
       "kind": "state",
       "bounds": [
@@ -12239,6 +12278,7 @@
     {
       "id": "scared",
       "name": "Scared",
+      "label": "Omi is scared",
       "group": "Emotions",
       "kind": "reaction",
       "hold": 1.6,
@@ -12394,6 +12434,7 @@
     {
       "id": "angry",
       "name": "Angry",
+      "label": "Omi is angry",
       "group": "Emotions",
       "kind": "state",
       "bounds": [
@@ -12561,6 +12602,7 @@
     {
       "id": "sudo",
       "name": "Sudo",
+      "label": "Omi needs your password",
       "group": "Easter eggs",
       "kind": "state",
       "bounds": [
@@ -12691,6 +12733,7 @@
     {
       "id": "peek",
       "name": "Peek",
+      "label": "Omi is peeking in",
       "group": "Easter eggs",
       "kind": "state",
       "bounds": [
@@ -12857,6 +12900,7 @@
     {
       "id": "party",
       "name": "Party",
+      "label": "Omi is celebrating",
       "group": "Easter eggs",
       "kind": "state",
       "bounds": [
@@ -13254,6 +13298,7 @@
     {
       "id": "glitch",
       "name": "Glitch",
+      "label": "Omi glitches",
       "group": "Easter eggs",
       "kind": "reaction",
       "hold": 1.8,
@@ -13400,6 +13445,7 @@
     {
       "id": "code-rain",
       "name": "Code rain",
+      "label": "Omi is raining code",
       "group": "Easter eggs",
       "kind": "state",
       "easter": true,
@@ -13585,6 +13631,7 @@
     {
       "id": "vim",
       "name": "Can’t quit vim",
+      "label": "Omi can’t quit vim",
       "group": "Easter eggs",
       "kind": "state",
       "easter": true,
@@ -13734,6 +13781,7 @@
     {
       "id": "tiling",
       "name": "Tiling",
+      "label": "Omi is tiling windows",
       "group": "Easter eggs",
       "kind": "state",
       "bounds": [
@@ -13943,6 +13991,7 @@
     {
       "id": "mind-blown",
       "name": "Mind blown",
+      "label": "Omi’s mind is blown",
       "group": "Easter eggs",
       "kind": "reaction",
       "hold": 2.4,

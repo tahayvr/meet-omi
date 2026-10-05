@@ -42,6 +42,11 @@ Omi {
 - **Calmer motion.** In small places, such as next to a title or in the bar,
   set `bodyMotion: false` to keep the face's motion and drop the whole-body
   bobs and hops. `animate: false` shows each mode at rest.
+- **Screen readers.** The item is a picture named by the pack's `label` for
+  what it shows ("Omi is thinking", "Omi succeeded"), so Omi is announced
+  the same way in every app. That is `label` on the item; bind
+  `Accessible.name` to something else when your app has better words for
+  the moment ("Updating 12 packages").
 
 `examples/omarchy` is a working plugin built this way. Install it with
 `examples/omarchy/install.sh` and try every mode with ← and →.

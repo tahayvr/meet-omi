@@ -56,6 +56,61 @@ const FAMILIES = {
   transfer: ["updating", "uploading"],
 };
 const EASTER = ["glitch", "code-rain", "vim"];
+// What a screen reader says for each mode: every app gives it to its toolkit
+// as the picture's name, so Omi is announced the same way everywhere.
+// Variations of one mode say the same thing (every thinking is "Omi is
+// thinking").
+const LABELS = {
+  mark: "The Omarchy logo",
+  idle: "Omi",
+  thinking: "Omi is thinking",
+  "thinking-drift": "Omi is thinking",
+  "thinking-sideeye": "Omi is thinking",
+  "thinking-hmm": "Omi is thinking",
+  "thinking-stack": "Omi is thinking",
+  "thinking-snake": "Omi is thinking",
+  updating: "Omi is updating",
+  uploading: "Omi is uploading",
+  working: "Omi is working",
+  success: "Omi succeeded",
+  warning: "Omi has a warning",
+  error: "Omi hit an error",
+  "offline-standby": "Omi is offline",
+  "offline-searching": "Omi is offline, looking for a network",
+  "low-battery": "Omi is low on battery",
+  sleeping: "Omi is asleep",
+  asking: "Omi has a question",
+  attention: "Omi wants your attention",
+  recording: "Omi is recording the screen",
+  typing: "Omi is typing",
+  listening: "Omi is listening",
+  hello: "Omi says hello",
+  goodbye: "Omi says goodbye",
+  nod: "Omi nods: yes",
+  shake: "Omi shakes its head: no",
+  happy: "Omi is happy",
+  laughing: "Omi is laughing",
+  excited: "Omi is excited",
+  love: "Omi loves it",
+  wink: "Omi winks",
+  shy: "Omi is shy",
+  surprised: "Omi is surprised",
+  confused: "Omi is confused",
+  skeptical: "Omi is skeptical",
+  bored: "Omi is bored",
+  sad: "Omi is sad",
+  crying: "Omi is crying",
+  scared: "Omi is scared",
+  angry: "Omi is angry",
+  sudo: "Omi needs your password",
+  peek: "Omi is peeking in",
+  party: "Omi is celebrating",
+  glitch: "Omi glitches",
+  "code-rain": "Omi is raining code",
+  vim: "Omi can\u2019t quit vim",
+  tiling: "Omi is tiling windows",
+  "mind-blown": "Omi\u2019s mind is blown",
+};
 function modeMeta(id) {
   const meta = { kind: id in REACTIONS ? "reaction" : "state" };
   if (id in REACTIONS) meta.hold = REACTIONS[id];
@@ -98,6 +153,8 @@ function packMode(d) {
     m = {
       id: d.id,
       name: d.name,
+      // a design the pack doesn't have (the anatomy's bare logo) has no label
+      ...(LABELS[d.id] ? { label: LABELS[d.id] } : {}),
       ...(d.group ? { group: d.group } : {}),
       ...modeMeta(d.id),
       bounds: [sh.box.x, sh.box.y, sh.box.x2 - sh.box.x, sh.box.y2 - sh.box.y],
@@ -113,6 +170,10 @@ function packMode(d) {
 function buildPack() {
   const used = new Set();
   const modes = [MORPH_MARK, ...DESIGNS].map((d) => {
+    if (!LABELS[d.id])
+      throw new Error(
+        `"${d.id}" has no label: say what a screen reader says for it, in LABELS`,
+      );
     const m = packMode(d);
     if (m.anim) used.add(m.anim);
     if (m.clip && m.clip.anim) used.add(m.clip.anim);
@@ -252,8 +313,289 @@ function packFiles() {
     "omi.json": JSON.stringify(pack, null, 2) + "\n",
     "README.md": PACK_README,
     "conformance.json": JSON.stringify(buildConformance(pack)) + "\n",
+    "omi.schema.json": JSON.stringify(PACK_SCHEMA, null, 2) + "\n",
   };
 }
+
+/* omi.json's shape, as a JSON Schema: what every pack of this format version
+   has, for an editor, a validator, or a player's own loader to check a pack
+   against. It says what the fields are, not what they mean (the README does),
+   and not the rules Omi is drawn by: tools/check-pack.js holds this pack to
+   those. */
+const schemaNumber = { type: "number" },
+  schemaAbove0 = { type: "number", exclusiveMinimum: 0 },
+  schemaFrom0 = { type: "number", minimum: 0 },
+  schemaName = { type: "string", minLength: 1 };
+const PACK_SCHEMA = {
+  $schema: "https://json-schema.org/draft/2020-12/schema",
+  $id: "https://tahayvr.github.io/meet-omi/pack/omi.schema.json",
+  title: "Omi pack",
+  description: `omi.json, format version ${PACK_VERSION}: every mode, every animation, and the morph and gaze settings. The pack's README.md says what each part means.`,
+  type: "object",
+  required: [
+    "format",
+    "version",
+    "grid",
+    "view",
+    "roles",
+    "morph",
+    "animations",
+    "modes",
+  ],
+  additionalProperties: false,
+  properties: {
+    format: { const: "omi-pack" },
+    version: { const: PACK_VERSION },
+    grid: {
+      description: "The size of one logo cell, in grid units.",
+      ...schemaAbove0,
+    },
+    view: {
+      description:
+        "A square around the logo with room for the props: use it as the viewBox.",
+      $ref: "#/$defs/box",
+    },
+    roles: {
+      description: "What a piece can be.",
+      type: "array",
+      items: schemaName,
+      minItems: 1,
+      uniqueItems: true,
+    },
+    morph: {
+      description: "How one mode turns into another.",
+      type: "object",
+      required: [
+        "duration",
+        "stagger",
+        "ease",
+        "center",
+        "splitReach",
+        "rolePenalty",
+      ],
+      additionalProperties: false,
+      properties: {
+        duration: schemaAbove0,
+        stagger: schemaFrom0,
+        ease: { $ref: "#/$defs/bezier" },
+        center: { $ref: "#/$defs/point" },
+        splitReach: schemaFrom0,
+        rolePenalty: schemaFrom0,
+      },
+    },
+    gaze: {
+      description:
+        "Where the eyes can look, on top of any mode. A player without it ignores looks.",
+      type: "object",
+      required: ["reach", "duration", "ease", "roles"],
+      additionalProperties: false,
+      properties: {
+        reach: { $ref: "#/$defs/point" },
+        duration: schemaAbove0,
+        ease: { $ref: "#/$defs/bezier" },
+        roles: { type: "array", items: schemaName, uniqueItems: true },
+        inside: {
+          description: "The box the gazing rects stay in.",
+          $ref: "#/$defs/box",
+        },
+      },
+    },
+    animations: {
+      description: "Every animation, by name.",
+      type: "object",
+      additionalProperties: { $ref: "#/$defs/animation" },
+    },
+    modes: { type: "array", minItems: 1, items: { $ref: "#/$defs/mode" } },
+  },
+  $defs: {
+    point: {
+      description: "[x, y]",
+      type: "array",
+      items: schemaNumber,
+      minItems: 2,
+      maxItems: 2,
+    },
+    box: {
+      description: "[x, y, w, h]",
+      type: "array",
+      items: schemaNumber,
+      minItems: 4,
+      maxItems: 4,
+    },
+    bezier: {
+      description: "A cubic-bezier [x1, y1, x2, y2], as in CSS.",
+      type: "array",
+      items: schemaNumber,
+      minItems: 4,
+      maxItems: 4,
+    },
+    value: {
+      description:
+        "A number, or [name, factor]: the piece's own number of that name, times factor.",
+      anyOf: [
+        schemaNumber,
+        {
+          type: "array",
+          prefixItems: [schemaName, schemaNumber],
+          items: false,
+          minItems: 2,
+          maxItems: 2,
+        },
+      ],
+    },
+    animation: {
+      description:
+        "A loop: keys of [progress 0..1, values], blended with the ease between every two.",
+      type: "object",
+      required: ["duration", "ease", "keys"],
+      additionalProperties: false,
+      properties: {
+        duration: { description: "Seconds a loop takes.", ...schemaAbove0 },
+        ease: {
+          anyOf: [
+            { $ref: "#/$defs/bezier" },
+            { description: "Hold each key until the next.", const: "steps" },
+          ],
+        },
+        body: {
+          description: "Moves the whole of Omi, as a mode's anim.",
+          const: true,
+        },
+        vars: {
+          description: "The numbers of a piece this animation reads.",
+          type: "array",
+          items: schemaName,
+          uniqueItems: true,
+        },
+        keys: {
+          type: "array",
+          minItems: 1,
+          items: {
+            type: "array",
+            prefixItems: [
+              {
+                description: "Progress.",
+                type: "number",
+                minimum: 0,
+                maximum: 1,
+              },
+              {
+                description:
+                  "Move (tx, ty), scale (sx, sy) and opacity (op), on top of the piece at rest.",
+                type: "object",
+                additionalProperties: false,
+                properties: {
+                  tx: { $ref: "#/$defs/value" },
+                  ty: { $ref: "#/$defs/value" },
+                  sx: { $ref: "#/$defs/value" },
+                  sy: { $ref: "#/$defs/value" },
+                  op: { $ref: "#/$defs/value" },
+                },
+              },
+            ],
+            items: false,
+            minItems: 2,
+            maxItems: 2,
+          },
+        },
+      },
+    },
+    piece: {
+      description:
+        "A filled rectangle. Any other number on it is one an animation reads by name.",
+      type: "object",
+      required: ["x", "y", "w", "h", "role"],
+      properties: {
+        x: schemaNumber,
+        y: schemaNumber,
+        w: schemaAbove0,
+        h: schemaAbove0,
+        role: schemaName,
+        opacity: { type: "number", minimum: 0, maximum: 1 },
+        anim: { description: "The animation it plays.", ...schemaName },
+        delay: {
+          description: "Seconds it lags behind its animation.",
+          ...schemaFrom0,
+        },
+        duration: {
+          description: "Its own loop time, instead of the animation's.",
+          ...schemaAbove0,
+        },
+        clip: {
+          description: "Only seen through the mode's window.",
+          const: true,
+        },
+      },
+      additionalProperties: schemaNumber,
+    },
+    mode: {
+      type: "object",
+      required: ["id", "name", "label", "kind", "bounds", "pieces"],
+      additionalProperties: false,
+      properties: {
+        id: { type: "string", pattern: "^[a-z][a-z0-9]*(-[a-z0-9]+)*$" },
+        name: schemaName,
+        label: {
+          description: "What a screen reader says for the mode.",
+          ...schemaName,
+        },
+        group: {
+          description: "Where the jig files it. For people, not for apps.",
+          ...schemaName,
+        },
+        kind: {
+          description:
+            "A state stays as long as what it stands for; a reaction is shown, then Omi goes back.",
+          enum: ["state", "reaction"],
+        },
+        hold: {
+          description:
+            "On a reaction: seconds to show it after its morph lands.",
+          ...schemaAbove0,
+        },
+        family: {
+          description: "Modes that mean the same thing share one.",
+          ...schemaName,
+        },
+        easter: {
+          description: "A joke: leave it out of a generic picker.",
+          const: true,
+        },
+        bounds: {
+          description: "The tightest box around the mode.",
+          $ref: "#/$defs/box",
+        },
+        anim: {
+          description: "An animation that moves the whole of Omi.",
+          ...schemaName,
+        },
+        clip: {
+          description:
+            "A window: pieces with clip: true are only seen through it.",
+          type: "object",
+          required: ["x", "y", "w", "h"],
+          additionalProperties: false,
+          properties: {
+            x: schemaNumber,
+            y: schemaNumber,
+            w: schemaAbove0,
+            h: schemaAbove0,
+            anim: schemaName,
+          },
+        },
+        pieces: {
+          type: "array",
+          minItems: 1,
+          items: { $ref: "#/$defs/piece" },
+        },
+      },
+      // a reaction says how long it is held; a state is held as long as it lasts
+      if: { required: ["kind"], properties: { kind: { const: "reaction" } } },
+      then: { required: ["hold"], properties: { hold: true } },
+      else: { properties: { hold: false } },
+    },
+  },
+};
 
 const PACK_README = `# Omi pack
 
@@ -267,6 +609,8 @@ ${PACK_VERSION}.
 - omi.js: the reference player, for web pages and anything with a
   JavaScript engine (Electron, QML, GJS).
 - conformance.json: what a correct player draws, to test your own.
+- omi.schema.json: omi.json's shape as a JSON Schema, for an editor or a
+  validator.
 
 Nothing here is tied to one language or toolkit. omi.json is plain JSON and
 this file describes every rule, so any app can read it and draw Omi itself:
@@ -289,8 +633,10 @@ for players in other languages:
 Options: color (null follows the canvas's CSS color), speed, animate (false
 shows every mode at rest; morphs and the gaze still play), bodyMotion (false
 leaves out whole-body bobs), mode (where to start), view (an [x, y, w, h]
-to show instead of the pack's view). omi.set(mode, { instant: true }) jumps
-instead of morphing. omi.on("settled", fn) runs fn when a morph lands, and
+to show instead of the pack's view), label (false leaves the canvas's
+accessible name alone: otherwise the player keeps its aria-label on the
+mode's \`label\`, and gives it role="img" if it has no role).
+omi.set(mode, { instant: true }) jumps instead of morphing. omi.on("settled", fn) runs fn when a morph lands, and
 after a jump. omi.loopSeconds(mode) is how long a mode takes
 to play every piece's loop once: show it at least that long in a tour.
 omi.hold(mode) is how long to show a reaction after its morph lands, and
@@ -354,6 +700,12 @@ What a mode is for:
   before going back. For a mode without one, hold it for its loop time
   (\`loopSeconds\` in the reference player), kept between 1.2 and 2.5 s. The
   reference player's \`omi.hold(mode)\` gives either.
+- \`label\`: what a screen reader says for the mode, in English ("Omi is
+  thinking"). Give it to your toolkit as the picture's accessible name
+  (aria-label on the web, Accessible.name in Qt), so Omi is announced the
+  same way in every app. Variations of one mode say the same thing (every
+  thinking is "Omi is thinking"). The reference player's
+  \`omi.label(mode)\` gives it.
 - \`family\`: modes that mean the same thing ("thinking", "offline",
   "transfer"). Pick one per family for a situation; the rest are variations.
 - \`easter\`: true on the jokes (vim, glitch, code-rain). Leave them out of a

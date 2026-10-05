@@ -23,7 +23,7 @@ function showView() {
     animated: C.anim,
     force: S.force,
     vb,
-    label: "Omi, " + d.name,
+    label: labelOf(d),
   });
   $("vart").dataset.sid = d.id;
   if (vHTML !== $("vart")._html) {
