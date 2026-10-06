@@ -962,6 +962,13 @@ listed, in drawing order.
 - \`gazes\`: a mode at rest with no loops (animate off), looking ahead, then
   turned to \`look\`: \`half\` is \`half.at\` seconds in, \`end\` is
   once it has landed. Yours must match both, in drawing order.
+
+## License
+
+omi.js is MIT licensed. The Omi design in omi.json and conformance.json is
+not: it is a derivative of the Omarchy logo, owned by the Omacom Foundation,
+and the MIT license does not apply to it. See LICENSE in the meet-omi
+repository.
 `;
 
 // on the page only (tools/build-pack.js loads this file without one)

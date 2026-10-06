@@ -2,7 +2,7 @@
   "name": "meet-omi",
   "private": true,
   "description": "Omi, the Omarchy mascot: the design jig, the Omi pack, its players and the checks that hold them together",
-  "license": "MIT",
+  "license": "SEE LICENSE",
   "scripts": {
     "build": "node tools/build-pack.js && node tools/modes-doc.js",
     "build:site": "node tools/publish-site.js _site",

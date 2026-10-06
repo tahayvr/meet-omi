@@ -1,3 +1,15 @@
+The MIT License below covers the source code in this repository only.
+
+It does not cover the Omi design: Omi's look, its modes and the shapes
+they're drawn with, wherever they appear (the pack data in pack/, the
+images in docs/modes and assets/, the site, and anything a player draws
+from them). The Omi design is a derivative of the Omarchy logo, which is
+owned by the Omacom Foundation. No license to the Omi design or the
+Omarchy logo is granted here, and all rights in them are reserved by
+their owners.
+
+---
+
 MIT License
 
 Copyright (c) 2026 Taha Hossein Nejad

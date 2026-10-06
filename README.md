@@ -83,3 +83,9 @@ a browser and a Wayland session, so they are run by hand.
 None of that needs anything installed. `pnpm install` brings in the two
 tools the code is kept tidy with: `pnpm fmt` formats it (oxfmt) and
 `pnpm lint` looks for mistakes (oxlint); both run on every push too.
+
+## License
+
+The code is MIT licensed. The Omi design is not: it is a derivative of the
+Omarchy logo, owned by the Omacom Foundation, and the MIT license does not
+apply to it. See [LICENSE](LICENSE).
